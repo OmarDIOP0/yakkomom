@@ -177,6 +177,8 @@ public class ServicesSiteService(
             if (cleV is not null) await Supprimer(cleV);
             return ResultatMedia<PhotoAdminVm>.Echec("Enregistrement impossible, réessayez.");
         }
+        await journal.EnregistrerAsync(TypeAction.Creation, nameof(ServicePhoto), photo.Id.ToString(),
+            $"Service n° {serviceId} : ajout d'une photo ({ReglesEnvoi.TailleLisible(photo.TailleOctets)})", ct: ct);
         return ResultatMedia<PhotoAdminVm>.Ok(VersVm(photo, ordre < 0));
     }
 
@@ -218,6 +220,7 @@ public class ServicesSiteService(
         await db.SaveChangesAsync(ct);
         await Supprimer(p.CleStockage);
         if (p.CleVignette is not null) await Supprimer(p.CleVignette);
+        await journal.EnregistrerAsync(TypeAction.Suppression, nameof(ServicePhoto), photoId.ToString(), $"Service n° {serviceId} : suppression d'une photo", ct: ct);
         return ResultatOperation.Ok();
     }
 

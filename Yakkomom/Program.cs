@@ -14,6 +14,14 @@ using Yakkomom.Stockage;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Render (et la plupart des hébergeurs de conteneurs) imposent le port d'écoute via PORT.
+if (Environment.GetEnvironmentVariable("PORT") is { Length: > 0 } port)
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// Derrière le proxy HTTPS de l'hébergeur, la redirection vise toujours le port 443.
+if (!builder.Environment.IsDevelopment())
+    builder.Services.AddHttpsRedirection(o => o.HttpsPort = 443);
+
 // --- Base de données (PostgreSQL) ------------------------------------------
 builder.Services.AddDbContext<YakkomomDbContext>(options =>
     options.UseNpgsql(ConnexionBaseDeDonnees.Lire(builder.Configuration),
@@ -21,6 +29,7 @@ builder.Services.AddDbContext<YakkomomDbContext>(options =>
         .UseSnakeCaseNamingConvention());
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddScoped<AdminInitialSeeder>();
+builder.Services.AddScoped<DemoSeeder>();
 
 // --- Sécurité : Identity, rôles, cookies, limitation de débit, proxy -------
 builder.Services.AjouterSecuriteAdmin(builder.Environment);
@@ -34,6 +43,7 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IGestionComptesService, GestionComptesService>();
 builder.Services.AddScoped<ILocaliteService, LocaliteService>();
 builder.Services.AddScoped<ITerrainAdminService, TerrainAdminService>();
+builder.Services.AddScoped<ITableauDeBordService, TableauDeBordService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IVisite360Service, Visite360Service>();
 builder.Services.AddScoped<IServicesSiteService, ServicesSiteService>();
@@ -86,10 +96,19 @@ if (app.Configuration.GetValue("Database:MigrerAuDemarrage", true))
     await db.Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<DbSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<AdminInitialSeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
 }
 
 // --- Pipeline HTTP ---------------------------------------------------------
 app.UseForwardedHeaders(); // en premier : vraie IP et schéma HTTPS derrière Render
+
+// Site de démonstration ou de recette : rien n'est indexé par les moteurs de recherche.
+if (!app.Configuration.GetValue("Site:Indexable", true))
+    app.Use((contexte, suivant) =>
+    {
+        contexte.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+        return suivant(contexte);
+    });
 
 if (!app.Environment.IsDevelopment())
 {
@@ -99,7 +118,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStatusCodePagesWithReExecute("/erreur/{0}");
-app.UseHttpsRedirection();
+// Pas de redirection HTTPS pour /health : les sondes internes de l'hébergeur appellent en HTTP.
+app.UseWhen(c => !c.Request.Path.StartsWithSegments("/health"), a => a.UseHttpsRedirection());
 app.UseResponseCompression();
 // Fichiers publics du stockage local (photos, logo) : noms uniques, donc cache immuable.
 // Les documents privés (App_Data/prive) ne sont JAMAIS servis ici.
@@ -127,6 +147,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// Vérification de santé (Render, UptimeRobot) : volontairement sans accès à la base,
+// pour ne pas réveiller inutilement une base gratuite mise en veille.
+app.MapGet("/health", (HttpContext c) =>
+{
+    c.Response.Headers.CacheControl = "no-store";
+    return Results.Text("ok");
+}).ExcludeFromDescription();
 
 app.MapControllerRoute(
     name: "default",

@@ -9,6 +9,9 @@ public interface ITerrainAdminService
 {
     Task<ListeTerrainsAdminVm> ListerAsync(FiltreTerrainsAdmin filtre, CancellationToken ct = default);
 
+    /// <summary>Fiches incomplètes à traiter en priorité (publiées d'abord, puis les moins complètes).</summary>
+    Task<(IReadOnlyList<TerrainLigneVm> Terrains, int Total)> ListerACompleterAsync(int maximum, CancellationToken ct = default);
+
     /// <summary>Terrain avec photos, documents et commune (lecture seule).</summary>
     Task<Terrain?> ObtenirAsync(int id, CancellationToken ct = default);
     Task<EnTeteTerrainVm?> EnTeteAsync(int id, OngletTerrain onglet, CancellationToken ct = default);

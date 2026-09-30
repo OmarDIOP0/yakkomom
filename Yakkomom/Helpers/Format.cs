@@ -70,6 +70,21 @@ public static class Format
         return $"{Date(utc)} à {d.Hour:00}:{d.Minute:00}";
     }
 
+    /// <summary>« 14:05 » (heure de Dakar).</summary>
+    public static string Heure(DateTime utc)
+    {
+        var d = HeureDakar(utc);
+        return $"{d.Hour:00}:{d.Minute:00}";
+    }
+
+    /// <summary>« mercredi 30 sept. 2026 ».</summary>
+    public static string JourComplet(DateOnly d) => $"{JoursSemaine[(int)d.DayOfWeek]} {d.Day} {Mois[d.Month - 1]} {d.Year}";
+
+    /// <summary>« 30 sept. » (axes de graphiques).</summary>
+    public static string JourCourt(DateOnly d) => $"{d.Day} {Mois[d.Month - 1]}";
+
+    private static readonly string[] JoursSemaine = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+
     public static string Statut(StatutTerrain statut) => statut switch
     {
         StatutTerrain.Brouillon => "Brouillon",

@@ -164,7 +164,7 @@ public class Visite360Service(
         foreach (var cle in new[] { p.CleStockageHd, p.CleStockageBd, p.CleVignette }.OfType<string>())
             await SupprimerFichierAsync(cle);
 
-        await journal.EnregistrerAsync(TypeAction.Suppression, nameof(Panorama), panoramaId.ToString(), $"Suppression du panorama « {p.Titre} »", ct: ct);
+        await journal.EnregistrerAsync(TypeAction.Suppression, nameof(Panorama), panoramaId.ToString(), await PrefixeJournalAsync(terrainId, ct) + $"suppression du panorama « {p.Titre} »", ct: ct);
         return ResultatOperation.Ok();
     }
 
@@ -338,4 +338,8 @@ public class Visite360Service(
 
     private static string? Nettoyer(string? s, int max) =>
         string.IsNullOrWhiteSpace(s) ? null : (s.Trim().Length > max ? s.Trim()[..max] : s.Trim());
+
+    /// <summary>« YK-0001 : » pour préfixer les lignes du journal (recherche par référence).</summary>
+    private async Task<string> PrefixeJournalAsync(int terrainId, CancellationToken ct) =>
+        await db.Terrains.AsNoTracking().Where(t => t.Id == terrainId).Select(t => t.Reference).FirstOrDefaultAsync(ct) is { } r ? r + " : " : "";
 }

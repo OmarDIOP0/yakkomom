@@ -1,0 +1,230 @@
+{
+  "avertissement": "Données de démonstration : textes et prix d'exemple, photos d'illustration sous licence libre (Wikimedia Commons).",
+  "terrains": [
+    {
+      "titre": "Terrain de 500 m² à Popenguine, près de la réserve (démo)",
+      "type": "Habitation",
+      "statut": "Disponible",
+      "miseEnAvant": true,
+      "prix": 17500000,
+      "negociable": true,
+      "surface": 500,
+      "longueur": 25,
+      "largeur": 20,
+      "foncier": "Bail",
+      "commune": "Popenguine-Ndayane",
+      "quartier": "Route de la réserve",
+      "lat": 14.5655,
+      "lng": -17.103,
+      "eau": true,
+      "electricite": true,
+      "route": true,
+      "routeDetail": "Piste latéritique praticable toute l'année, à 600 m de la route goudronnée",
+      "description": "Parcelle d'habitation de 500 m² (20 × 25 m) dans une zone calme de Popenguine, à 1 km de la réserve naturelle et à environ 2 km de la plage. Quartier en cours de construction, voisins déjà installés, eau et électricité au bord du terrain. Idéal pour une résidence principale ou secondaire sur la Petite-Côte.\n\nFiche de démonstration : photos d'illustration des environs, informations à titre d'exemple.",
+      "commodites": [
+        {
+          "libelle": "Centre de Popenguine",
+          "distanceKm": 1.4
+        },
+        {
+          "libelle": "Plage de Popenguine",
+          "distanceKm": 2.0
+        },
+        {
+          "libelle": "Réserve naturelle de Popenguine",
+          "distanceKm": 1.0
+        },
+        {
+          "libelle": "Sindia (route nationale)",
+          "distanceKm": 7.6
+        }
+      ],
+      "photos": [
+        {
+          "fichier": "popenguine-1.webp",
+          "vignette": "popenguine-1-480.webp",
+          "largeur": 1600,
+          "hauteur": 1205,
+          "couleur": "#818C8D",
+          "legende": "Réserve naturelle de Popenguine et la côte, à 1 km",
+          "credit": "Photo Tbo47, CC0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Reserve_de_Popenguine_(37752).jpg"
+        },
+        {
+          "fichier": "popenguine-2.webp",
+          "vignette": "popenguine-2-480.webp",
+          "largeur": 1600,
+          "hauteur": 1067,
+          "couleur": "#787069",
+          "legende": "Popenguine, vue sur la falaise et le village",
+          "credit": "Photo OumarLass, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:POPENGUINE_03.jpg"
+        },
+        {
+          "fichier": "popenguine-3.webp",
+          "vignette": "popenguine-3-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#848078",
+          "legende": "Brousse de la réserve, au sud du terrain",
+          "credit": "Photo A R 228, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:R%C3%A9serve_naturel_%C3%A0_Thi%C3%A8s,_Popenguine.jpg"
+        },
+        {
+          "fichier": "popenguine-4.webp",
+          "vignette": "popenguine-4-480.webp",
+          "largeur": 1600,
+          "hauteur": 1067,
+          "couleur": "#6F5848",
+          "legende": "Plage de Popenguine, à environ 2 km",
+          "credit": "Photo OumarLass, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:POPENGUINE_06.jpg"
+        }
+      ]
+    },
+    {
+      "titre": "Terrain agricole de 1 ha à Mboro, zone des Niayes (démo)",
+      "type": "Agricole",
+      "statut": "Disponible",
+      "miseEnAvant": true,
+      "prix": 12000000,
+      "negociable": true,
+      "surface": 10000,
+      "longueur": 100,
+      "largeur": 100,
+      "foncier": "Deliberation",
+      "commune": "Mboro",
+      "quartier": "Sortie sud-est, vers Darou Khoudoss",
+      "lat": 15.1262,
+      "lng": -16.8535,
+      "eau": true,
+      "electricite": false,
+      "route": true,
+      "routeDetail": "Piste sableuse accessible en voiture, 3 km du centre de Mboro",
+      "description": "Terrain agricole d'un hectare (100 × 100 m) au cœur de la zone maraîchère des Niayes, entouré de parcelles déjà cultivées. Nappe d'eau peu profonde : un puits ou un forage léger suffit pour l'irrigation. Convient au maraîchage (oignon, carotte, chou) ou à l'arboriculture.\n\nFiche de démonstration : photos d'illustration des environs, informations à titre d'exemple.",
+      "commodites": [
+        {
+          "libelle": "Centre de Mboro (marché)",
+          "distanceKm": 3.2
+        },
+        {
+          "libelle": "Darou Khoudoss",
+          "distanceKm": 2.9
+        },
+        {
+          "libelle": "Tivaouane",
+          "distanceKm": 30.0
+        }
+      ],
+      "photos": [
+        {
+          "fichier": "mboro-1.webp",
+          "vignette": "mboro-1-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#A4A2A5",
+          "legende": "Baobab et parcours sur la route de Darou Khoudoss",
+          "credit": "Photo Patrice78500, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Baobab_vers_Darou_Khoudoss.jpg"
+        },
+        {
+          "fichier": "mboro-2.webp",
+          "vignette": "mboro-2-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#A5A4A6",
+          "legende": "Baobab typique des environs de Mboro",
+          "credit": "Photo Patrice78500, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Baobab_vers_Mboro_01.jpg"
+        },
+        {
+          "fichier": "mboro-3.webp",
+          "vignette": "mboro-3-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#B0AAA2",
+          "legende": "Végétation des environs, zone des Niayes",
+          "credit": "Photo Patrice78500, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Baobab_vers_Mboro_02.jpg"
+        },
+        {
+          "fichier": "mboro-4.webp",
+          "vignette": "mboro-4-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#9B8A77",
+          "legende": "Savane arborée de la région de Thiès",
+          "credit": "Photo Patrice78500, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Savane_vers_Lam-Lam_-_Senegal.jpg"
+        }
+      ]
+    },
+    {
+      "titre": "Terrain de 300 m² à Diamniadio, près du TER (démo)",
+      "type": "Habitation",
+      "statut": "Disponible",
+      "miseEnAvant": true,
+      "prix": 21000000,
+      "negociable": false,
+      "surface": 300,
+      "longueur": 20,
+      "largeur": 15,
+      "foncier": "TitreFoncier",
+      "commune": "Diamniadio",
+      "quartier": "Pôle urbain, zone sud",
+      "lat": 14.7128,
+      "lng": -17.1768,
+      "eau": true,
+      "electricite": true,
+      "route": true,
+      "routeDetail": "En bordure de voie latéritique, à 300 m de la route nationale",
+      "description": "Parcelle de 300 m² (15 × 20 m) avec titre foncier, dans le pôle urbain de Diamniadio en plein développement. À 2,4 km de la gare du TER (Dakar en 45 minutes) et à quelques minutes de l'autoroute à péage, du centre de conférences Abdou Diouf et de Dakar Arena. Bon placement comme résidence ou pour un immeuble locatif.\n\nFiche de démonstration : photos d'illustration, informations à titre d'exemple.",
+      "commodites": [
+        {
+          "libelle": "Gare TER de Diamniadio",
+          "distanceKm": 2.4
+        },
+        {
+          "libelle": "Centre de conférences Abdou Diouf",
+          "distanceKm": 3.7
+        },
+        {
+          "libelle": "Dakar Arena",
+          "distanceKm": 4.5
+        }
+      ],
+      "photos": [
+        {
+          "fichier": "diamniadio-1.webp",
+          "vignette": "diamniadio-1-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#8D8781",
+          "legende": "Terrain dégagé avec baobab (photo d'illustration)",
+          "credit": "Photo kumar303 from Chicago, IL, CC BY-SA 2.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Baobab_tree,_Senegal,_3_January_2006.jpg"
+        },
+        {
+          "fichier": "diamniadio-2.webp",
+          "vignette": "diamniadio-2-480.webp",
+          "largeur": 1600,
+          "hauteur": 1200,
+          "couleur": "#64666F",
+          "legende": "Gare TER de Diamniadio, à 2,4 km",
+          "credit": "Photo Ourytima, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Gare_du_TER_de_Diamniadio_03.jpg"
+        },
+        {
+          "fichier": "diamniadio-3.webp",
+          "vignette": "diamniadio-3-480.webp",
+          "largeur": 1600,
+          "hauteur": 1067,
+          "couleur": "#93917E",
+          "legende": "Arbres du quartier, pôle urbain de Diamniadio",
+          "credit": "Photo Princesssenegal, CC BY-SA 4.0, Wikimedia Commons",
+          "source": "https://commons.wikimedia.org/wiki/File:Le_climat_au_nord.jpg"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+@model JournalLigneVm
+@using System.Text.Json
+@{
+    var avecDate = ViewData["AvecDate"] is true;
+    var classe = Model.Action switch
+    {
+        TypeAction.Creation => "journal__action--creation",
+        TypeAction.Suppression => "journal__action--suppression",
+        TypeAction.ChangementStatut => "journal__action--statut",
+        _ => null
+    };
+    var libelle = Model.Action switch
+    {
+        TypeAction.Creation => "Création",
+        TypeAction.Modification => "Modification",
+        TypeAction.Suppression => "Suppression",
+        TypeAction.ChangementStatut => "Statut",
+        TypeAction.Connexion => "Connexion",
+        _ => "Autre"
+    };
+
+    // Détails : liste des champs modifiés, sinon JSON brut indenté.
+    string? champs = null, brut = null;
+    if (!string.IsNullOrEmpty(Model.DetailsJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(Model.DetailsJson);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object
+                && doc.RootElement.TryGetProperty("champs", out var c) && c.ValueKind == JsonValueKind.Array)
+                champs = LibellesChamps.Lister(c.EnumerateArray().Select(e => e.ToString()));
+            else
+                brut = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        }
+        catch (JsonException) { brut = Model.DetailsJson; }
+    }
+}
+<li class="journal__ligne @(avecDate ? "journal__ligne--date" : null)">
+    <time class="journal__heure chiffres" datetime="@Model.Date.ToString("yyyy-MM-ddTHH:mm:ssZ")">@(avecDate ? Format.DateHeure(Model.Date) : Format.Heure(Model.Date))</time>
+    <div class="journal__corps">
+        <p class="journal__description">
+            <span class="journal__action @classe">@libelle</span>
+            @if (Model.Lien is not null) { <a href="@Model.Lien">@Model.Description</a> } else { @Model.Description }
+        </p>
+        <p class="journal__auteur muet">@(Model.UtilisateurNom ?? "Système")</p>
+        @if (champs is not null)
+        {
+            <p class="journal__details muet">Champs : @champs</p>
+        }
+        else if (brut is not null)
+        {
+            <details class="journal__details"><summary>Détails</summary><pre>@brut</pre></details>
+        }
+    </div>
+</li>

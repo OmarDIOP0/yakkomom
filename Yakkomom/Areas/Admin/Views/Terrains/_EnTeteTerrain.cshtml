@@ -43,6 +43,7 @@
         {
             <a class="btn btn--discret btn--petit" href="@Model.UrlPublique" target="_blank" rel="noopener"><icone nom="partager" />Voir sur le site</a>
         }
+        <a class="btn btn--discret btn--petit" href="/admin/journal?q=@Model.Reference"><icone nom="document" />Historique</a>
         @if (User.IsInRole(Roles.SuperAdmin))
         {
             <details class="admin-actions">

@@ -28,6 +28,8 @@
   <ItemGroup>
     <!-- Modèle du service worker (servi par PwaController) -->
     <Content Include="Pwa/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Terrains de démonstration (chargés seulement si Demo__Terrains=true) -->
+    <None Include="Demo/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -32,7 +32,6 @@ public class TerrainAdminService(
     // =====================================================================
     public async Task<ListeTerrainsAdminVm> ListerAsync(FiltreTerrainsAdmin filtre, CancellationToken ct = default)
     {
-        var contactsDefaut = (await parametres.ObtenirAsync(ct)).ContactsParDefaut;
         var requete = db.Terrains.AsNoTracking();
 
         if (filtre.Statut is { } statut) requete = requete.Where(t => t.Statut == statut);
@@ -45,26 +44,7 @@ public class TerrainAdminService(
                 (t.Commune != null && EF.Functions.ILike(t.Commune.Nom, motif)));
         }
 
-        // Projection légère ; la complétude se calcule en mémoire (quelques centaines de terrains au plus).
-        var lignes = await requete
-            .OrderByDescending(t => t.ModifieLe)
-            .Select(t => new
-            {
-                t.Id, t.Reference, t.Titre, t.Statut, t.Prix, t.SurfaceM2, t.ModifieLe, t.EstMisEnAvant,
-                Commune = t.Commune != null ? t.Commune.Nom : null,
-                Entree = new EntreeCompletude(t.Type, t.Prix, t.SurfaceM2, t.Description, t.CommuneId, t.Latitude, t.Longitude,
-                    t.Photos.Count, t.SituationFonciere, t.Documents.Count, t.AccesEau, t.AccesElectricite, t.RouteAcces,
-                    t.Contacts.WhatsApp1 != null || t.Contacts.WhatsApp2 != null || t.Contacts.WhatsApp3 != null)
-            })
-            .ToListAsync(ct);
-
-        var aContactDefaut = EntreeCompletude.ContactAvecWhatsApp(contactsDefaut);
-        var vms = lignes.Select(l => new TerrainLigneVm
-            {
-                Id = l.Id, Reference = l.Reference, Titre = l.Titre, Statut = l.Statut, Prix = l.Prix,
-                SurfaceM2 = l.SurfaceM2, Commune = l.Commune, ModifieLe = l.ModifieLe, EstMisEnAvant = l.EstMisEnAvant,
-                Completude = Completude.Calculer(l.Entree with { AUnWhatsApp = l.Entree.AUnWhatsApp || aContactDefaut })
-            })
+        var vms = (await LignesAsync(requete, ct))
             .Where(v => !filtre.Incomplets || !v.Completude.EstComplete)
             .ToList();
 
@@ -81,6 +61,44 @@ public class TerrainAdminService(
             Resultats = new PageResultat<TerrainLigneVm>(elements, total, page, TaillePage),
             CompteParStatut = comptes
         };
+    }
+
+    public async Task<(IReadOnlyList<TerrainLigneVm> Terrains, int Total)> ListerACompleterAsync(int maximum, CancellationToken ct = default)
+    {
+        // Les fiches visibles du public passent d'abord, puis les brouillons ; vendus et archivés sont ignorés.
+        var requete = db.Terrains.AsNoTracking().Where(t =>
+            t.Statut == StatutTerrain.Disponible || t.Statut == StatutTerrain.Reserve || t.Statut == StatutTerrain.Brouillon);
+        var incomplets = (await LignesAsync(requete, ct)).Where(v => !v.Completude.EstComplete)
+            .OrderBy(v => v.Statut == StatutTerrain.Brouillon)
+            .ThenBy(v => v.Completude.Pourcentage)
+            .ThenByDescending(v => v.ModifieLe)
+            .ToList();
+        return (incomplets.Take(maximum).ToList(), incomplets.Count);
+    }
+
+    /// <summary>Projection légère ; la complétude se calcule en mémoire (quelques centaines de terrains au plus).</summary>
+    private async Task<List<TerrainLigneVm>> LignesAsync(IQueryable<Terrain> requete, CancellationToken ct)
+    {
+        var contactsDefaut = (await parametres.ObtenirAsync(ct)).ContactsParDefaut;
+        var lignes = await requete
+            .OrderByDescending(t => t.ModifieLe)
+            .Select(t => new
+            {
+                t.Id, t.Reference, t.Titre, t.Statut, t.Prix, t.SurfaceM2, t.ModifieLe, t.EstMisEnAvant,
+                Commune = t.Commune != null ? t.Commune.Nom : null,
+                Entree = new EntreeCompletude(t.Type, t.Prix, t.SurfaceM2, t.Description, t.CommuneId, t.Latitude, t.Longitude,
+                    t.Photos.Count, t.SituationFonciere, t.Documents.Count, t.AccesEau, t.AccesElectricite, t.RouteAcces,
+                    t.Contacts.WhatsApp1 != null || t.Contacts.WhatsApp2 != null || t.Contacts.WhatsApp3 != null)
+            })
+            .ToListAsync(ct);
+
+        var aContactDefaut = EntreeCompletude.ContactAvecWhatsApp(contactsDefaut);
+        return lignes.Select(l => new TerrainLigneVm
+        {
+            Id = l.Id, Reference = l.Reference, Titre = l.Titre, Statut = l.Statut, Prix = l.Prix,
+            SurfaceM2 = l.SurfaceM2, Commune = l.Commune, ModifieLe = l.ModifieLe, EstMisEnAvant = l.EstMisEnAvant,
+            Completude = Completude.Calculer(l.Entree with { AUnWhatsApp = l.Entree.AUnWhatsApp || aContactDefaut })
+        }).ToList();
     }
 
     // =====================================================================

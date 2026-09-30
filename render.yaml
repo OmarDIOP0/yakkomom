@@ -1,0 +1,35 @@
+# Blueprint Render : https://render.com/docs/blueprint-spec
+# Les valeurs « sync: false » sont demandées dans le tableau de bord Render à la création
+# (elles ne sont jamais écrites dans le dépôt).
+services:
+  - type: web
+    name: yakkomom
+    runtime: docker
+    plan: free
+    region: frankfurt          # la plus proche de Dakar parmi les régions Render
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Base PostgreSQL (Neon) : postgresql://utilisateur:motdepasse@hote/base?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      # Photos et documents : cloudinary://cle:secret@nom-du-cloud
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: Stockage__Fournisseur
+        value: Cloudinary
+      # Premier SuperAdmin, créé au premier démarrage seulement
+      - key: AdminInitial__Email
+        sync: false
+      - key: AdminInitial__MotDePasse
+        sync: false
+      - key: AdminInitial__Nom
+        value: Administrateur
+      # Démonstration : 3 terrains d'exemple, site non indexé par Google
+      - key: Demo__Terrains
+        value: "true"
+      - key: Site__Indexable
+        value: "false"

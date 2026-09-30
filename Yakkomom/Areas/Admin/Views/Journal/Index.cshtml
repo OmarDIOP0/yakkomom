@@ -1,0 +1,108 @@
+@model JournalVm
+@{
+    ViewData["Title"] = "Journal des actions";
+    var f = Model.Filtre;
+    var r = Model.Resultats;
+    var aujourdhui = DateOnly.FromDateTime(Format.HeureDakar(DateTime.UtcNow));
+    var actions = new (TypeAction Valeur, string Libelle)[]
+    {
+        (TypeAction.Creation, "Créations"), (TypeAction.Modification, "Modifications"),
+        (TypeAction.ChangementStatut, "Changements de statut"), (TypeAction.Suppression, "Suppressions"),
+        (TypeAction.Connexion, "Connexions")
+    };
+
+    string Page(int page)
+    {
+        var q = Context.Request.Query.Where(kv => kv.Key != "page" && !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value.ToString())}").ToList();
+        if (page > 1) q.Add($"page={page}");
+        return "/admin/journal" + (q.Count > 0 ? "?" + string.Join("&", q) : "");
+    }
+    string Jour(DateOnly d) => d == aujourdhui ? "Aujourd'hui" : d == aujourdhui.AddDays(-1) ? "Hier" : Format.JourComplet(d);
+    var groupes = r.Elements.GroupBy(l => DateOnly.FromDateTime(Format.HeureDakar(l.Date)));
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">@Format.Nombre(r.Total) action@(r.Total > 1 ? "s" : "")@(f.NombreFiltres > 0 || !string.IsNullOrWhiteSpace(f.Q) ? " trouvée" + (r.Total > 1 ? "s" : "") : "")</p>
+        <h1>Journal des actions</h1>
+    </div>
+</header>
+<p class="muet">Qui a modifié quoi, et quand. Le journal ne peut être ni modifié ni effacé depuis l'administration.</p>
+
+<form method="get" action="/admin/journal" class="mt-4">
+    <div class="recherche-admin" role="search">
+        <label class="sr-only" for="q">Rechercher dans le journal</label>
+        <input id="q" name="q" type="search" value="@f.Q" class="saisie" placeholder="Référence (YK-…), mot, e-mail…" enterkeyhint="search">
+        <button class="btn btn--icone" type="submit" aria-label="Rechercher"><icone nom="recherche" /></button>
+    </div>
+    <details class="journal-filtres mt-3" open="@(f.NombreFiltres > 0)">
+        <summary class="btn btn--contour btn--petit"><icone nom="filtres" />Filtres@(f.NombreFiltres > 0 ? $" · {f.NombreFiltres}" : "")</summary>
+        <div class="journal-filtres__champs">
+            <div class="champ">
+                <label for="utilisateur">Auteur</label>
+                <select id="utilisateur" name="utilisateur">
+                    <option value="">Tous</option>
+                    @foreach (var (id, nom) in Model.Utilisateurs) { <option value="@id" selected="@(id == f.Utilisateur)">@nom</option> }
+                </select>
+            </div>
+            <div class="champ">
+                <label for="action">Action</label>
+                <select id="action" name="action">
+                    <option value="">Toutes</option>
+                    @foreach (var (v, l) in actions) { <option value="@v" selected="@(v == f.Action)">@l</option> }
+                </select>
+            </div>
+            <div class="champ">
+                <label for="entite">Élément</label>
+                <select id="entite" name="entite">
+                    <option value="">Tous</option>
+                    @foreach (var (cle, libelle) in Model.Entites) { <option value="@cle" selected="@(cle == f.Entite)">@libelle</option> }
+                </select>
+            </div>
+            <div class="champ">
+                <label for="du">Du</label>
+                <input id="du" name="du" type="date" value="@f.Du?.ToString("yyyy-MM-dd")" max="@aujourdhui.ToString("yyyy-MM-dd")">
+            </div>
+            <div class="champ">
+                <label for="au">Au</label>
+                <input id="au" name="au" type="date" value="@f.Au?.ToString("yyyy-MM-dd")" max="@aujourdhui.ToString("yyyy-MM-dd")">
+            </div>
+            <div class="journal-filtres__actions">
+                <button class="btn btn--accent" type="submit">Filtrer</button>
+                @if (f.NombreFiltres > 0 || !string.IsNullOrWhiteSpace(f.Q)) { <a class="btn btn--discret" href="/admin/journal">Tout effacer</a> }
+            </div>
+        </div>
+    </details>
+</form>
+
+@if (r.Total == 0)
+{
+    <div class="vide mt-6">
+        <icone nom="document" />
+        <h2>Aucune action</h2>
+        <p class="muet">@(f.NombreFiltres > 0 || !string.IsNullOrWhiteSpace(f.Q) ? "Essayez d'autres filtres." : "Les modifications faites dans l'administration apparaîtront ici.")</p>
+    </div>
+}
+else
+{
+    @foreach (var g in groupes)
+    {
+        <section class="journal-jour" aria-labelledby="jour-@g.Key.ToString("yyyyMMdd")">
+            <h2 id="jour-@g.Key.ToString("yyyyMMdd")" class="journal-jour__titre">@Jour(g.Key)</h2>
+            <ul class="journal" role="list">
+                @foreach (var l in g) { <partial name="_LigneJournal" model="l" /> }
+            </ul>
+        </section>
+    }
+
+    @if (r.NombrePages > 1)
+    {
+        <nav aria-label="Pagination">
+            <ul class="pagination">
+                @if (r.Page > 1) { <li><a href="@Page(r.Page - 1)" aria-label="Page précédente"><icone nom="retour" /></a></li> }
+                <li><span aria-current="page">@r.Page / @r.NombrePages</span></li>
+                @if (r.Page < r.NombrePages) { <li><a href="@Page(r.Page + 1)" aria-label="Page suivante"><icone nom="suivant" /></a></li> }
+            </ul>
+        </nav>
+    }
+}

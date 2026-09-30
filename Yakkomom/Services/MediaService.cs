@@ -135,7 +135,7 @@ public partial class MediaService(
             await transaction.CommitAsync(ct);
         });
 
-        await journal.EnregistrerAsync(TypeAction.Modification, nameof(TerrainPhoto), photoId.ToString(), "Nouvelle photo de couverture", ct: ct);
+        await journal.EnregistrerAsync(TypeAction.Modification, nameof(TerrainPhoto), photoId.ToString(), await PrefixeJournalAsync(terrainId, ct) + "nouvelle photo de couverture", ct: ct);
         return ResultatOperation.Ok();
     }
 
@@ -191,7 +191,7 @@ public partial class MediaService(
 
         await SupprimerSansErreurAsync(photo.CleStockage, ZoneStockage.Publique);
         if (photo.CleVignette is not null) await SupprimerSansErreurAsync(photo.CleVignette, ZoneStockage.Publique);
-        await journal.EnregistrerAsync(TypeAction.Suppression, nameof(TerrainPhoto), photoId.ToString(), "Suppression d'une photo", ct: ct);
+        await journal.EnregistrerAsync(TypeAction.Suppression, nameof(TerrainPhoto), photoId.ToString(), await PrefixeJournalAsync(terrainId, ct) + "suppression d'une photo", ct: ct);
         return ResultatOperation.Ok();
     }
 
@@ -293,7 +293,7 @@ public partial class MediaService(
         await db.SaveChangesAsync(ct);
         await SupprimerSansErreurAsync(document.CleStockage, ZoneStockage.Privee);
         await journal.EnregistrerAsync(TypeAction.Suppression, nameof(DocumentFoncier), documentId.ToString(),
-            $"Suppression du document « {document.NomFichierOriginal} »", ct: ct);
+            await PrefixeJournalAsync(terrainId, ct) + $"suppression du document « {document.NomFichierOriginal} »", ct: ct);
         return ResultatOperation.Ok();
     }
 
@@ -434,4 +434,8 @@ public partial class MediaService(
 
     [GeneratedRegex("^#[0-9A-Fa-f]{6}$")]
     private static partial Regex RegexCouleur();
+
+    /// <summary>« YK-0001 : » pour préfixer les lignes du journal (recherche par référence).</summary>
+    private async Task<string> PrefixeJournalAsync(int terrainId, CancellationToken ct) =>
+        await db.Terrains.AsNoTracking().Where(t => t.Id == terrainId).Select(t => t.Reference).FirstOrDefaultAsync(ct) is { } r ? r + " : " : "";
 }

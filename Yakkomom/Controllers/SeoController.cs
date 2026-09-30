@@ -12,11 +12,15 @@ using Yakkomom.Stockage;
 namespace Yakkomom.Controllers;
 
 /// <summary>robots.txt et sitemap.xml (générés à la volée).</summary>
-public class SeoController(YakkomomDbContext db, UrlSite urls, IStorageService stockage, IMemoryCache cache) : Controller
+public class SeoController(YakkomomDbContext db, UrlSite urls, IStorageService stockage, IMemoryCache cache, IConfiguration configuration) : Controller
 {
     [HttpGet("robots.txt")]
     public IActionResult Robots()
     {
+        Response.Headers.CacheControl = "public, max-age=86400";
+        if (!configuration.GetValue("Site:Indexable", true))
+            return Content("# Site de démonstration : aucune indexation\nUser-agent: *\nDisallow: /\n", "text/plain; charset=utf-8");
+
         var texte = $"""
             # Yakkomom — consignes aux robots d'indexation
             User-agent: *
@@ -31,7 +35,6 @@ public class SeoController(YakkomomDbContext db, UrlSite urls, IStorageService s
 
             Sitemap: {urls.Absolue("/sitemap.xml")}
             """;
-        Response.Headers.CacheControl = "public, max-age=86400";
         return Content(texte + "\n", "text/plain; charset=utf-8");
     }
 

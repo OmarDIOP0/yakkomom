@@ -1,7 +1,32 @@
+@model TableauDeBordVm
 @using System.Security.Claims
 @{
     ViewData["Title"] = "Tableau de bord";
     var nom = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name;
+    var clics = Model.Clics;
+    var maxJour = Math.Max(1, clics.ParJour.Max(j => j.Clics));
+    var jourMax = clics.ParJour.OrderByDescending(j => j.Clics).First();
+    var maxTerrain = Math.Max(1, clics.ParTerrain.Select(t => t.Clics).DefaultIfEmpty().Max());
+
+    string Onglet(OngletTerrain o) => o switch
+    {
+        OngletTerrain.Localisation => "localisation",
+        OngletTerrain.Photos => "photos",
+        OngletTerrain.Visite360 => "visite-360",
+        OngletTerrain.Documents => "documents",
+        OngletTerrain.Contacts => "contacts",
+        _ => "infos"
+    };
+    string Source(SourceClicWhatsApp s) => s switch
+    {
+        SourceClicWhatsApp.FicheTerrain => "Fiche terrain",
+        SourceClicWhatsApp.BoutonFlottant => "Bouton flottant",
+        SourceClicWhatsApp.Liste => "Liste des terrains",
+        SourceClicWhatsApp.Service => "Pages services",
+        _ => "Contact général"
+    };
+    string Pluriel(int n, string mot) => $"{Format.Nombre(n)} {mot}{(n > 1 ? "s" : "")}";
+    var statuts = new[] { StatutTerrain.Disponible, StatutTerrain.Reserve, StatutTerrain.Vendu, StatutTerrain.Brouillon, StatutTerrain.Archive };
 }
 <header class="admin-titre">
     <div>
@@ -11,7 +36,201 @@
     <a class="btn btn--accent bureau-seulement" href="/admin/terrains/nouveau"><icone nom="plus" />Nouveau terrain</a>
 </header>
 
-<div class="alerte alerte--info"><icone nom="info" />Les statistiques (terrains par statut, clics WhatsApp, fiches à compléter) arrivent à l'étape 12.</div>
+@* --- Terrains par statut ------------------------------------------------- *@
+<section class="tdb-bloc" aria-labelledby="tdb-terrains">
+    <div class="tdb-bloc__titre">
+        <h2 id="tdb-terrains">Terrains</h2>
+        <span class="muet">@Pluriel(Model.TerrainsEnLigne, "fiche") en ligne</span>
+    </div>
+    <ul class="tdb-statuts" role="list">
+        @foreach (var s in statuts)
+        {
+            <li>
+                <a href="/admin/terrains?statut=@s">
+                    <strong class="chiffres">@Format.Nombre(Model.Compte(s))</strong>
+                    <partial name="_Statut" model="s" />
+                </a>
+            </li>
+        }
+    </ul>
+</section>
+
+@* --- Clics WhatsApp -------------------------------------------------------- *@
+<section class="tdb-bloc" aria-labelledby="tdb-clics">
+    <div class="tdb-bloc__titre">
+        <h2 id="tdb-clics">Clics WhatsApp</h2>
+        <nav class="puces" aria-label="Période">
+            @foreach (var j in TableauDeBordVm.Periodes)
+            {
+                <a class="puce @(j == Model.Jours ? "est-active" : null)" href="/admin?jours=@j" aria-current="@(j == Model.Jours ? "page" : null)">@j jours</a>
+            }
+        </nav>
+    </div>
+
+    <div class="tdb-clics">
+        <div class="tdb-chiffre">
+            <strong class="chiffres">@Format.Nombre(clics.Total)</strong>
+            <span>@(clics.Total > 1 ? "clics" : "clic") sur les @Model.Jours derniers jours</span>
+            @if (clics.Evolution is { } evo)
+            {
+                <span class="tdb-evolution @(evo > 0 ? "tdb-evolution--hausse" : evo < 0 ? "tdb-evolution--baisse" : null)">
+                    @(evo > 0 ? "+" : "")@evo % par rapport aux @Model.Jours jours précédents (@Format.Nombre(clics.TotalPrecedent))
+                </span>
+            }
+            else if (clics.Total > 0)
+            {
+                <span class="muet">Aucun clic sur la période précédente.</span>
+            }
+        </div>
+
+        <figure class="tdb-graphe">
+            <svg viewBox="0 0 @(clics.ParJour.Count * 10) 100" preserveAspectRatio="none" role="img"
+                 aria-label="Clics par jour : @(clics.Total == 0 ? "aucun clic" : $"maximum {jourMax.Clics} le {Format.JourCourt(jourMax.Jour)}")">
+                @for (var i = 0; i < clics.ParJour.Count; i++)
+                {
+                    var (jour, n) = clics.ParJour[i];
+                    var h = n == 0 ? 0 : Math.Max(2.0, 96.0 * n / maxJour);
+                    <rect x="@(i * 10 + 1)" y="@((100 - h).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" width="8"
+                          height="@(h.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))"><title>@Format.JourCourt(jour) : @Pluriel(n, "clic")</title></rect>
+                }
+            </svg>
+            <figcaption class="tdb-graphe__axe muet">
+                <span>@Format.JourCourt(clics.ParJour[0].Jour)</span>
+                <span>max. @maxJour / jour</span>
+                <span>@Format.JourCourt(clics.ParJour[^1].Jour)</span>
+            </figcaption>
+        </figure>
+    </div>
+
+    @if (clics.Total == 0)
+    {
+        <p class="muet mt-4">Aucun clic sur cette période. Les clics apparaîtront ici dès qu'un visiteur ouvrira WhatsApp depuis le site.</p>
+    }
+    else
+    {
+        <div class="tdb-colonnes mt-6">
+            <div>
+                <h3>Par terrain</h3>
+                @if (clics.ParTerrain.Count == 0)
+                {
+                    <p class="muet">Aucun clic depuis une fiche terrain sur cette période.</p>
+                }
+                else
+                {
+                    <ol class="tdb-classement" role="list">
+                        @foreach (var t in clics.ParTerrain)
+                        {
+                            <li>
+                                <a href="/admin/terrains/@t.Id/infos">
+                                    <span class="tdb-classement__ligne">
+                                        <span class="ref">@t.Reference</span>
+                                        <span class="tdb-classement__titre">@t.Titre</span>
+                                        <strong class="chiffres">@t.Clics</strong>
+                                    </span>
+                                    <progress max="@maxTerrain" value="@t.Clics" aria-hidden="true"></progress>
+                                    <span class="tdb-classement__detail muet">
+                                        <partial name="_Statut" model="t.Statut" /> · fiche @t.Fiche · liste @t.Liste · bouton flottant @t.Flottant
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ol>
+                }
+            </div>
+            <div>
+                <h3>D'où viennent les clics</h3>
+                <ul class="tdb-sources" role="list">
+                    @foreach (var (source, n) in clics.ParSource)
+                    {
+                        <li>
+                            <span class="tdb-sources__libelle">@Source(source)</span>
+                            <strong class="chiffres">@n</strong>
+                            <progress max="@clics.Total" value="@n" aria-hidden="true"></progress>
+                        </li>
+                    }
+                </ul>
+
+                @if (clics.ParService.Count > 0)
+                {
+                    <h3 class="mt-6">Par service</h3>
+                    <ul class="tdb-sources" role="list">
+                        @foreach (var (id, titre, n) in clics.ParService)
+                        {
+                            <li>
+                                <a class="tdb-sources__libelle" href="/admin/services/@id">@titre</a>
+                                <strong class="chiffres">@n</strong>
+                            </li>
+                        }
+                    </ul>
+                }
+                @if (clics.Generaux > 0)
+                {
+                    <p class="muet mt-4"><small>@Pluriel(clics.Generaux, "clic") sans terrain ni service (bouton général, page contact, demande personnalisée).</small></p>
+                }
+            </div>
+        </div>
+    }
+    <p class="muet mt-4"><small><icone nom="bouclier" /> Seuls le terrain ou le service, le numéro choisi, la page d'origine et la date sont enregistrés : aucune donnée sur le visiteur.</small></p>
+</section>
+
+@* --- Fiches à compléter ---------------------------------------------------- *@
+<section class="tdb-bloc" aria-labelledby="tdb-completer">
+    <div class="tdb-bloc__titre">
+        <h2 id="tdb-completer">Fiches à compléter</h2>
+        @if (Model.TotalACompleter > 0) { <a href="/admin/terrains?incomplets=true">Voir les @Model.TotalACompleter</a> }
+    </div>
+    @if (Model.ACompleter.Count == 0)
+    {
+        <p class="muet"><icone nom="coche" /> Toutes les fiches en cours sont complètes.</p>
+    }
+    else
+    {
+        <p class="muet"><small>Fiches en ligne d'abord, puis les brouillons. Cliquez pour aller directement à ce qui manque.</small></p>
+        <ul class="liste-terrains" role="list">
+            @foreach (var t in Model.ACompleter)
+            {
+                var c = t.Completude;
+                var niveau = c.Pourcentage >= 60 ? "moyen" : "faible";
+                var premier = c.Manquants.First();
+                <li>
+                    <a class="ligne-terrain" href="/admin/terrains/@t.Id/@Onglet(premier.Onglet)">
+                        <span class="ligne-terrain__haut">
+                            <span class="ref">@t.Reference</span>
+                            <partial name="_Statut" model="t.Statut" />
+                        </span>
+                        <strong class="ligne-terrain__titre">@t.Titre</strong>
+                        <span class="ligne-terrain__meta muet">Il manque @string.Join(", ", c.Manquants.Take(3).Select(m => m.Manque))@(c.Manquants.Count() > 3 ? "…" : "")</span>
+                        <span class="jauge jauge--mini jauge--@niveau" title="@c.Resume()">
+                            <span class="jauge__piste" aria-hidden="true"><span class="jauge__barre" style="width:@(c.Pourcentage)%"></span></span>
+                            <span class="jauge__pct">@c.Pourcentage %</span>
+                        </span>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@* --- Dernières actions ------------------------------------------------------- *@
+<section class="tdb-bloc" aria-labelledby="tdb-journal">
+    <div class="tdb-bloc__titre">
+        <h2 id="tdb-journal">Dernières modifications</h2>
+        <a href="/admin/journal">Tout le journal</a>
+    </div>
+    @if (Model.DernieresActions.Count == 0)
+    {
+        <p class="muet">Aucune modification pour l'instant.</p>
+    }
+    else
+    {
+        <ul class="journal" role="list">
+            @foreach (var a in Model.DernieresActions)
+            {
+                <partial name="_LigneJournal" model="a" view-data='new ViewDataDictionary(ViewData) { ["AvecDate"] = true }' />
+            }
+        </ul>
+    }
+</section>
 
 <section class="admin-raccourcis mt-6" aria-label="Raccourcis">
     <a href="/admin/terrains/nouveau"><icone nom="plus" /><strong>Ajouter un terrain</strong><span>Un titre suffit pour commencer un brouillon.</span></a>
