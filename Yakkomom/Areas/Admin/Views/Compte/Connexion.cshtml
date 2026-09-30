@@ -1,0 +1,33 @@
+@model ConnexionVm
+@{
+    ViewData["Title"] = "Connexion";
+    ViewData["SansNavigation"] = true;
+}
+<div class="admin-carte-seule">
+    <p class="surtitre">Espace réservé</p>
+    <h1>Connexion</h1>
+    <p class="muet">Accès réservé à l'équipe Yakkomom.</p>
+
+    <form method="post" asp-action="Connexion" asp-route-retour="@Model.Retour" class="mt-6" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+        <input type="hidden" asp-for="Retour">
+
+        <div class="champ">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" autofocus required>
+            <span asp-validation-for="Email" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="MotDePasse"></label>
+            <input asp-for="MotDePasse" autocomplete="current-password" required>
+            <span asp-validation-for="MotDePasse" class="erreur"></span>
+        </div>
+        <label class="interrupteur mt-4">
+            <input asp-for="SeSouvenir" role="switch">
+            <span>@Html.DisplayNameFor(m => m.SeSouvenir)</span>
+        </label>
+
+        <button class="btn btn--bloc mt-4" type="submit">Se connecter</button>
+    </form>
+    <p class="muet mt-6"><small>Mot de passe oublié ? Demandez au responsable du site de le réinitialiser.</small></p>
+</div>

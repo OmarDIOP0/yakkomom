@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Design system";
+    var demo = Url.Content("~/img/demo/terrain-demo.svg");
+    var cartes = new[]
+    {
+        new CarteTerrainVm { Reference = "YK-0042", Titre = "Terrain de 500 m² à Nguékokh", Url = "#", Localisation = "Nguékokh, Mbour",
+            Prix = 12_500_000, SurfaceM2 = 500, Statut = StatutTerrain.Disponible, ImageUrl = demo, CouleurDominante = "#D9B48A",
+            TitreFoncier = true, Visite360 = true, Prioritaire = true },
+        new CarteTerrainVm { Reference = "YK-0038", Titre = "Champ de 2,5 ha près de Sindia", Url = "#", Localisation = "Sindia, Mbour",
+            Prix = 45_000_000, SurfaceM2 = 25_000, Statut = StatutTerrain.Reserve, ImageUrl = demo, CouleurDominante = "#C9A06A" },
+        new CarteTerrainVm { Reference = "YK-0031", Titre = "Parcelle de 300 m² à Diamniadio", Url = "#", Localisation = "Diamniadio, Rufisque",
+            Prix = 8_000_000, SurfaceM2 = 300, Statut = StatutTerrain.Vendu, ImageUrl = demo, CouleurDominante = "#B98B62", TitreFoncier = true },
+    };
+}
+<section class="section">
+    <div class="conteneur pile" style="--pile: var(--e-6)">
+        <header class="pile">
+            <p class="surtitre">Yakkomom · Cadastre + emprunts Latérite</p>
+            <h1>Design system</h1>
+            <p class="muet">Tous les composants de base, en clair et en sombre (suivez le réglage de votre téléphone ou de votre ordinateur).</p>
+        </header>
+
+        <div class="pile">
+            <h2>Couleurs</h2>
+            <div class="nuancier">
+                <div style="background:var(--c-papier)"><b>Papier</b>--c-papier</div>
+                <div style="background:var(--c-sable)"><b>Sable</b>--c-sable</div>
+                <div style="background:var(--c-encre);color:var(--c-papier)"><b>Encre</b>--c-encre</div>
+                <div style="background:var(--c-laterite);color:#fff"><b>Latérite</b>--c-laterite</div>
+                <div style="background:var(--c-ocre);color:#1C2A21"><b>Ocre</b>--c-ocre</div>
+                <div style="background:var(--c-vert);color:#fff"><b>Végétal</b>--c-vert</div>
+                <div style="background:var(--c-filet)"><b>Filet</b>--c-filet</div>
+            </div>
+        </div>
+
+        <div class="pile">
+            <h2>Typographie</h2>
+            <p class="surtitre">Surtitre · police mono</p>
+            <h1 class="mt-0">La terre, <em style="font-style:italic;font-weight:500;color:var(--c-laterite)">vérifiée</em>.</h1>
+            <h2>Titre de section (h2)</h2>
+            <h3>Sous-titre (h3)</h3>
+            <p>Texte courant en police système : rapide, lisible, zéro octet à télécharger. Les montants s'écrivent <strong class="chiffres">@Format.Fcfa(12_500_000)</strong>, les surfaces <strong>@Format.Surface(500)</strong> ou <strong>@Format.Surface(25_000)</strong>.</p>
+            <p class="ref">YK-0042 · 14.5198° N, 17.0021° O</p>
+        </div>
+
+        <div class="pile">
+            <h2>Boutons</h2>
+            <div class="flex">
+                <button class="btn">Principal</button>
+                <button class="btn btn--accent">Accent</button>
+                <button class="btn btn--whatsapp"><icone nom="whatsapp" />WhatsApp</button>
+                <button class="btn btn--contour">Contour</button>
+                <button class="btn btn--discret"><icone nom="partager" />Partager</button>
+                <button class="btn btn--petit">Petit</button>
+                <button class="btn btn--contour btn--icone" aria-label="Favori"><icone nom="favori" /></button>
+                <button class="btn" disabled>Désactivé</button>
+            </div>
+        </div>
+
+        <div class="pile">
+            <h2>Badges, statuts et filtres</h2>
+            <div class="flex">
+                <span class="badge badge--verifie"><icone nom="coche" />Titre foncier</span>
+                <span class="badge badge--ocre"><icone nom="vue360" />Visite 360°</span>
+                <span class="badge">Bail</span>
+                <span class="badge badge--plein">Nouveau</span>
+                <span class="statut statut--disponible">Disponible</span>
+                <span class="statut statut--reserve">Réservé</span>
+                <span class="statut statut--vendu">Vendu</span>
+            </div>
+            <div class="puces">
+                <button class="puce" aria-pressed="true"><icone nom="filtres" />Filtres · 2</button>
+                <button class="puce" aria-pressed="false">Thiès</button>
+                <button class="puce" aria-pressed="false">Titre foncier</button>
+                <button class="puce" aria-pressed="false">Visite 360°</button>
+                <button class="puce" aria-pressed="false">Moins de 10 M FCFA</button>
+            </div>
+        </div>
+
+        <div class="pile">
+            <h2>Frise</h2>
+            <div class="frise"></div>
+            <div class="frise frise--fine"></div>
+        </div>
+
+        <div class="pile">
+            <div class="titre-section"><h2>Cartes terrain</h2><a href="#">Tout voir (38)</a></div>
+            <div class="grille-cartes">
+                @foreach (var carte in cartes)
+                {
+                    <partial name="_CarteTerrain" model="carte" />
+                }
+                <div aria-hidden="true">
+                    <div class="squelette squelette--media"></div>
+                    <div class="squelette squelette--texte" style="width:40%"></div>
+                    <div class="squelette squelette--texte" style="width:85%"></div>
+                    <div class="squelette squelette--texte" style="width:60%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pile">
+            <h2>Fiche technique</h2>
+            <dl class="fiche-tech">
+                <div><dt>Prix</dt><dd>@Format.Fcfa(12_500_000)</dd></div>
+                <div><dt>Prix au m²</dt><dd>@Format.Fcfa(Format.PrixAuM2(12_500_000, 500))</dd></div>
+                <div><dt>Surface</dt><dd>@Format.Surface(500)</dd></div>
+                <div><dt>Dimensions</dt><dd>@Format.Dimensions(20, 25)</dd></div>
+                <div class="fiche-tech__large"><dt>Document foncier</dt><dd class="flex" style="color:var(--c-vert)"><icone nom="bouclier" />Titre foncier disponible</dd></div>
+            </dl>
+        </div>
+
+        <div class="pile">
+            <h2>Bandeau de confiance</h2>
+            <div class="confiance">
+                <div><icone nom="document" /><strong>Documents contrôlés</strong><span>Vérifiés avant publication.</span></div>
+                <div><icone nom="position" /><strong>Bornage et GPS</strong><span>Relevés sur place.</span></div>
+                <div><icone nom="bouclier" /><strong>Notaire</strong><span>Aucun paiement sans document.</span></div>
+            </div>
+        </div>
+
+        <div class="pile">
+            <h2>Formulaires</h2>
+            <form style="max-width:520px" onsubmit="return false">
+                <div class="champ">
+                    <label for="d-titre">Titre du terrain</label>
+                    <input id="d-titre" placeholder="Terrain de 500 m² à Nguékokh">
+                    <span class="aide">Seul champ obligatoire : vous pourrez compléter plus tard.</span>
+                </div>
+                <div class="champ">
+                    <label for="d-region">Région</label>
+                    <select id="d-region"><option>Thiès</option><option>Dakar</option></select>
+                </div>
+                <div class="champ champ--erreur">
+                    <label for="d-wa">WhatsApp 1</label>
+                    <input id="d-wa" value="77 12" inputmode="tel" aria-describedby="d-wa-err" aria-invalid="true">
+                    <span class="erreur" id="d-wa-err">Numéro incomplet : 9 chiffres attendus (ex. 77 123 45 67).</span>
+                </div>
+                <div class="champ">
+                    <label for="d-desc">Description</label>
+                    <textarea id="d-desc"></textarea>
+                </div>
+                <label class="interrupteur mt-4"><input type="checkbox" role="switch">Visible par le public</label>
+            </form>
+        </div>
+
+        <div class="pile">
+            <h2>Alertes et états</h2>
+            <div class="alerte alerte--succes"><icone nom="coche" />Terrain enregistré en brouillon.</div>
+            <div class="alerte alerte--info"><icone nom="info" />Fiche complète à 60 % : il manque la localisation et le titre foncier.</div>
+            <div class="alerte alerte--erreur"><icone nom="info" />L'envoi de la photo a échoué. Nouvelle tentative…</div>
+            <div><span class="hors-ligne" style="position:static;transform:none"><icone nom="hors-ligne" />Vous êtes hors ligne</span></div>
+        </div>
+
+        <div class="pile">
+            <h2>Pagination</h2>
+            <nav aria-label="Pagination">
+                <ul class="pagination">
+                    <li><a href="#" aria-label="Page précédente"><icone nom="retour" /></a></li>
+                    <li><a href="#">1</a></li>
+                    <li><span aria-current="page">2</span></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#" aria-label="Page suivante"><icone nom="suivant" /></a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<a class="btn btn--whatsapp wa-flottant" href="#"><icone nom="whatsapp" />Demander ce terrain sur WhatsApp</a>

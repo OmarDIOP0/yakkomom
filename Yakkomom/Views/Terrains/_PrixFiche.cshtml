@@ -1,0 +1,18 @@
+@model FicheTerrainVm
+@{
+    var prixM2 = Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+}
+<div class="prix-fiche">
+    @if (Model.Prix is null)
+    {
+        <p class="prix-fiche__montant">Prix sur demande</p>
+    }
+    else
+    {
+        <p class="prix-fiche__montant chiffres">@Format.Montant(Model.Prix.Value)<small>FCFA</small></p>
+        <p class="prix-fiche__detail muet">
+            @Format.Surface(Model.SurfaceM2)@if (prixM2 is not null) {<text> · soit @Format.Fcfa(prixM2) le m²</text>}
+            @if (Model.PrixNegociable) { <span class="badge badge--ocre">Négociable</span> }
+        </p>
+    }
+</div>

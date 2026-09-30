@@ -1,0 +1,89 @@
+@model Yakkomom.Models.Entities.ParametreSite
+@using Yakkomom.Services
+@{
+    ViewData["Title"] = "Contact";
+    ViewData["Description"] = $"Contactez {Model.NomSite} sur WhatsApp ou par e-mail : terrains, construction, accompagnement au Sénégal.";
+    var numeros = WhatsAppLiens.NumerosEffectifs(null, Model.ContactsParDefaut);
+    var reseaux = new (string Nom, string? Url)[] { ("Facebook", Model.Facebook), ("Instagram", Model.Instagram), ("TikTok", Model.TikTok), ("YouTube", Model.YouTube), ("LinkedIn", Model.LinkedIn) }
+        .Where(r => !string.IsNullOrWhiteSpace(r.Url)).ToList();
+}
+<section class="section">
+    <div class="conteneur contact">
+        <header class="contact__entete">
+            <p class="surtitre">Contact</p>
+            <h1>Parlons de votre projet</h1>
+            <p class="muet mt-4">Le plus simple et le plus rapide : WhatsApp. Écrivez-nous, même un dimanche : nous répondons dès que possible.</p>
+        </header>
+
+        <div class="contact__grille">
+            <div class="contact__direct">
+                @if (numeros.Count == 0)
+                {
+                    <p class="alerte alerte--info"><icone nom="info" />Nos numéros WhatsApp seront bientôt affichés ici.</p>
+                }
+                @foreach (var n in numeros)
+                {
+                    <a class="contact__wa" href="/wa/general/@n.Index?source=general" rel="nofollow" target="_blank">
+                        <icone nom="whatsapp" />
+                        <span><strong>@(n.Libelle ?? "WhatsApp")</strong><span class="chiffres">@Yakkomom.Helpers.TelephoneSenegal.Afficher(n.Numero)</span></span>
+                    </a>
+                }
+                @if (!string.IsNullOrEmpty(Model.ContactsParDefaut.Email))
+                {
+                    <a class="contact__wa contact__wa--email" href="mailto:@Model.ContactsParDefaut.Email"><icone nom="email" /><span><strong>E-mail</strong><span>@Model.ContactsParDefaut.Email</span></span></a>
+                }
+                @if (!string.IsNullOrEmpty(Model.Adresse) || !string.IsNullOrEmpty(Model.HorairesOuverture))
+                {
+                    <div class="contact__agence">
+                        @if (!string.IsNullOrEmpty(Model.Adresse)) { <p class="flex"><icone nom="position" />@Model.Adresse</p> }
+                        @if (!string.IsNullOrEmpty(Model.HorairesOuverture)) { <p class="muet">@Model.HorairesOuverture</p> }
+                    </div>
+                }
+                @if (reseaux.Count > 0)
+                {
+                    <ul class="puces mt-4" role="list">
+                        @foreach (var r in reseaux) { <li><a class="puce" href="@r.Url" target="_blank" rel="noopener">@r.Nom</a></li> }
+                    </ul>
+                }
+            </div>
+
+            @if (numeros.Count > 0)
+            {
+                <form class="contact__formulaire" method="get" action="/wa/demande/@numeros[0].Index" target="_blank">
+                    <h2>Décrivez votre besoin</h2>
+                    <p class="muet"><small>Votre message s'ouvrira dans WhatsApp, prêt à envoyer. Rien n'est enregistré sur notre site.</small></p>
+                    <div class="champ mt-4">
+                        <label for="c-nom">Votre prénom et nom</label>
+                        <input id="c-nom" name="Nom" maxlength="80" autocomplete="name">
+                    </div>
+                    <div class="champ">
+                        <label for="c-besoin">Vous cherchez</label>
+                        <select id="c-besoin" name="Besoin">
+                            <option>Un terrain à acheter</option>
+                            <option>La construction d'une maison</option>
+                            <option>Un bâtiment ou un ouvrage</option>
+                            <option>Un accompagnement pour un achat</option>
+                            <option>La vérification d'un terrain</option>
+                            <option>Un investissement</option>
+                            <option>Un champ ou un aménagement agricole</option>
+                            <option>Autre chose</option>
+                        </select>
+                    </div>
+                    <div class="champ">
+                        <label for="c-zone">Zone souhaitée</label>
+                        <input id="c-zone" name="Zone" maxlength="80" placeholder="Ex. Mbour, Diamniadio, Thiès…">
+                    </div>
+                    <div class="champ">
+                        <label for="c-budget">Budget approximatif</label>
+                        <input id="c-budget" name="Budget" maxlength="60" placeholder="Ex. 10 millions FCFA">
+                    </div>
+                    <div class="champ">
+                        <label for="c-message">Message <span class="muet">(facultatif)</span></label>
+                        <textarea id="c-message" name="Message" maxlength="600" rows="4"></textarea>
+                    </div>
+                    <button class="btn btn--whatsapp btn--bloc mt-4" type="submit"><icone nom="whatsapp" />Envoyer sur WhatsApp</button>
+                </form>
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,50 @@
+@model IReadOnlyList<UtilisateurLigneVm>
+@{
+    ViewData["Title"] = "Utilisateurs";
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">Équipe</p>
+        <h1>Utilisateurs</h1>
+    </div>
+    <a class="btn btn--accent" href="/admin/utilisateurs/nouveau"><icone nom="plus" />Nouveau compte</a>
+</header>
+
+<p class="muet">Il n'y a pas d'inscription publique : seuls les comptes créés ici peuvent accéder à l'administration.</p>
+
+<ul class="admin-liste mt-4" role="list">
+    @foreach (var u in Model)
+    {
+        <li class="admin-liste__ligne">
+            <div class="admin-liste__principal">
+                <strong>@(u.NomComplet ?? u.Email)</strong>
+                @if (u.EstMoi) { <span class="badge">Vous</span> }
+                <span class="badge @(u.Role == Roles.SuperAdmin ? "badge--plein" : null)">@u.Role</span>
+                @if (u.EstBloque) { <span class="badge statut--vendu">Bloqué</span> }
+                @if (u.EstVerrouilleTemporairement) { <span class="badge statut--vendu">Verrouillé 15 min (trop d'essais)</span> }
+                @if (u.DoitChangerMotDePasse) { <span class="badge badge--ocre">Mot de passe provisoire</span> }
+                <div class="muet"><small>@u.Email · créé le @Format.Date(u.CreeLe) · @(u.DerniereConnexion is { } d ? $"dernière connexion le {Format.Date(d)}" : "jamais connecté")</small></div>
+            </div>
+            @if (!u.EstMoi)
+            {
+                <details class="admin-actions">
+                    <summary class="btn btn--contour btn--petit">Actions</summary>
+                    <div class="admin-actions__menu">
+                        <form method="post" asp-action="ChangerRole" asp-route-id="@u.Id">
+                            <input type="hidden" name="role" value="@(u.Role == Roles.SuperAdmin ? Roles.Admin : Roles.SuperAdmin)">
+                            <button type="submit">@(u.Role == Roles.SuperAdmin ? "Passer en Admin" : "Passer en SuperAdmin")</button>
+                        </form>
+                        <form method="post" asp-action="ReinitialiserMotDePasse" asp-route-id="@u.Id">
+                            <button type="submit">Réinitialiser le mot de passe</button>
+                        </form>
+                        <form method="post" asp-action="Bloquer" asp-route-id="@u.Id">
+                            @{ var debloquer = u.EstBloque || u.EstVerrouilleTemporairement; }
+                            <input type="hidden" name="bloquer" value="@(debloquer ? "false" : "true")">
+                            <button type="submit" class="@(debloquer ? null : "danger")">@(debloquer ? "Débloquer le compte" : "Bloquer le compte")</button>
+                        </form>
+                    </div>
+                </details>
+            }
+        </li>
+    }
+</ul>

@@ -1,0 +1,24 @@
+@model MotDePasseProvisoireVm
+@{
+    ViewData["Title"] = "Mot de passe provisoire";
+    var message = $"Bonjour {Model.NomComplet}, voici vos accès à l'administration Yakkomom :\n" +
+                  $"Adresse : {Context.Request.Scheme}://{Context.Request.Host}/admin\n" +
+                  $"Identifiant : {Model.Email}\nMot de passe provisoire : {Model.MotDePasse}\n" +
+                  "Vous devrez le changer à la première connexion.";
+}
+<div class="admin-formulaire">
+    <p class="surtitre">@(Model.EstNouveauCompte ? "Compte créé" : "Mot de passe réinitialisé")</p>
+    <h1>@(Model.NomComplet ?? Model.Email)</h1>
+
+    <div class="alerte alerte--info mt-4"><icone nom="info" />Ce mot de passe ne sera plus jamais affiché. Transmettez-le maintenant, de préférence de vive voix ou par message privé.</div>
+
+    <dl class="fiche-tech mt-4">
+        <div class="fiche-tech__large"><dt>Identifiant</dt><dd>@Model.Email</dd></div>
+        <div class="fiche-tech__large"><dt>Mot de passe provisoire</dt><dd class="ref admin-mdp">@Model.MotDePasse</dd></div>
+    </dl>
+
+    <div class="flex mt-6">
+        <a class="btn btn--whatsapp" href="https://wa.me/?text=@Uri.EscapeDataString(message)" target="_blank" rel="noopener"><icone nom="whatsapp" />Envoyer par WhatsApp</a>
+        <a class="btn btn--contour" href="/admin/utilisateurs">Terminé</a>
+    </div>
+</div>

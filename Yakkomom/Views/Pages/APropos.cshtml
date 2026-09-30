@@ -1,0 +1,51 @@
+@model Yakkomom.Models.Entities.ParametreSite
+@{
+    ViewData["Title"] = "À propos";
+    ViewData["Description"] = $"{Model.NomSite} : terrains vérifiés et services immobiliers au Sénégal. Notre méthode pour des achats fonciers transparents.";
+}
+<article class="page-contenu">
+    <header class="section">
+        <div class="conteneur conteneur--texte">
+            <p class="surtitre">À propos</p>
+            <h1>@(Model.Slogan ?? "Des terrains vérifiés, des projets bâtis en confiance.")</h1>
+            <p class="page-contenu__chapo">@Model.NomSite accompagne celles et ceux qui veulent acheter un terrain, construire ou investir au Sénégal, depuis Dakar comme depuis l'étranger. Notre engagement : que chaque achat soit clair, vérifié et signé en toute sécurité.</p>
+        </div>
+    </header>
+
+    <div class="frise frise--fine" role="presentation"></div>
+
+    <section class="section">
+        <div class="conteneur">
+            <h2>Notre méthode</h2>
+            <div class="confiance mt-6">
+                <div><icone nom="document" /><strong>Vérifier avant de publier</strong><span>Nous contrôlons les documents fonciers de chaque terrain avant de le proposer.</span></div>
+                <div><icone nom="position" /><strong>Montrer sans rien cacher</strong><span>Photos récentes, visite 360°, carte satellite et contour GPS de la parcelle.</span></div>
+                <div><icone nom="bouclier" /><strong>Signer chez le notaire</strong><span>Le paiement se fait uniquement contre un acte, jamais de la main à la main.</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section--sable">
+        <div class="conteneur conteneur--texte pile">
+            <h2>Pour qui ?</h2>
+            <p><strong>Familles</strong> qui cherchent un terrain pour bâtir leur maison, <strong>Sénégalais de la diaspora</strong> qui veulent investir sans se déplacer à chaque étape, <strong>investisseurs</strong> et <strong>porteurs de projets agricoles</strong> : nous adaptons notre accompagnement à votre situation.</p>
+            <p>Nous vous répondons sur WhatsApp, là où vous êtes, et nous vous tenons informé à chaque étape.</p>
+            <div class="flex mt-4">
+                <a class="btn btn--accent" href="/terrains">Voir les terrains</a>
+                <a class="btn btn--contour" href="/services">Nos services</a>
+            </div>
+        </div>
+    </section>
+
+    @if (!string.IsNullOrEmpty(Model.Adresse) || !string.IsNullOrEmpty(Model.HorairesOuverture))
+    {
+        <section class="section">
+            <div class="conteneur conteneur--texte pile">
+                <h2>Nous rencontrer</h2>
+                @if (!string.IsNullOrEmpty(Model.Adresse)) { <p class="flex"><icone nom="position" />@Model.Adresse</p> }
+                @if (!string.IsNullOrEmpty(Model.HorairesOuverture)) { <p class="muet">@Model.HorairesOuverture</p> }
+                <a class="btn btn--whatsapp" href="/contact"><icone nom="whatsapp" />Prendre rendez-vous</a>
+            </div>
+        </section>
+    }
+</article>

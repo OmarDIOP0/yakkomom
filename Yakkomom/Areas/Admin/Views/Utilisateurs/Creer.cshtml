@@ -1,0 +1,29 @@
+@model CreationUtilisateurVm
+@{
+    ViewData["Title"] = "Nouveau compte";
+}
+<div class="admin-formulaire">
+    <a class="btn btn--discret btn--petit" href="/admin/utilisateurs"><icone nom="retour" />Utilisateurs</a>
+    <h1 class="mt-4">Nouveau compte</h1>
+    <p class="muet">Un mot de passe provisoire sera généré. La personne devra le changer à sa première connexion.</p>
+
+    <form method="post" asp-action="Creer" class="mt-4" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+        <div class="champ">
+            <label asp-for="NomComplet"></label>
+            <input asp-for="NomComplet" autocomplete="off" required>
+            <span asp-validation-for="NomComplet" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" type="email" inputmode="email" autocapitalize="off" spellcheck="false" autocomplete="off" required>
+            <span asp-validation-for="Email" class="erreur"></span>
+        </div>
+        <fieldset class="champ">
+            <legend class="libelle">Rôle</legend>
+            <label class="choix"><input type="radio" asp-for="Role" value="@Roles.Admin"> <span><strong>Admin</strong><br><small class="muet">Gère les terrains, services, localités et paramètres.</small></span></label>
+            <label class="choix"><input type="radio" asp-for="Role" value="@Roles.SuperAdmin"> <span><strong>SuperAdmin</strong><br><small class="muet">Tout, plus la gestion des comptes de l'équipe.</small></span></label>
+        </fieldset>
+        <button class="btn btn--bloc mt-4" type="submit">Créer le compte</button>
+    </form>
+</div>

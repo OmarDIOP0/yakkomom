@@ -1,0 +1,101 @@
+@model PhotosTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Photos";
+    var id = Model.EnTete.Id;
+    var total = Model.Photos.Count;
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<section class="bloc-formulaire photos" data-photos data-terrain="@id"
+         data-url-envoi="/admin/terrains/@id/photos/envoi" data-url-ordre="/admin/terrains/@id/photos/ordre">
+    @Html.AntiForgeryToken()
+    <h2>Photos <span class="muet">(@total)</span></h2>
+
+    <div class="depot" data-depot>
+        <icone nom="camera" />
+        <p><strong>Ajoutez des photos</strong><br><span class="muet">Elles sont compressées sur votre téléphone avant l'envoi (≈ 300 Ko chacune). Vous pouvez fermer la page : l'envoi reprendra.</span></p>
+        <div class="depot__boutons">
+            <label class="btn btn--accent">
+                <icone nom="plus" />Choisir des photos
+                <input type="file" accept="image/*" multiple data-selection class="sr-only">
+            </label>
+            <label class="btn btn--contour mobile-seulement">
+                <icone nom="camera" />Prendre une photo
+                <input type="file" accept="image/*" capture="environment" data-selection class="sr-only">
+            </label>
+        </div>
+        <p class="aide bureau-seulement">… ou glissez-déposez les fichiers ici.</p>
+        <p class="alerte alerte--info" data-sans-js>L'envoi de photos nécessite JavaScript (pour les compresser avant l'envoi).</p>
+    </div>
+
+    <ul class="envois" data-envois role="list" aria-label="Envois en cours"></ul>
+    <p class="sr-only" data-annonce aria-live="polite"></p>
+
+    @if (total > 1)
+    {
+        <p class="aide mt-4"><span class="bureau-seulement">Glissez les photos par la poignée</span><span class="mobile-seulement">Maintenez la poignée et déplacez</span> pour changer l'ordre. La <strong>couverture</strong> est la photo affichée dans les listes et lors des partages WhatsApp.</p>
+    }
+
+    <ul class="photos-grille" data-grille role="list">
+        @if (total == 0)
+        {
+            <li class="photos-vide" data-vide>Aucune photo pour l'instant. Au moins @Completude.PhotosMinimum sont conseillées : vue d'ensemble, bornes, accès, voisinage.</li>
+        }
+        @for (var i = 0; i < total; i++)
+        {
+            var p = Model.Photos[i];
+            <li class="photo" data-id="@p.Id">
+                <div class="photo__media" style="background:@(p.CouleurDominante ?? "var(--c-sable-fonce)")">
+                    <a href="@p.UrlGrande" target="_blank" rel="noopener" aria-label="Voir la photo en grand">
+                        <img src="@p.UrlVignette" alt="@(p.Legende ?? $"Photo {i + 1}")" width="@p.Largeur" height="@p.Hauteur" loading="lazy" decoding="async">
+                    </a>
+                    @if (p.EstCouverture) { <span class="photo__couverture">Couverture</span> }
+                    <button type="button" class="photo__poignee" data-poignee aria-label="Déplacer la photo @(i + 1)" title="Déplacer">
+                        <span data-numero>@(i + 1)</span>
+                        <svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01" stroke-width="3"/></svg>
+                    </button>
+                </div>
+
+                <form method="post" asp-action="LegendePhoto" asp-route-id="@id" asp-route-photoId="@p.Id" class="photo__legende" data-form-legende>
+                    <label class="sr-only" for="legende-@p.Id">Légende de la photo @(i + 1)</label>
+                    <input id="legende-@p.Id" name="legende" value="@p.Legende" maxlength="200" placeholder="Légende (facultatif)" autocomplete="off">
+                    <button type="submit" class="btn btn--discret btn--petit" aria-label="Enregistrer la légende">OK</button>
+                    <span class="photo__etat muet" data-etat-legende aria-live="polite"></span>
+                </form>
+
+                <div class="photo__actions">
+                    @if (!p.EstCouverture)
+                    {
+                        <form method="post" asp-action="CouverturePhoto" asp-route-id="@id" asp-route-photoId="@p.Id">
+                            <button type="submit" class="btn btn--discret btn--petit">Couverture</button>
+                        </form>
+                    }
+                    <form method="post" asp-action="DeplacerPhoto" asp-route-id="@id" asp-route-photoId="@p.Id">
+                        <input type="hidden" name="decalage" value="-1">
+                        <button type="submit" class="btn btn--discret btn--petit btn--icone" aria-label="Avancer la photo" disabled="@(i == 0)"><icone nom="retour" /></button>
+                    </form>
+                    <form method="post" asp-action="DeplacerPhoto" asp-route-id="@id" asp-route-photoId="@p.Id">
+                        <input type="hidden" name="decalage" value="1">
+                        <button type="submit" class="btn btn--discret btn--petit btn--icone" aria-label="Reculer la photo" disabled="@(i == total - 1)"><icone nom="suivant" /></button>
+                    </form>
+                    <details class="admin-actions">
+                        <summary class="btn btn--discret btn--petit btn--icone" aria-label="Supprimer la photo"><icone nom="fermer" /></summary>
+                        <div class="admin-actions__menu">
+                            <form method="post" asp-action="SupprimerPhoto" asp-route-id="@id" asp-route-photoId="@p.Id">
+                                <button type="submit" class="danger">Supprimer cette photo</button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            </li>
+        }
+    </ul>
+</section>
+
+<div class="barre-enregistrer">
+    <a class="btn btn--bloc" asp-action="Visite360" asp-route-id="@id">Continuer<icone nom="suivant" /></a>
+</div>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/photos.js"]"></script>
+}

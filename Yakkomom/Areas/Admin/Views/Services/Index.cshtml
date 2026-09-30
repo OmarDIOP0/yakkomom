@@ -1,0 +1,44 @@
+@model IReadOnlyList<ServiceLigneVm>
+@{
+    ViewData["Title"] = "Services";
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">@Model.Count service@(Model.Count > 1 ? "s" : "")</p>
+        <h1>Services</h1>
+    </div>
+</header>
+<p class="muet">L'ordre ci-dessous est celui de l'accueil et de la page Services. Les services masqués n'apparaissent pas sur le site.</p>
+
+<ul class="liste-services-admin mt-4" role="list">
+    @for (var i = 0; i < Model.Count; i++)
+    {
+        var s = Model[i];
+        <li class="service-admin @(s.EstActif ? null : "service-admin--masque")">
+            <a class="service-admin__lien" href="/admin/services/@s.Id">
+                <span class="service-admin__visuel">
+                    @if (s.UrlCouverture is not null) { <img src="@s.UrlCouverture" alt="" width="96" height="72" loading="lazy"> }
+                    else { <icone nom="@(s.Icone ?? "terrain")" /> }
+                </span>
+                <span>
+                    <strong>@s.Titre</strong>
+                    @if (!s.EstActif) { <span class="badge">Masqué</span> }
+                    <small class="muet">@(s.Resume ?? "Pas encore de résumé") · @s.NombrePhotos photo@(s.NombrePhotos > 1 ? "s" : "")</small>
+                </span>
+            </a>
+            <div class="flex">
+                <form method="post" asp-action="Deplacer" asp-route-id="@s.Id"><input type="hidden" name="decalage" value="-1"><button class="btn btn--discret btn--petit btn--icone" type="submit" aria-label="Monter @s.Titre" disabled="@(i == 0)"><icone nom="retour" /></button></form>
+                <form method="post" asp-action="Deplacer" asp-route-id="@s.Id"><input type="hidden" name="decalage" value="1"><button class="btn btn--discret btn--petit btn--icone" type="submit" aria-label="Descendre @s.Titre" disabled="@(i == Model.Count - 1)"><icone nom="suivant" /></button></form>
+            </div>
+        </li>
+    }
+</ul>
+
+<form method="post" asp-action="Nouveau" class="ajout-document mt-6">
+    <h3>Ajouter un service</h3>
+    <div class="flex">
+        <label class="sr-only" for="titre-service">Titre du nouveau service</label>
+        <input id="titre-service" name="Titre" class="saisie" required maxlength="120" placeholder="Ex. Forage et adduction d'eau" style="flex:1;min-width:0">
+        <button class="btn btn--accent" type="submit"><icone nom="plus" />Créer</button>
+    </div>
+</form>

@@ -1,0 +1,90 @@
+@using Yakkomom.Stockage
+@model DocumentsTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Documents";
+    var id = Model.EnTete.Id;
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<form method="post" asp-action="Documents" asp-route-id="@id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+    <section class="bloc-formulaire">
+        <h2>Situation foncière</h2>
+        <div class="champ">
+            <label asp-for="SituationFonciere"></label>
+            <select asp-for="SituationFonciere" asp-items="Html.GetEnumSelectList<TypeDocumentFoncier>()">
+                <option value="">— Non précisée —</option>
+            </select>
+            <span class="aide">Le document principal qui prouve les droits sur le terrain. Le public verra un badge, par exemple « Titre foncier disponible », et pourra demander à le consulter sur WhatsApp.</span>
+            <span asp-validation-for="SituationFonciere" class="erreur"></span>
+        </div>
+        <button class="btn btn--contour mt-4" type="submit">Enregistrer la situation foncière</button>
+    </section>
+</form>
+
+<section class="bloc-formulaire formulaire-terrain" data-documents data-terrain="@id">
+    <h2>Fichiers <span class="muet">(@Model.Documents.Count)</span></h2>
+    <div class="alerte alerte--info"><icone nom="bouclier" />Chaque document est <strong>privé par défaut</strong> : invisible au public et inaccessible même avec le lien exact. Activez « Visible par le public » seulement pour un document que vous acceptez de montrer à tous.</div>
+
+    @if (Model.Documents.Count > 0)
+    {
+        <ul class="documents mt-4" role="list">
+            @foreach (var d in Model.Documents)
+            {
+                var typeNom = Html.GetEnumSelectList<TypeDocumentFoncier>().First(x => x.Value == ((int)d.Type).ToString()).Text;
+                <li class="document">
+                    <a class="document__fichier" href="/admin/documents/@d.Id" target="_blank" rel="noopener">
+                        <icone nom="document" />
+                        <span>
+                            <strong>@(d.Titre ?? typeNom)</strong>
+                            <span class="muet"><small>@typeNom · @d.NomFichier · @ReglesEnvoi.TailleLisible(d.TailleOctets) · @Format.Date(d.CreeLe)</small></span>
+                        </span>
+                    </a>
+                    <form method="post" asp-action="VisibiliteDocument" asp-route-id="@id" asp-route-documentId="@d.Id" class="document__visibilite">
+                        <button type="submit" class="interrupteur" role="switch" aria-checked="@(d.EstPublic ? "true" : "false")">
+                            <span class="interrupteur__piste" aria-hidden="true"></span>
+                            <span>@(d.EstPublic ? "Visible par le public" : "Privé")</span>
+                        </button>
+                    </form>
+                    <details class="admin-actions">
+                        <summary class="btn btn--discret btn--petit btn--icone" aria-label="Supprimer le document"><icone nom="fermer" /></summary>
+                        <div class="admin-actions__menu">
+                            <form method="post" asp-action="SupprimerDocument" asp-route-id="@id" asp-route-documentId="@d.Id">
+                                <button type="submit" class="danger">Supprimer ce document</button>
+                            </form>
+                        </div>
+                    </details>
+                </li>
+            }
+        </ul>
+    }
+
+    <form method="post" action="/admin/terrains/@id/documents/envoi" asp-antiforgery="true" enctype="multipart/form-data" class="ajout-document mt-6" data-form-document>
+        <h3>Ajouter un document</h3>
+        <div class="champ">
+            <label for="doc-type">Type de document</label>
+            <select id="doc-type" name="Type" asp-items="Html.GetEnumSelectList<TypeDocumentFoncier>()"></select>
+        </div>
+        <div class="champ">
+            <label for="doc-titre">Titre <span class="muet">(facultatif)</span></label>
+            <input id="doc-titre" name="Titre" maxlength="200" placeholder="Ex. TF n° 1234/GR, délibération de 2019…">
+        </div>
+        <div class="champ">
+            <label for="doc-fichier">Fichier</label>
+            <input id="doc-fichier" name="fichier" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" required>
+            <span class="aide">PDF, JPEG, PNG ou WebP · @ReglesEnvoi.TailleLisible(ReglesEnvoi.DocumentTailleMax) maximum. Les photos de documents sont allégées automatiquement.</span>
+        </div>
+        <label class="interrupteur mt-4"><input type="checkbox" name="EstPublic" value="true" role="switch"><span>Visible par le public</span></label>
+        <ul class="envois" data-envois role="list" aria-label="Envois en cours"></ul>
+        <button class="btn btn--accent btn--bloc mt-4" type="submit"><icone nom="plus" />Ajouter le document</button>
+    </form>
+</section>
+
+<div class="barre-enregistrer">
+    <a class="btn btn--bloc" asp-action="Contacts" asp-route-id="@id">Continuer<icone nom="suivant" /></a>
+</div>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+    <script type="module" src="@Assets["js/admin/documents.js"]"></script>
+}

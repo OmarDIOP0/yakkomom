@@ -1,0 +1,99 @@
+@model ListeTerrainsAdminVm
+@{
+    ViewData["Title"] = "Terrains";
+    var f = Model.Filtre;
+    var total = Model.CompteParStatut.Values.Sum();
+    string Lien(StatutTerrain? statut = null, bool? incomplets = null, int? page = null, bool tousStatuts = false)
+    {
+        var q = new List<string>();
+        if (!string.IsNullOrWhiteSpace(f.Q)) q.Add("q=" + Uri.EscapeDataString(f.Q));
+        var s = tousStatuts ? null : statut ?? f.Statut;
+        if (s is not null) q.Add("statut=" + s);
+        if (incomplets ?? f.Incomplets) q.Add("incomplets=true");
+        if (page is > 1) q.Add("page=" + page);
+        return "/admin/terrains" + (q.Count > 0 ? "?" + string.Join("&", q) : "");
+    }
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">@total terrain@(total > 1 ? "s" : "")</p>
+        <h1>Terrains</h1>
+    </div>
+    <a class="btn btn--accent" href="/admin/terrains/nouveau"><icone nom="plus" />Nouveau terrain</a>
+</header>
+
+<form method="get" action="/admin/terrains" class="recherche-admin" role="search">
+    <label class="sr-only" for="q">Rechercher</label>
+    <input id="q" name="q" type="search" value="@f.Q" class="saisie" placeholder="Référence, titre, commune…" enterkeyhint="search">
+    @if (f.Statut is not null) { <input type="hidden" name="statut" value="@f.Statut"> }
+    @if (f.Incomplets) { <input type="hidden" name="incomplets" value="true"> }
+    <button class="btn btn--icone" type="submit" aria-label="Rechercher"><icone nom="recherche" /></button>
+</form>
+
+<nav class="puces mt-4" aria-label="Filtrer par statut">
+    <a class="puce @(f.Statut is null ? "est-active" : null)" href="@Lien(tousStatuts: true)">Tous <span class="muet">@total</span></a>
+    @foreach (var s in Enum.GetValues<StatutTerrain>())
+    {
+        Model.CompteParStatut.TryGetValue(s, out var n);
+        <a class="puce @(f.Statut == s ? "est-active" : null)" href="@Lien(s)">@Format.Statut(s) <span class="muet">@n</span></a>
+    }
+    <a class="puce @(f.Incomplets ? "est-active" : null)" href="@Lien(incomplets: !f.Incomplets)">À compléter</a>
+</nav>
+
+@if (Model.Resultats.Total == 0)
+{
+    <div class="vide mt-6">
+        <icone nom="terrain" />
+        @if (total == 0)
+        {
+            <h2>Aucun terrain pour l'instant</h2>
+            <p class="muet">Commencez par un brouillon : un titre suffit, vous complèterez plus tard.</p>
+            <a class="btn btn--accent mt-4" href="/admin/terrains/nouveau"><icone nom="plus" />Ajouter le premier terrain</a>
+        }
+        else
+        {
+            <h2>Aucun résultat</h2>
+            <p class="muet">Essayez un autre filtre ou une autre recherche.</p>
+        }
+    </div>
+}
+else
+{
+    <ul class="liste-terrains mt-4" role="list">
+        @foreach (var t in Model.Resultats.Elements)
+        {
+            var c = t.Completude;
+            var niveau = c.Pourcentage >= 100 ? "complet" : c.Pourcentage >= 60 ? "moyen" : "faible";
+            <li>
+                <a class="ligne-terrain" href="/admin/terrains/@t.Id/infos">
+                    <span class="ligne-terrain__haut">
+                        <span class="ref">@t.Reference</span>
+                        <partial name="_Statut" model="t.Statut" />
+                        @if (t.EstMisEnAvant) { <span class="badge badge--ocre">À la une</span> }
+                    </span>
+                    <strong class="ligne-terrain__titre">@t.Titre</strong>
+                    <span class="ligne-terrain__meta muet">
+                        @(t.Prix is null ? "Prix non renseigné" : Format.Fcfa(t.Prix))
+                        · @(t.SurfaceM2 is null ? "surface ?" : Format.Surface(t.SurfaceM2))
+                        · @(t.Commune ?? "commune ?")
+                    </span>
+                    <span class="jauge jauge--mini jauge--@niveau" title="@c.Resume()">
+                        <span class="jauge__piste" aria-hidden="true"><span class="jauge__barre" style="width:@(c.Pourcentage)%"></span></span>
+                        <span class="jauge__pct">@c.Pourcentage %</span>
+                    </span>
+                </a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.Resultats.NombrePages > 1)
+    {
+        <nav aria-label="Pagination">
+            <ul class="pagination">
+                @if (Model.Resultats.Page > 1) { <li><a href="@Lien(page: Model.Resultats.Page - 1)" aria-label="Page précédente"><icone nom="retour" /></a></li> }
+                <li><span aria-current="page">@Model.Resultats.Page / @Model.Resultats.NombrePages</span></li>
+                @if (Model.Resultats.Page < Model.Resultats.NombrePages) { <li><a href="@Lien(page: Model.Resultats.Page + 1)" aria-label="Page suivante"><icone nom="suivant" /></a></li> }
+            </ul>
+        </nav>
+    }
+}

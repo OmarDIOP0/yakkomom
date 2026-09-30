@@ -1,0 +1,11 @@
+@model StatutTerrain
+@{
+    var classe = Model switch
+    {
+        StatutTerrain.Disponible => "statut--disponible",
+        StatutTerrain.Reserve => "statut--reserve",
+        StatutTerrain.Vendu => "statut--vendu",
+        _ => "statut--neutre"
+    };
+}
+<span class="statut @classe">@Format.Statut(Model)</span>

@@ -1,0 +1,55 @@
+@model CarteTerrainVm
+@{
+    var vendu = Model.Statut == StatutTerrain.Vendu;
+    var classeStatut = Model.Statut switch
+    {
+        StatutTerrain.Disponible => "statut--disponible",
+        StatutTerrain.Reserve => "statut--reserve",
+        _ => "statut--vendu"
+    };
+    var prixM2 = Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+}
+<article class="carte-terrain @(vendu ? "carte-terrain--vendu" : null)">
+    <div class="carte-terrain__media" style="--couleur-dominante:@(Model.CouleurDominante ?? "var(--c-sable-fonce)")">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" srcset="@Model.ImageSrcset" sizes="(min-width: 1200px) 380px, (min-width: 640px) 45vw, 100vw"
+                 width="@Model.ImageLargeur" height="@Model.ImageHauteur" alt="@Model.Titre"
+                 loading="@(Model.Prioritaire ? "eager" : "lazy")" fetchpriority="@(Model.Prioritaire ? "high" : null)" decoding="async">
+        }
+        <span class="carte-terrain__ref">@Model.Reference</span>
+        @if (vendu)
+        {
+            <span class="carte-terrain__bandeau">Vendu</span>
+        }
+        @if (Model.Prix is not null)
+        {
+            <span class="carte-terrain__prix chiffres">@Format.Montant(Model.Prix.Value)<small>FCFA</small></span>
+        }
+        <button type="button" class="carte-terrain__fav" data-favori="@Model.Reference" aria-pressed="false" aria-label="Ajouter @Model.Reference aux favoris"
+                data-titre="@Model.Titre" data-url="@Model.Url" data-image="@Model.ImageUrl" data-couleur="@Model.CouleurDominante"
+                data-prix="@(Model.Prix is null ? null : Format.Montant(Model.Prix.Value))" data-surface="@Format.Surface(Model.SurfaceM2)" data-lieu="@Model.Localisation">
+            <span><icone nom="favori" /></span>
+        </button>
+    </div>
+    <div class="carte-terrain__corps">
+        <span class="statut @classeStatut">@Format.Statut(Model.Statut)</span>
+        <h3 class="carte-terrain__titre"><a href="@Model.Url">@Model.Titre</a></h3>
+        <p class="carte-terrain__lieu">
+            @Format.Surface(Model.SurfaceM2)@if (prixM2 is not null) {<text> · @Format.Fcfa(prixM2)/m²</text>}@if (!string.IsNullOrEmpty(Model.Localisation)) {<text> · @Model.Localisation</text>}
+        </p>
+        @if (Model.TitreFoncier || Model.Visite360)
+        {
+            <div class="carte-terrain__badges">
+                @if (Model.TitreFoncier)
+                {
+                    <span class="badge badge--verifie"><icone nom="coche" />Titre foncier</span>
+                }
+                @if (Model.Visite360)
+                {
+                    <span class="badge badge--ocre"><icone nom="vue360" />Visite 360°</span>
+                }
+            </div>
+        }
+    </div>
+</article>

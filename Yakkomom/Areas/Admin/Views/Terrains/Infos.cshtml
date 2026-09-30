@@ -1,0 +1,94 @@
+@model InfosTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Infos";
+
+    void TriEtat(string nom, string libelle, bool? valeur)
+    {
+        <fieldset class="tri-etat">
+            <legend>@libelle</legend>
+            <div>
+                <label><input type="radio" name="@nom" value="true" checked="@(valeur == true)"><span>Oui</span></label>
+                <label><input type="radio" name="@nom" value="false" checked="@(valeur == false)"><span>Non</span></label>
+                <label><input type="radio" name="@nom" value="" checked="@(valeur is null)"><span>Je ne sais pas</span></label>
+            </div>
+        </fieldset>
+    }
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<form method="post" asp-action="Infos" asp-route-id="@Model.EnTete.Id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+
+    <section class="bloc-formulaire">
+        <h2>Présentation</h2>
+        <div class="champ">
+            <label asp-for="Titre"></label>
+            <input asp-for="Titre" required maxlength="200">
+            <span asp-validation-for="Titre" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Type"></label>
+            <select asp-for="Type" asp-items="Html.GetEnumSelectList<TypeTerrain>()">
+                <option value="">— Non précisé —</option>
+            </select>
+        </div>
+        <div class="champ">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" rows="6" maxlength="5000"
+                      placeholder="Ex. Terrain plat, à 800 m de la route nationale, quartier calme et déjà habité…"></textarea>
+            <span class="aide">Décrivez ce qu'un acheteur verrait sur place : environnement, voisinage, accès. Au moins @Completude.LongueurDescriptionMinimum caractères.</span>
+            <span asp-validation-for="Description" class="erreur"></span>
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Prix et dimensions</h2>
+        <div class="champ">
+            <label asp-for="Prix"></label>
+            <input asp-for="Prix" inputmode="numeric" autocomplete="off" placeholder="12 500 000" data-format-montant>
+            <span class="aide">Laissez vide pour afficher « Prix sur demande ».</span>
+            <span asp-validation-for="Prix" class="erreur"></span>
+        </div>
+        <label class="interrupteur"><input asp-for="PrixNegociable" role="switch"><span>@Html.DisplayNameFor(m => m.PrixNegociable)</span></label>
+        <div class="champ mt-4">
+            <label asp-for="SurfaceM2"></label>
+            <input asp-for="SurfaceM2" inputmode="decimal" autocomplete="off" placeholder="500">
+            <span class="aide">1 hectare = 10 000 m².@if (Model.SurfaceCalculeeM2 is { } calc) {<text> Surface du contour dessiné : ≈ @Format.Surface(calc).</text>}</span>
+            <span asp-validation-for="SurfaceM2" class="erreur"></span>
+        </div>
+        <div class="grille-2">
+            <div class="champ">
+                <label asp-for="LongueurM"></label>
+                <input asp-for="LongueurM" inputmode="decimal" autocomplete="off" placeholder="25">
+                <span asp-validation-for="LongueurM" class="erreur"></span>
+            </div>
+            <div class="champ">
+                <label asp-for="LargeurM"></label>
+                <input asp-for="LargeurM" inputmode="decimal" autocomplete="off" placeholder="20">
+                <span asp-validation-for="LargeurM" class="erreur"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Viabilisation</h2>
+        @{ TriEtat(nameof(Model.AccesEau), "Eau courante", Model.AccesEau); }
+        @{ TriEtat(nameof(Model.AccesElectricite), "Électricité", Model.AccesElectricite); }
+        @{ TriEtat(nameof(Model.RouteAcces), "Route d'accès praticable", Model.RouteAcces); }
+        <div class="champ">
+            <label asp-for="RouteAccesDetail"></label>
+            <input asp-for="RouteAccesDetail" placeholder="Ex. piste latéritique de 300 m depuis la route goudronnée">
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Mise en avant</h2>
+        <label class="interrupteur"><input asp-for="EstMisEnAvant" role="switch"><span>@Html.DisplayNameFor(m => m.EstMisEnAvant)</span></label>
+    </section>
+
+    <partial name="_BarreEnregistrer" />
+</form>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+}

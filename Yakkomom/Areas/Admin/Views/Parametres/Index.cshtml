@@ -1,0 +1,96 @@
+@using Yakkomom.Stockage
+@model ParametresVm
+@inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
+@inject Yakkomom.Services.Interfaces.IMediaService Medias
+@{
+    var cleLogo = (await ParametresSite.ObtenirAsync()).CleLogo;
+    ViewData["Title"] = "Paramètres du site";
+    ViewData["DernierOnglet"] = true;
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">Configuration</p>
+        <h1>Paramètres du site</h1>
+    </div>
+</header>
+
+<section class="bloc-formulaire formulaire-terrain">
+    <h2>Logo</h2>
+    <div class="logo-actuel">
+        <img src="@(cleLogo is null ? Assets["img/logo.svg"] : Medias.UrlImage(cleLogo, 256))" alt="Logo actuel" width="72" height="72">
+        <p class="muet"><small>@(cleLogo is null ? "Logo par défaut de Yakkomom." : "Logo personnalisé.") Format carré conseillé, PNG ou WebP (fond transparent possible), @ReglesEnvoi.LogoDimensionMax px et @ReglesEnvoi.TailleLisible(ReglesEnvoi.LogoTailleMax) maximum.</small></p>
+    </div>
+    <form method="post" asp-action="Logo" enctype="multipart/form-data" class="flex mt-4">
+        <label class="sr-only" for="logo">Nouveau logo</label>
+        <input id="logo" name="logo" type="file" accept="image/png,image/webp,image/jpeg" required>
+        <button class="btn btn--contour btn--petit" type="submit">Envoyer le logo</button>
+    </form>
+    @if (cleLogo is not null)
+    {
+        <form method="post" asp-action="SupprimerLogo" class="mt-4">
+            <button class="btn btn--discret btn--petit" type="submit">Revenir au logo par défaut</button>
+        </form>
+    }
+</section>
+
+<form method="post" asp-action="Index" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+
+    <section class="bloc-formulaire">
+        <h2>Identité</h2>
+        <div class="champ">
+            <label asp-for="NomSite"></label>
+            <input asp-for="NomSite" required maxlength="100">
+            <span asp-validation-for="NomSite" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Slogan"></label>
+            <input asp-for="Slogan" maxlength="200">
+        </div>
+    </section>
+
+    <div class="alerte alerte--info"><icone nom="whatsapp" />Contacts par défaut : utilisés sur tout le site et sur chaque terrain qui n'a pas ses propres contacts.</div>
+    <partial name="_ChampsContacts" model="Model" />
+
+    <section class="bloc-formulaire">
+        <h2>Message WhatsApp pré-rempli</h2>
+        <div class="champ">
+            <label asp-for="MessageWhatsAppTerrain"></label>
+            <textarea asp-for="MessageWhatsAppTerrain" rows="4" maxlength="500" required></textarea>
+            <span class="aide">Jetons remplacés automatiquement : <code>{reference}</code> (YK-0042), <code>{resume}</code> (500 m² à Nguékokh), <code>{lien}</code> (adresse de la fiche, obligatoire).</span>
+            <span asp-validation-for="MessageWhatsAppTerrain" class="erreur"></span>
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Agence</h2>
+        <div class="champ">
+            <label asp-for="Adresse"></label>
+            <input asp-for="Adresse" maxlength="300" placeholder="Ex. Mbour, route de Joal, en face de…">
+        </div>
+        <div class="champ">
+            <label asp-for="HorairesOuverture"></label>
+            <input asp-for="HorairesOuverture" maxlength="200" placeholder="Ex. Lun–sam, 9 h – 18 h">
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Réseaux sociaux</h2>
+        @foreach (var reseau in new[] { nameof(Model.Facebook), nameof(Model.Instagram), nameof(Model.TikTok), nameof(Model.YouTube), nameof(Model.LinkedIn) })
+        {
+            var valeur = typeof(ParametresVm).GetProperty(reseau)!.GetValue(Model) as string;
+            var erreur = ViewData.ModelState[reseau]?.Errors.FirstOrDefault()?.ErrorMessage;
+            <div class="champ @(erreur is null ? null : "champ--erreur")">
+                <label for="@reseau">@reseau</label>
+                <input id="@reseau" name="@reseau" value="@valeur" type="url" inputmode="url" maxlength="300" placeholder="https://…">
+                @if (erreur is not null) { <span class="erreur">@erreur</span> }
+            </div>
+        }
+    </section>
+
+    <partial name="~/Areas/Admin/Views/Terrains/_BarreEnregistrer.cshtml" />
+</form>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+}

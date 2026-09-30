@@ -1,0 +1,19 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erreur";
+}
+<section class="section">
+    <div class="conteneur pile">
+        <p class="surtitre">Erreur</p>
+        <h1>Un problème est survenu.</h1>
+        <p class="muet">Nous n'avons pas pu afficher cette page. Réessayez dans un instant ou revenez à l'accueil.</p>
+        @if (Model.ShowRequestId)
+        {
+            <p class="muet"><small>Référence de l'incident : <code class="ref">@Model.RequestId</code></small></p>
+        }
+        <div class="flex">
+            <a class="btn" href="/">Retour à l'accueil</a>
+            <a class="btn btn--whatsapp" href="/contact"><icone nom="whatsapp" />Nous contacter</a>
+        </div>
+    </div>
+</section>

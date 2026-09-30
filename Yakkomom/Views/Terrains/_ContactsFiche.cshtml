@@ -1,0 +1,33 @@
+@model FicheTerrainVm
+@{
+    var vendu = Model.Statut == StatutTerrain.Vendu;
+}
+<div class="contacts-fiche">
+    @if (vendu)
+    {
+        <p class="contacts-fiche__intro">Ce terrain est vendu. Nous avons peut-être un terrain similaire dans la même zone.</p>
+    }
+    else
+    {
+        <p class="contacts-fiche__intro">Une question, une visite ? Réponse rapide sur WhatsApp.</p>
+    }
+    @if (Model.WhatsApp.Count == 0 && string.IsNullOrEmpty(Model.Email))
+    {
+        <a class="btn btn--contour btn--bloc" href="/contact">Nous contacter</a>
+    }
+    @for (var i = 0; i < Model.WhatsApp.Count; i++)
+    {
+        var w = Model.WhatsApp[i];
+        <a class="btn @(i == 0 ? "btn--whatsapp" : "btn--contour") btn--bloc contacts-fiche__wa" href="@w.UrlSuivi?source=fiche" rel="nofollow" target="_blank">
+            <icone nom="whatsapp" />
+            <span>@(i == 0 ? (vendu ? "Demander un terrain similaire" : "Écrire sur WhatsApp") + (w.Libelle is null ? "" : $" · {w.Libelle}") : $"WhatsApp · {w.Libelle ?? w.NumeroAffiche}")</span>
+        </a>
+    }
+    @if (!string.IsNullOrEmpty(Model.Email))
+    {
+        <a class="btn btn--discret btn--bloc" href="mailto:@Model.Email?subject=@Uri.EscapeDataString($"Terrain {Model.Reference}")&body=@Uri.EscapeDataString($"Bonjour, je suis intéressé(e) par le terrain {Model.Reference} : {Model.UrlCanonique}")">
+            <icone nom="email" />@Model.Email
+        </a>
+    }
+    <p class="contacts-fiche__ref muet"><small>Citez la référence <strong class="ref">@Model.Reference</strong></small></p>
+</div>

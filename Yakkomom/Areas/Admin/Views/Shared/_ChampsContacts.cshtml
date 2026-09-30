@@ -1,0 +1,35 @@
+@model IChampsContacts
+@* Trois numéros WhatsApp + un e-mail. Numéros normalisés au format +221… à l'enregistrement. *@
+<section class="bloc-formulaire">
+    <h2>WhatsApp</h2>
+    <p class="aide">Formats acceptés : 77 123 45 67, 771234567, +221 77 123 45 67. Numéro étranger : commencez par + (ex. +33 6…).</p>
+    @for (var i = 1; i <= 3; i++)
+    {
+        var numero = i switch { 1 => Model.WhatsApp1, 2 => Model.WhatsApp2, _ => Model.WhatsApp3 };
+        var libelle = i switch { 1 => Model.WhatsApp1Libelle, 2 => Model.WhatsApp2Libelle, _ => Model.WhatsApp3Libelle };
+        var champ = $"WhatsApp{i}";
+        var erreur = ViewData.ModelState[champ]?.Errors.FirstOrDefault()?.ErrorMessage;
+        <div class="contact-ligne">
+            <div class="champ @(erreur is null ? null : "champ--erreur")">
+                <label for="@champ">WhatsApp @i</label>
+                <input id="@champ" name="@champ" value="@numero" type="tel" inputmode="tel" autocomplete="off" placeholder="77 123 45 67"
+                       aria-invalid="@(erreur is null ? null : "true")" aria-describedby="@(erreur is null ? null : champ + "-err")">
+                @if (erreur is not null) { <span class="erreur" id="@(champ)-err">@erreur</span> }
+            </div>
+            <div class="champ">
+                <label for="@(champ)Libelle">Nom affiché <span class="muet">(facultatif)</span></label>
+                <input id="@(champ)Libelle" name="@(champ)Libelle" value="@libelle" maxlength="60" placeholder="Ex. Moussa, service commercial">
+            </div>
+        </div>
+    }
+</section>
+
+<section class="bloc-formulaire">
+    <h2>E-mail</h2>
+    @{ var erreurEmail = ViewData.ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage; }
+    <div class="champ @(erreurEmail is null ? null : "champ--erreur")">
+        <label for="Email">Adresse e-mail</label>
+        <input id="Email" name="Email" value="@Model.Email" type="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="contact@yakkomom.com">
+        @if (erreurEmail is not null) { <span class="erreur">@erreurEmail</span> }
+    </div>
+</section>

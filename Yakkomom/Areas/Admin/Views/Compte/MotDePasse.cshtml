@@ -1,0 +1,41 @@
+@model ChangementMotDePasseVm
+@{
+    ViewData["Title"] = "Mot de passe";
+    ViewData["SansNavigation"] = Model.Obligatoire;
+}
+<div class="@(Model.Obligatoire ? "admin-carte-seule" : "admin-formulaire")">
+    <p class="surtitre">Sécurité du compte</p>
+    <h1>@(Model.Obligatoire ? "Choisissez votre mot de passe" : "Changer mon mot de passe")</h1>
+    @if (Model.Obligatoire)
+    {
+        <div class="alerte alerte--info mt-4"><icone nom="info" />Vous vous êtes connecté avec un mot de passe provisoire. Choisissez-en un personnel pour continuer.</div>
+    }
+
+    <form method="post" asp-action="MotDePasse" class="mt-4" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+        <div class="champ">
+            <label asp-for="Actuel">@(Model.Obligatoire ? "Mot de passe provisoire" : "Mot de passe actuel")</label>
+            <input asp-for="Actuel" autocomplete="current-password" required>
+            <span asp-validation-for="Actuel" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Nouveau"></label>
+            <input asp-for="Nouveau" autocomplete="new-password" aria-describedby="aide-mdp" required minlength="10">
+            <span class="aide" id="aide-mdp">Au moins 10 caractères, dont un chiffre. Une courte phrase est plus sûre qu'un mot compliqué.</span>
+            <span asp-validation-for="Nouveau" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Confirmation"></label>
+            <input asp-for="Confirmation" autocomplete="new-password" required>
+            <span asp-validation-for="Confirmation" class="erreur"></span>
+        </div>
+        <button class="btn btn--bloc mt-4" type="submit">Enregistrer le mot de passe</button>
+    </form>
+
+    @if (Model.Obligatoire)
+    {
+        <form method="post" action="/admin/deconnexion" asp-antiforgery="true" class="mt-4">
+            <button class="btn btn--discret btn--bloc" type="submit">Se déconnecter</button>
+        </form>
+    }
+</div>

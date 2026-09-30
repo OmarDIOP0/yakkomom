@@ -1,0 +1,46 @@
+@{
+    ViewData["Robots"] = "noindex, follow";
+    ViewData["Title"] = "Mes favoris";
+    ViewData["Description"] = "Les terrains que vous avez mis de côté, enregistrés sur votre téléphone.";
+}
+<section class="section">
+    <div class="conteneur">
+        <header class="liste-publique__entete">
+            <p class="surtitre">Enregistrés sur cet appareil</p>
+            <h1>Mes favoris</h1>
+            <p class="muet">Pas besoin de compte : vos favoris restent sur votre téléphone. Touchez le cœur d'un terrain pour l'ajouter.</p>
+        </header>
+
+        <p class="alerte alerte--info mt-4" data-favoris-maj hidden role="status"></p>
+        <div class="grille-cartes mt-6" data-favoris-grille aria-live="polite"></div>
+
+        <div class="vide-public" data-favoris-vide hidden>
+            <icone nom="favori" />
+            <h2>Aucun favori pour l'instant</h2>
+            <p class="muet">Parcourez les terrains et touchez le cœur pour les retrouver ici, même sans connexion.</p>
+            <a class="btn btn--accent mt-4" href="/terrains">Voir les terrains</a>
+        </div>
+        <noscript><p class="alerte alerte--info">Les favoris nécessitent JavaScript.</p></noscript>
+
+        <template data-modele-carte>
+            <article class="carte-terrain">
+                <div class="carte-terrain__media">
+                    <img alt="" width="800" height="600" loading="lazy" decoding="async">
+                    <span class="carte-terrain__ref"></span>
+                    <span class="carte-terrain__bandeau" hidden>Vendu</span>
+                    <span class="carte-terrain__prix chiffres" hidden><span data-prix></span><small>FCFA</small></span>
+                    <button type="button" class="carte-terrain__fav" aria-pressed="true"><span><icone nom="favori" /></span></button>
+                </div>
+                <div class="carte-terrain__corps">
+                    <span class="statut" data-statut></span>
+                    <h3 class="carte-terrain__titre"><a></a></h3>
+                    <p class="carte-terrain__lieu"></p>
+                </div>
+            </article>
+        </template>
+    </div>
+</section>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/public/favoris-page.js"]"></script>
+}

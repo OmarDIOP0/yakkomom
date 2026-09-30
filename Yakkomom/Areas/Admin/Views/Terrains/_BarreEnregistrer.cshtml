@@ -1,0 +1,17 @@
+@* Barre collée en bas de l'écran : enregistrer est toujours à portée de pouce. *@
+@{
+    var dernier = ViewData["DernierOnglet"] is true;
+}
+<div class="barre-enregistrer">
+    @if (dernier)
+    {
+        <button class="btn btn--bloc" type="submit">Enregistrer</button>
+    }
+    else
+    {
+        <button class="btn btn--contour" type="submit">Enregistrer</button>
+        <button class="btn" type="submit" name="Suite" value="continuer" aria-label="Enregistrer et passer à la section suivante">
+            <span class="mobile-seulement">Suivant</span><span class="bureau-seulement">Enregistrer et continuer</span><icone nom="suivant" />
+        </button>
+    }
+</div>

@@ -1,0 +1,96 @@
+@model AccueilVm
+@{
+    ViewData["Title"] = null;
+}
+<section class="heros">
+    <icone nom="topo" classe="heros__topo decoratif" />
+    <div class="conteneur">
+        <p class="surtitre">Terrains &amp; services immobiliers · Sénégal</p>
+        <h1>La terre, <em>vérifiée</em> avant d'être vendue.</h1>
+        <form class="heros__recherche" action="/terrains" method="get" role="search">
+            <icone nom="position" />
+            <label class="sr-only" for="recherche-lieu">Où cherchez-vous un terrain ?</label>
+            <input id="recherche-lieu" name="q" type="search" placeholder="Mbour, Diamniadio, Thiès…" autocomplete="off" enterkeyhint="search">
+            <button class="btn btn--accent btn--petit" type="submit">Chercher</button>
+        </form>
+        @if (Model.NombreDisponibles > 0)
+        {
+            <p class="heros__chiffres"><strong>@Model.NombreDisponibles</strong> terrain@(Model.NombreDisponibles > 1 ? "s" : "") disponible@(Model.NombreDisponibles > 1 ? "s" : "")@if (Model.NombreVendus > 0) {<text> · <strong>@Model.NombreVendus</strong> déjà vendu@(Model.NombreVendus > 1 ? "s" : "")</text>}</p>
+        }
+    </div>
+</section>
+
+<div class="conteneur">
+    <div class="confiance">
+        <div><icone nom="document" /><strong>Documents contrôlés</strong><span>Titre foncier, bail ou délibération vérifiés avant publication.</span></div>
+        <div><icone nom="position" /><strong>Bornage et GPS</strong><span>Position et contour de chaque parcelle relevés sur place.</span></div>
+        <div><icone nom="bouclier" /><strong>Signature chez le notaire</strong><span>Aucun paiement sans document vérifié.</span></div>
+    </div>
+</div>
+
+@if (Model.ALaUne.Count > 0)
+{
+    <section class="section" aria-labelledby="titre-une">
+        <div class="conteneur">
+            <div class="titre-section">
+                <h2 id="titre-une">À la une</h2>
+                <a href="/terrains">Tous les terrains</a>
+            </div>
+            <div class="grille-cartes">
+                @foreach (var carte in Model.ALaUne)
+                {
+                    <partial name="_CarteTerrain" model="carte" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<div class="frise" role="presentation"></div>
+<section class="section section--sable" aria-labelledby="titre-services">
+    <div class="conteneur">
+        <div class="titre-section">
+            <h2 id="titre-services">Nos services</h2>
+            <a href="/services">En savoir plus</a>
+        </div>
+        <ul class="services-liste" role="list">
+            @foreach (var s in Model.Services)
+            {
+                <li>
+                    <a href="/services/@s.Slug">
+                        <icone nom="@(s.Icone ?? "terrain")" />
+                        <span><strong>@s.Titre</strong><span>@s.Resume</span></span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</section>
+
+<section class="section" aria-labelledby="titre-securite">
+    <div class="conteneur etapes-achat">
+        <div>
+            <p class="surtitre">Acheter sans risque</p>
+            <h2 id="titre-securite">Un achat foncier en 4 étapes claires</h2>
+            <p class="muet mt-4">La peur de l'arnaque foncière est légitime. Voici comment nous la supprimons.</p>
+            <a class="btn btn--contour mt-6" href="/acheter-en-securite">Le guide de l'achat sécurisé</a>
+        </div>
+        <ol class="etapes" role="list">
+            <li><span>1</span><div><strong>Visite à distance</strong><p>Photos récentes, visite 360°, carte satellite et contour GPS.</p></div></li>
+            <li><span>2</span><div><strong>Vérification des papiers</strong><p>Titre foncier ou délibération contrôlés au cadastre et aux domaines.</p></div></li>
+            <li><span>3</span><div><strong>Visite sur place</strong><p>Un conseiller vous montre les bornes et le voisinage.</p></div></li>
+            <li><span>4</span><div><strong>Signature chez le notaire</strong><p>Le paiement se fait uniquement contre un acte authentique.</p></div></li>
+        </ol>
+    </div>
+</section>
+
+@if (Model.WhatsAppPrincipal is { } wa)
+{
+    <section class="bandeau-contact">
+        <div class="conteneur">
+            <h2>Vous cherchez un terrain précis ?</h2>
+            <p>Dites-nous la zone, la surface et votre budget : nous vous répondons sur WhatsApp.</p>
+            <a class="btn btn--whatsapp" href="@wa.UrlSuivi?source=general" rel="nofollow"><icone nom="whatsapp" />Écrire sur WhatsApp</a>
+        </div>
+    </section>
+}

@@ -1,0 +1,136 @@
+@using Yakkomom.Stockage
+@model MediasTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Visite 360°";
+    var id = Model.EnTete.Id;
+    var idVideo = YouTube.ExtraireId(Model.VideoYoutubeUrl);
+    var panoramas = Model.Panoramas;
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<section class="bloc-formulaire formulaire-terrain" data-panoramas data-terrain="@id" data-url-envoi="/admin/terrains/@id/panoramas/envoi">
+    @Html.AntiForgeryToken()
+    <h2>Visite 360° <span class="muet">(@panoramas.Count)</span></h2>
+    <p class="aide">Prenez les photos avec le mode <strong>« Panorama »</strong> ou <strong>« Photo sphère »</strong> de l'appareil photo (ou une caméra 360), depuis plusieurs endroits : entrée, centre, route, voisinage. Chaque panorama est allégé sur votre téléphone avant l'envoi.</p>
+    <div class="depot">
+        <icone nom="vue360" />
+        <label class="btn btn--accent">
+            <icone nom="plus" />Ajouter des panoramas
+            <input type="file" accept="image/jpeg,image/webp,image/*" multiple class="sr-only">
+        </label>
+    </div>
+    <ul class="envois" data-envois role="list" aria-label="Envois en cours"></ul>
+
+    @if (panoramas.Count > 0)
+    {
+        <ul class="panoramas mt-4" role="list">
+            @for (var i = 0; i < panoramas.Count; i++)
+            {
+                var p = panoramas[i];
+                <li class="panorama">
+                    <img src="@p.UrlVignette" alt="" width="640" height="320" loading="lazy">
+                    <div class="panorama__corps">
+                        <form method="post" asp-action="TitrePanorama" asp-route-id="@id" asp-route-panoramaId="@p.Id" class="panorama__titre">
+                            <label class="sr-only" for="titre-pano-@p.Id">Titre du panorama</label>
+                            <input id="titre-pano-@p.Id" name="titre" value="@p.Titre" maxlength="120" class="saisie" placeholder="Ex. Entrée du terrain">
+                            <button type="submit" class="btn btn--discret btn--petit">OK</button>
+                        </form>
+                        <p class="muet"><small>
+                            @(p.EstDepart ? "Scène de départ · " : "")@p.NombreHotspots point@(p.NombreHotspots > 1 ? "s" : "") ·
+                            léger @ReglesEnvoi.TailleLisible(p.TailleBd) · HD @ReglesEnvoi.TailleLisible(p.TailleHd)@(p.Vaov < 180 ? " · panorama partiel" : "")
+                        </small></p>
+                        <div class="panorama__actions">
+                            @if (!p.EstDepart)
+                            {
+                                <form method="post" asp-action="DepartPanorama" asp-route-id="@id" asp-route-panoramaId="@p.Id"><button class="btn btn--discret btn--petit" type="submit">Scène de départ</button></form>
+                            }
+                            else
+                            {
+                                <span class="badge badge--plein">Départ</span>
+                            }
+                            <form method="post" asp-action="DeplacerPanorama" asp-route-id="@id" asp-route-panoramaId="@p.Id"><input type="hidden" name="decalage" value="-1"><button class="btn btn--discret btn--petit btn--icone" type="submit" aria-label="Monter" disabled="@(i == 0)"><icone nom="retour" /></button></form>
+                            <form method="post" asp-action="DeplacerPanorama" asp-route-id="@id" asp-route-panoramaId="@p.Id"><input type="hidden" name="decalage" value="1"><button class="btn btn--discret btn--petit btn--icone" type="submit" aria-label="Descendre" disabled="@(i == panoramas.Count - 1)"><icone nom="suivant" /></button></form>
+                            <details class="admin-actions">
+                                <summary class="btn btn--discret btn--petit btn--icone" aria-label="Supprimer le panorama"><icone nom="fermer" /></summary>
+                                <div class="admin-actions__menu">
+                                    <form method="post" asp-action="SupprimerPanorama" asp-route-id="@id" asp-route-panoramaId="@p.Id"><button type="submit" class="danger">Supprimer ce panorama et ses points</button></form>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@if (Model.ConfigEdition is not null)
+{
+    <section class="bloc-formulaire formulaire-terrain editeur-360" data-editeur-360 data-url-base="/admin/terrains/@id"
+             data-pannellum-js="@Assets["lib/pannellum/pannellum.js"]" data-pannellum-css="@Assets["lib/pannellum/pannellum.css"]">
+        <h2>Vue de départ et points de passage</h2>
+        <p class="aide">Tournez la vue pour placer le <strong>viseur</strong> (au centre) sur un endroit, puis ajoutez un point. Touchez un point de passage pour vous déplacer dans la visite.</p>
+        <script type="application/json" data-config>@Html.Raw(Model.ConfigEdition)</script>
+
+        <button type="button" class="btn btn--contour btn--bloc" data-lancer-editeur><icone nom="vue360" />Ouvrir l'éditeur de visite</button>
+        <div class="editeur-360__viseur" data-viseur hidden>
+            <div class="editeur-360__vue" data-viewer></div>
+            <span class="editeur-360__croix" aria-hidden="true"></span>
+        </div>
+        <p class="aide" data-etat role="status"></p>
+
+        <div class="editeur-360__outils" data-outils hidden>
+            <div class="champ">
+                <label for="scene-courante">Panorama affiché</label>
+                <select id="scene-courante" data-scene>
+                    @foreach (var p in panoramas) { <option value="@Visite360Service.IdScene(p.Id)">@p.Titre</option> }
+                </select>
+            </div>
+            <button type="button" class="btn btn--contour btn--bloc mt-4" data-action="vue"><icone nom="camera" />Utiliser cette vue comme vue de départ</button>
+
+            <form class="editeur-360__point mt-4" data-form-point>
+                <div class="champ">
+                    <label for="cible-point">Passage vers</label>
+                    <select id="cible-point" name="cible"></select>
+                </div>
+                <div class="champ">
+                    <label for="texte-point">Texte <span class="muet">(facultatif pour un passage)</span></label>
+                    <input id="texte-point" name="texte" maxlength="200" placeholder="Ex. Vers le fond du terrain, Borne nord-est…">
+                </div>
+                <div class="flex mt-4">
+                    <button class="btn" type="submit" value="scene"><icone nom="suivant" />Ajouter un passage ici</button>
+                    <button class="btn btn--contour" type="submit" value="info"><icone nom="info" />Ajouter une info ici</button>
+                </div>
+            </form>
+
+            <h3 class="mt-6">Points de cette vue</h3>
+            <ul class="editeur-360__points" data-points role="list"></ul>
+        </div>
+    </section>
+}
+
+<form method="post" asp-action="Visite360" asp-route-id="@id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+    <section class="bloc-formulaire">
+        <h2>Vidéo (drone ou visite)</h2>
+        <div class="champ">
+            <label asp-for="VideoYoutubeUrl"></label>
+            <input asp-for="VideoYoutubeUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://youtu.be/…">
+            <span class="aide">Publiez la vidéo sur YouTube (elle peut être « non répertoriée »), puis collez ici le lien du bouton « Partager ».</span>
+            <span asp-validation-for="VideoYoutubeUrl" class="erreur"></span>
+        </div>
+        @if (idVideo is not null)
+        {
+            <a class="apercu-video mt-4" href="@YouTube.UrlCanonique(idVideo)" target="_blank" rel="noopener">
+                <img src="@YouTube.Miniature(idVideo)" alt="Aperçu de la vidéo" width="480" height="360" loading="lazy">
+                <span>Voir sur YouTube</span>
+            </a>
+        }
+    </section>
+    <partial name="_BarreEnregistrer" />
+</form>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+    <script type="module" src="@Assets["js/admin/visite360.js"]"></script>
+}

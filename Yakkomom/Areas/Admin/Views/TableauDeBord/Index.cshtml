@@ -1,0 +1,24 @@
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Tableau de bord";
+    var nom = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name;
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">Tableau de bord</p>
+        <h1>Bonjour @nom</h1>
+    </div>
+    <a class="btn btn--accent bureau-seulement" href="/admin/terrains/nouveau"><icone nom="plus" />Nouveau terrain</a>
+</header>
+
+<div class="alerte alerte--info"><icone nom="info" />Les statistiques (terrains par statut, clics WhatsApp, fiches à compléter) arrivent à l'étape 12.</div>
+
+<section class="admin-raccourcis mt-6" aria-label="Raccourcis">
+    <a href="/admin/terrains/nouveau"><icone nom="plus" /><strong>Ajouter un terrain</strong><span>Un titre suffit pour commencer un brouillon.</span></a>
+    <a href="/admin/terrains"><icone nom="terrains" /><strong>Gérer les terrains</strong><span>Statuts, photos, documents, contacts.</span></a>
+    <a href="/admin/parametres"><icone nom="whatsapp" /><strong>Contacts par défaut</strong><span>Numéros WhatsApp utilisés sur tout le site.</span></a>
+    @if (User.IsInRole(Roles.SuperAdmin))
+    {
+        <a href="/admin/utilisateurs"><icone nom="accompagnement" /><strong>Équipe</strong><span>Créer et gérer les comptes admin.</span></a>
+    }
+</section>

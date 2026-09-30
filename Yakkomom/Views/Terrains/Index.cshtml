@@ -1,0 +1,167 @@
+@model ListeTerrainsPublicVm
+@{
+    var f = Model.Filtre;
+    ViewData["Title"] = "Terrains à vendre au Sénégal";
+    ViewData["Description"] = $"{Model.Total} terrains vérifiés à vendre au Sénégal : habitation, commercial, agricole, lotissements. Photos, visite 360°, carte et contact WhatsApp.";
+    var types = new (TypeTerrain Valeur, string Libelle)[] { (TypeTerrain.Habitation, "Habitation"), (TypeTerrain.Commercial, "Commercial"), (TypeTerrain.Agricole, "Agricole"), (TypeTerrain.Lotissement, "Lotissement") };
+
+    string Page(int page)
+    {
+        var q = Context.Request.Query.Where(kv => kv.Key != "page" && !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value.ToString())}").ToList();
+        if (page > 1) q.Add($"page={page}");
+        return "/terrains" + (q.Count > 0 ? "?" + string.Join("&", q) : "");
+    }
+    string Sans(params string[] cles)
+    {
+        var q = Context.Request.Query.Where(kv => kv.Key != "page" && !cles.Contains(kv.Key, StringComparer.OrdinalIgnoreCase) && !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value.ToString())}").ToList();
+        return "/terrains" + (q.Count > 0 ? "?" + string.Join("&", q) : "");
+    }
+
+    var actifs = new List<(string Libelle, string Url)>();
+    if (!string.IsNullOrWhiteSpace(f.Q)) actifs.Add(($"« {f.Q} »", Sans("q")));
+    if (f.Region is { } r) actifs.Add((Model.Regions.FirstOrDefault(x => x.Id == r)?.Nom ?? "Région", Sans("region", "commune")));
+    if (f.Commune is { } c) actifs.Add((Model.Communes.FirstOrDefault(x => x.Id == c)?.Nom ?? "Commune", Sans("commune")));
+    if (f.Type is { } ty) actifs.Add((types.First(x => x.Valeur == ty).Libelle, Sans("type")));
+    if (f.Statut == "disponible") actifs.Add(("Disponibles", Sans("statut")));
+    if (!string.IsNullOrWhiteSpace(f.PrixMin)) actifs.Add(($"≥ {f.PrixMin} F", Sans("prixmin")));
+    if (!string.IsNullOrWhiteSpace(f.PrixMax)) actifs.Add(($"≤ {f.PrixMax} F", Sans("prixmax")));
+    if (!string.IsNullOrWhiteSpace(f.SurfaceMin)) actifs.Add(($"≥ {f.SurfaceMin} m²", Sans("surfacemin")));
+    if (!string.IsNullOrWhiteSpace(f.SurfaceMax)) actifs.Add(($"≤ {f.SurfaceMax} m²", Sans("surfacemax")));
+    if (f.Visite360) actifs.Add(("Visite 360°", Sans("visite360")));
+    if (f.TitreFoncier) actifs.Add(("Titre foncier", Sans("titrefoncier")));
+}
+<div class="conteneur liste-publique">
+    <header class="liste-publique__entete">
+        <p class="surtitre">@Model.Total terrain@(Model.Total > 1 ? "s" : "")@(f.NombreFiltresActifs > 0 || !string.IsNullOrWhiteSpace(f.Q) ? " correspondant" + (Model.Total > 1 ? "s" : "") : "")</p>
+        <h1>Terrains</h1>
+    </header>
+
+    <form method="get" action="/terrains" class="filtres" id="filtres" data-filtres>
+        <div class="filtres__barre">
+            <label class="sr-only" for="f-q">Rechercher un lieu ou une référence</label>
+            <input id="f-q" name="q" value="@f.Q" type="search" class="saisie" placeholder="Lieu ou référence (YK-…)" enterkeyhint="search">
+            <label class="sr-only" for="f-tri">Trier</label>
+            <select id="f-tri" name="tri" class="saisie filtres__tri" data-envoi-auto>
+                <option value="" selected="@(string.IsNullOrEmpty(f.Tri))">Plus récents</option>
+                <option value="prix" selected="@(f.Tri == "prix")">Prix croissant</option>
+                <option value="prix-desc" selected="@(f.Tri == "prix-desc")">Prix décroissant</option>
+                <option value="surface" selected="@(f.Tri == "surface")">Surface croissante</option>
+                <option value="surface-desc" selected="@(f.Tri == "surface-desc")">Surface décroissante</option>
+            </select>
+        </div>
+
+        <details class="filtres__panneau">
+            <summary class="btn btn--contour"><icone nom="filtres" />Filtres@(f.NombreFiltresActifs > 0 ? $" · {f.NombreFiltresActifs}" : "")</summary>
+            <div class="filtres__champs">
+                <div class="champ">
+                    <label for="f-region">Région</label>
+                    <select id="f-region" name="region" data-region>
+                        <option value="">Toutes</option>
+                        @foreach (var o in Model.Regions) { <option value="@o.Id" selected="@(o.Id == f.Region)">@o.Nom (@o.Nombre)</option> }
+                    </select>
+                </div>
+                <div class="champ">
+                    <label for="f-commune">Commune</label>
+                    <select id="f-commune" name="commune" data-commune>
+                        <option value="">Toutes</option>
+                        @foreach (var o in Model.Communes) { <option value="@o.Id" selected="@(o.Id == f.Commune)">@o.Nom (@o.Nombre)</option> }
+                    </select>
+                </div>
+                <div class="champ">
+                    <label for="f-type">Type</label>
+                    <select id="f-type" name="type">
+                        <option value="">Tous</option>
+                        @foreach (var t in types) { <option value="@t.Valeur" selected="@(t.Valeur == f.Type)">@t.Libelle</option> }
+                    </select>
+                </div>
+                <fieldset class="champ filtres__plage">
+                    <legend class="libelle">Prix (FCFA)</legend>
+                    <label class="sr-only" for="f-pmin">Prix minimum</label>
+                    <input id="f-pmin" name="prixmin" value="@f.PrixMin" inputmode="numeric" placeholder="Min" class="saisie">
+                    <span aria-hidden="true">–</span>
+                    <label class="sr-only" for="f-pmax">Prix maximum</label>
+                    <input id="f-pmax" name="prixmax" value="@f.PrixMax" inputmode="numeric" placeholder="Max" class="saisie">
+                </fieldset>
+                <fieldset class="champ filtres__plage">
+                    <legend class="libelle">Surface (m²)</legend>
+                    <label class="sr-only" for="f-smin">Surface minimum</label>
+                    <input id="f-smin" name="surfacemin" value="@f.SurfaceMin" inputmode="decimal" placeholder="Min" class="saisie">
+                    <span aria-hidden="true">–</span>
+                    <label class="sr-only" for="f-smax">Surface maximum</label>
+                    <input id="f-smax" name="surfacemax" value="@f.SurfaceMax" inputmode="decimal" placeholder="Max" class="saisie">
+                </fieldset>
+                <div class="filtres__cases">
+                    <label class="interrupteur"><input type="checkbox" name="statut" value="disponible" role="switch" checked="@(f.Statut == "disponible")"><span>Disponibles uniquement</span></label>
+                    <label class="interrupteur"><input type="checkbox" name="titrefoncier" value="true" role="switch" checked="@f.TitreFoncier"><span>Avec titre foncier</span></label>
+                    <label class="interrupteur"><input type="checkbox" name="visite360" value="true" role="switch" checked="@f.Visite360"><span>Avec visite 360°</span></label>
+                </div>
+                <div class="filtres__actions">
+                    <button class="btn btn--accent" type="submit">Voir les terrains</button>
+                    @if (actifs.Count > 0) { <a class="btn btn--discret" href="/terrains">Tout effacer</a> }
+                </div>
+            </div>
+        </details>
+    </form>
+
+    @if (actifs.Count > 0)
+    {
+        <ul class="puces filtres__actifs" role="list" aria-label="Filtres actifs">
+            @foreach (var a in actifs)
+            {
+                <li><a class="puce est-active" href="@a.Url" aria-label="Retirer le filtre @a.Libelle">@a.Libelle <icone nom="fermer" /></a></li>
+            }
+        </ul>
+    }
+
+    <div class="liste-publique__resultats">
+        <h2 class="sr-only">Résultats</h2>
+        @if (Model.Terrains.Count == 0)
+        {
+            <div class="vide-public">
+                <icone nom="terrain" />
+                <h2>Aucun terrain ne correspond</h2>
+                <p class="muet">Élargissez la recherche, ou dites-nous ce que vous cherchez : de nouveaux terrains arrivent chaque semaine.</p>
+                <div class="flex mt-4" style="justify-content:center">
+                    <a class="btn btn--contour" href="/terrains">Voir tous les terrains</a>
+                    <a class="btn btn--whatsapp" href="/wa/general/1?source=liste" rel="nofollow"><icone nom="whatsapp" />Demander sur WhatsApp</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="grille-cartes">
+                @foreach (var carte in Model.Terrains)
+                {
+                    <partial name="_CarteTerrain" model="carte" />
+                }
+            </div>
+
+            @if (Model.NombrePages > 1)
+            {
+                <nav aria-label="Pages de résultats">
+                    <ul class="pagination">
+                        @if (Model.Page > 1) { <li><a href="@Page(Model.Page - 1)" rel="prev" aria-label="Page précédente"><icone nom="retour" /></a></li> }
+                        @for (var p = 1; p <= Model.NombrePages; p++)
+                        {
+                            if (p == 1 || p == Model.NombrePages || Math.Abs(p - Model.Page) <= 1)
+                            {
+                                <li>@if (p == Model.Page) { <span aria-current="page">@p</span> } else { <a href="@Page(p)">@p</a> }</li>
+                            }
+                            else if (Math.Abs(p - Model.Page) == 2)
+                            {
+                                <li><span class="pagination__ellipse" aria-hidden="true">…</span></li>
+                            }
+                        }
+                        @if (Model.Page < Model.NombrePages) { <li><a href="@Page(Model.Page + 1)" rel="next" aria-label="Page suivante"><icone nom="suivant" /></a></li> }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/public/filtres.js"]"></script>
+}

@@ -1,0 +1,30 @@
+@{
+    ViewData["Robots"] = "noindex, follow";
+    ViewData["Title"] = "Hors ligne";
+}
+<section class="section">
+    <div class="conteneur">
+        <header class="liste-publique__entete">
+            <p class="surtitre">Pas de connexion</p>
+            <h1>Vous êtes hors ligne</h1>
+            <p class="muet mt-4">Pas d'inquiétude : les terrains que vous avez déjà consultés et vos favoris restent disponibles ci-dessous. La page se mettra à jour dès le retour du réseau.</p>
+            <button type="button" class="btn btn--accent mt-4" data-reessayer>Réessayer</button>
+        </header>
+
+        <section class="mt-6" data-bloc-vus hidden aria-labelledby="titre-vus">
+            <h2 id="titre-vus" class="titre-section">Consultés récemment</h2>
+            <ul class="liste-hors-ligne" data-vus role="list"></ul>
+        </section>
+
+        <section class="mt-6" data-bloc-favoris hidden aria-labelledby="titre-favoris-hl">
+            <h2 id="titre-favoris-hl" class="titre-section">Vos favoris</h2>
+            <ul class="liste-hors-ligne" data-favoris-hl role="list"></ul>
+        </section>
+
+        <p class="muet mt-6" data-rien hidden>Aucun terrain consulté pour l'instant sur cet appareil. Revenez quand vous aurez du réseau.</p>
+    </div>
+</section>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/public/hors-ligne.js"]"></script>
+}

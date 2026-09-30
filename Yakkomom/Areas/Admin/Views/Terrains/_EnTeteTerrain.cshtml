@@ -1,0 +1,71 @@
+@model EnTeteTerrainVm
+@{
+    var onglets = new (OngletTerrain Onglet, string Action, string Libelle)[]
+    {
+        (OngletTerrain.Infos, "Infos", "Infos générales"),
+        (OngletTerrain.Localisation, "Localisation", "Localisation"),
+        (OngletTerrain.Photos, "Photos", "Photos"),
+        (OngletTerrain.Visite360, "Visite360", "Visite 360°"),
+        (OngletTerrain.Documents, "Documents", "Documents"),
+        (OngletTerrain.Contacts, "Contacts", "Contacts"),
+    };
+    var c = Model.Completude;
+    var niveau = c.Pourcentage >= 100 ? "complet" : c.Pourcentage >= 60 ? "moyen" : "faible";
+}
+<header class="terrain-entete">
+    <a class="btn btn--discret btn--petit terrain-entete__retour" href="/admin/terrains"><icone nom="retour" />Terrains</a>
+
+    <div class="terrain-entete__ligne">
+        <span class="ref">@Model.Reference</span>
+        <partial name="_Statut" model="Model.Statut" />
+        <span class="muet"><small>Modifié le @Format.DateHeure(Model.ModifieLe)</small></span>
+    </div>
+    <h1>@Model.Titre</h1>
+
+    <div class="jauge jauge--@niveau" role="group" aria-label="Complétude de la fiche">
+        <div class="jauge__piste" aria-hidden="true"><div class="jauge__barre" style="width:@(c.Pourcentage)%"></div></div>
+        <p>@c.Resume()</p>
+    </div>
+
+    <div class="terrain-entete__actions">
+        <form method="post" asp-action="Statut" asp-route-id="@Model.Id" class="terrain-statut">
+            <label class="sr-only" for="statut-terrain">Statut</label>
+            <select id="statut-terrain" name="Statut" class="saisie">
+                @foreach (var s in Enum.GetValues<StatutTerrain>())
+                {
+                    <option value="@s" selected="@(s == Model.Statut)">@Format.Statut(s)@(s == StatutTerrain.Brouillon ? " (invisible)" : s == StatutTerrain.Archive ? " (retiré du site)" : "")</option>
+                }
+            </select>
+            <input type="hidden" name="retour" value="@Context.Request.Path">
+            <button class="btn btn--contour btn--petit" type="submit">Appliquer</button>
+        </form>
+        @if (Model.Statut is StatutTerrain.Disponible or StatutTerrain.Reserve or StatutTerrain.Vendu)
+        {
+            <a class="btn btn--discret btn--petit" href="@Model.UrlPublique" target="_blank" rel="noopener"><icone nom="partager" />Voir sur le site</a>
+        }
+        @if (User.IsInRole(Roles.SuperAdmin))
+        {
+            <details class="admin-actions">
+                <summary class="btn btn--discret btn--petit">Supprimer…</summary>
+                <div class="admin-actions__menu admin-actions__menu--confirmation">
+                    <p>Supprimer <strong>@Model.Reference</strong> définitivement ? Photos et documents seront perdus. Pour le retirer du site sans rien perdre, choisissez plutôt le statut « Archivé ».</p>
+                    <form method="post" asp-action="Supprimer" asp-route-id="@Model.Id">
+                        <button type="submit" class="danger">Oui, supprimer définitivement</button>
+                    </form>
+                </div>
+            </details>
+        }
+    </div>
+
+    <nav class="onglets" aria-label="Sections de la fiche">
+        @foreach (var o in onglets)
+        {
+            var complet = c.OngletAdesCriteres(o.Onglet) && c.OngletComplet(o.Onglet);
+            <a asp-action="@o.Action" asp-route-id="@Model.Id" aria-current="@(o.Onglet == Model.OngletActif ? "page" : null)"
+               class="@(complet ? "est-complet" : null)">
+                @if (complet) { <icone nom="coche" libelle="complet" /> }
+                @o.Libelle
+            </a>
+        }
+    </nav>
+</header>

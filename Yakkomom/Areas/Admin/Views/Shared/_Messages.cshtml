@@ -1,0 +1,11 @@
+@using Yakkomom.Areas.Admin.Controllers
+@{
+    var message = TempData[AdminControllerBase.CleMessage] as string;
+    var type = TempData[AdminControllerBase.CleMessageType] as string ?? "info";
+}
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alerte alerte--@type admin-message" role="@(type == "erreur" ? "alert" : "status")">
+        <icone nom="@(type == "succes" ? "coche" : "info")" />@message
+    </div>
+}

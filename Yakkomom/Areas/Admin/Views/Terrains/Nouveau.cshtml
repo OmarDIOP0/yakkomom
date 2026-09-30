@@ -1,0 +1,20 @@
+@model NouveauTerrainVm
+@{
+    ViewData["Title"] = "Nouveau terrain";
+}
+<div class="admin-formulaire">
+    <a class="btn btn--discret btn--petit" href="/admin/terrains"><icone nom="retour" />Terrains</a>
+    <p class="surtitre mt-4">Nouveau terrain</p>
+    <h1>Comment s'appelle ce terrain ?</h1>
+    <p class="muet">C'est la seule information obligatoire. Le terrain est créé en <strong>brouillon</strong> (invisible au public) avec une référence YK-… automatique. Vous complèterez la fiche quand vous voudrez, même depuis le terrain.</p>
+
+    <form method="post" asp-action="Nouveau" class="mt-6" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+        <div class="champ">
+            <label asp-for="Titre"></label>
+            <input asp-for="Titre" required maxlength="200" autofocus placeholder="Ex. Terrain de 500 m² à Nguékokh">
+            <span asp-validation-for="Titre" class="erreur"></span>
+        </div>
+        <button class="btn btn--accent btn--bloc mt-4" type="submit">Créer le brouillon</button>
+    </form>
+</div>

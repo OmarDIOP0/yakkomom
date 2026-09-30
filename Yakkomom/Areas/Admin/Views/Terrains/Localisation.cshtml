@@ -1,0 +1,138 @@
+@model LocalisationTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Localisation";
+    var visibles = Model.Localites.Where(l => l.EstActive || l.Id == Model.RegionId || l.Id == Model.DepartementId || l.Id == Model.CommuneId).ToList();
+    var regions = visibles.Where(l => l.Type == TypeLocalite.Region).ToList();
+    var departements = visibles.Where(l => l.Type == TypeLocalite.Departement).ToList();
+    var communes = visibles.Where(l => l.Type == TypeLocalite.Commune).ToList();
+    var nomDepartement = departements.ToDictionary(d => d.Id, d => d.Nom);
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<form method="post" asp-action="Localisation" asp-route-id="@Model.EnTete.Id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+
+    <section class="bloc-formulaire" data-cascade-localites>
+        <h2>Découpage administratif</h2>
+        <p class="aide">Choisir la commune suffit : la région et le département se complètent tout seuls.</p>
+        <div class="champ">
+            <label asp-for="RegionId"></label>
+            <select asp-for="RegionId" data-niveau="region">
+                <option value="">— Toutes les régions —</option>
+                @foreach (var r in regions) { <option value="@r.Id" selected="@(r.Id == Model.RegionId)">@r.Nom</option> }
+            </select>
+        </div>
+        <div class="champ">
+            <label asp-for="DepartementId"></label>
+            <select asp-for="DepartementId" data-niveau="departement">
+                <option value="">— Tous les départements —</option>
+                @foreach (var d in departements) { <option value="@d.Id" data-parent="@d.ParentId" selected="@(d.Id == Model.DepartementId)">@d.Nom</option> }
+            </select>
+        </div>
+        <div class="champ">
+            <label asp-for="CommuneId"></label>
+            <select asp-for="CommuneId" data-niveau="commune">
+                <option value="">— Choisir la commune —</option>
+                @foreach (var groupe in communes.GroupBy(c => c.ParentId))
+                {
+                    <optgroup label="@(groupe.Key is { } k && nomDepartement.TryGetValue(k, out var n) ? n : "Autres")" data-parent="@groupe.Key">
+                        @foreach (var c in groupe) { <option value="@c.Id" data-parent="@c.ParentId" selected="@(c.Id == Model.CommuneId)">@c.Nom</option> }
+                    </optgroup>
+                }
+            </select>
+            <span class="aide">Commune absente de la liste ? Ajoutez-la dans <a href="/admin/localites" target="_blank">Localités</a>.</span>
+            <span asp-validation-for="CommuneId" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="QuartierVillage"></label>
+            <input asp-for="QuartierVillage" placeholder="Ex. Keur Mbaye Fall, Ngaparou Plage…">
+        </div>
+        <div class="champ">
+            <label asp-for="Adresse"></label>
+            <input asp-for="Adresse" placeholder="Ex. derrière la station Total, 2e rue à gauche">
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Position et contour</h2>
+
+        <div class="carte-edition" data-carte-edition hidden
+             data-leaflet-js="@Assets["lib/leaflet/leaflet.js"]" data-leaflet-css="@Assets["lib/leaflet/leaflet.css"]">
+            <div class="carte-edition__outils" role="toolbar" aria-label="Outils de la carte">
+                <button type="button" class="puce" data-action="point" aria-pressed="true"><icone nom="position" />Point</button>
+                <button type="button" class="puce" data-action="parcelle" aria-pressed="false"><icone nom="surface" />Parcelle</button>
+                <button type="button" class="puce" data-action="annuler" disabled>Annuler le dernier sommet</button>
+                <button type="button" class="puce" data-action="effacer" disabled>Effacer le contour</button>
+                <button type="button" class="puce" data-action="recentrer">Recentrer</button>
+            </div>
+            <div class="carte-edition__carte" data-carte>
+                <button type="button" class="btn btn--contour" data-action="charger"><icone nom="carte" />Afficher la carte</button>
+            </div>
+            <p class="carte-edition__surface" data-surface aria-live="polite"></p>
+            <p class="aide" data-etat-carte role="status"></p>
+            <button type="button" class="btn btn--accent btn--bloc mt-4" data-action="sommetGps" hidden><icone nom="position" />Ajouter un sommet à ma position GPS</button>
+            <p class="aide">Sur le terrain : placez-vous sur chaque borne, dans l'ordre, et appuyez sur ce bouton.</p>
+            <div class="champ mt-4">
+                <label for="collage-coordonnees">Coller des coordonnées ou un lien Google Maps</label>
+                <input id="collage-coordonnees" data-collage inputmode="text" autocomplete="off" placeholder="14.5198, -17.0021">
+            </div>
+        </div>
+
+        <input type="hidden" asp-for="ContourGeoJson">
+        <span asp-validation-for="ContourGeoJson" class="erreur"></span>
+        @if (Model.SurfaceCalculeeM2 is { } surface)
+        {
+            <p class="aide">Surface enregistrée d'après le contour : ≈ @Format.Surface(surface) (indicatif).</p>
+        }
+
+        <div class="grille-2">
+            <div class="champ">
+                <label asp-for="Latitude"></label>
+                <input asp-for="Latitude" inputmode="decimal" autocomplete="off" placeholder="14.5198">
+                <span asp-validation-for="Latitude" class="erreur"></span>
+            </div>
+            <div class="champ">
+                <label asp-for="Longitude"></label>
+                <input asp-for="Longitude" inputmode="decimal" autocomplete="off" placeholder="-17.0021">
+                <span asp-validation-for="Longitude" class="erreur"></span>
+            </div>
+        </div>
+        <button type="button" class="btn btn--contour btn--petit mt-4" data-position-gps hidden><icone nom="position" />Utiliser ma position actuelle</button>
+        <p class="aide" data-position-gps-etat role="status"></p>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Distances aux commodités</h2>
+        <p class="aide">Laissez vides les lignes inutiles.</p>
+        <datalist id="suggestions-commodites">
+            <option value="École"></option><option value="Marché"></option><option value="Route nationale"></option>
+            <option value="Centre de santé"></option><option value="Mosquée"></option><option value="Église"></option>
+            <option value="Plage"></option><option value="Autoroute"></option><option value="Aéroport AIBD"></option>
+        </datalist>
+        <div class="commodites">
+            @for (var i = 0; i < Model.Commodites.Count; i++)
+            {
+                <div class="commodites__ligne">
+                    <div class="champ">
+                        <label for="Commodites_@(i)__Libelle" class="sr-only">Commodité @(i + 1)</label>
+                        <input asp-for="Commodites[i].Libelle" list="suggestions-commodites" placeholder="Ex. École">
+                        <span asp-validation-for="Commodites[i].Libelle" class="erreur"></span>
+                    </div>
+                    <div class="champ">
+                        <label for="Commodites_@(i)__DistanceKm" class="sr-only">Distance en km</label>
+                        <div class="saisie-unite"><input asp-for="Commodites[i].DistanceKm" inputmode="decimal" placeholder="1,5"><span>km</span></div>
+                        <span asp-validation-for="Commodites[i].DistanceKm" class="erreur"></span>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <partial name="_BarreEnregistrer" />
+</form>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+    <script type="module" src="@Assets["js/admin/localites.js"]"></script>
+    <script type="module" src="@Assets["js/admin/carte-terrain.js"]"></script>
+}

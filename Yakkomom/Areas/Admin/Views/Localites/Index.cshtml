@@ -1,0 +1,66 @@
+@model IReadOnlyList<LocaliteOption>
+@{
+    ViewData["Title"] = "Localités";
+    var ouvert = ViewData["Ouvert"] as int?;
+    var enfants = Model.ToLookup(l => l.ParentId);
+    var regions = Model.Where(l => l.Type == TypeLocalite.Region).ToList();
+
+    async Task Ligne(LocaliteOption l, int regionId)
+    {
+        <div class="localite @(l.EstActive ? null : "localite--masquee")">
+            <form method="post" action="/admin/localites/@l.Id/renommer" asp-antiforgery="true" class="localite__nom">
+                <input type="hidden" name="ouvert" value="@regionId">
+                <label class="sr-only" for="loc-@l.Id">Nom</label>
+                <input id="loc-@l.Id" name="nom" value="@l.Nom" class="saisie" maxlength="120">
+                <button class="btn btn--discret btn--petit" type="submit">Renommer</button>
+            </form>
+            <form method="post" action="/admin/localites/@l.Id/visibilite" asp-antiforgery="true">
+                <input type="hidden" name="ouvert" value="@regionId">
+                <button class="btn btn--discret btn--petit" type="submit">@(l.EstActive ? "Masquer" : "Réafficher")</button>
+            </form>
+        </div>
+    }
+
+    async Task Ajout(TypeLocalite type, int parentId, string libelle, int regionId)
+    {
+        <form method="post" action="/admin/localites/ajouter" asp-antiforgery="true" class="localite-ajout">
+            <input type="hidden" name="type" value="@type">
+            <input type="hidden" name="parentId" value="@parentId">
+            <input type="hidden" name="ouvert" value="@regionId">
+            <label class="sr-only" for="ajout-@type-@parentId">@libelle</label>
+            <input id="ajout-@type-@parentId" name="nom" class="saisie" maxlength="120" placeholder="@libelle" required>
+            <button class="btn btn--contour btn--petit" type="submit"><icone nom="plus" />Ajouter</button>
+        </form>
+    }
+}
+<header class="admin-titre">
+    <div>
+        <p class="surtitre">Région › Département › Commune</p>
+        <h1>Localités</h1>
+    </div>
+</header>
+<p class="muet">Une localité « masquée » n'est plus proposée pour les nouveaux terrains, mais les terrains existants la conservent. Les quartiers et villages se saisissent librement sur chaque terrain.</p>
+
+<div class="arbre-localites mt-4">
+    @foreach (var r in regions)
+    {
+        var deps = enfants[r.Id].ToList();
+        <details class="arbre-localites__region" open="@(ouvert == r.Id)">
+            <summary><strong>@r.Nom</strong> <span class="muet">@deps.Count département@(deps.Count > 1 ? "s" : "")</span></summary>
+            @{ await Ligne(r, r.Id); }
+            @foreach (var d in deps)
+            {
+                var communes = enfants[d.Id].ToList();
+                <div class="arbre-localites__departement">
+                    <p class="surtitre">Département</p>
+                    @{ await Ligne(d, r.Id); }
+                    <div class="arbre-localites__communes">
+                        @foreach (var c in communes) { await Ligne(c, r.Id); }
+                        @{ await Ajout(TypeLocalite.Commune, d.Id, $"Nouvelle commune ({d.Nom})", r.Id); }
+                    </div>
+                </div>
+            }
+            @{ await Ajout(TypeLocalite.Departement, r.Id, $"Nouveau département ({r.Nom})", r.Id); }
+        </details>
+    }
+</div>

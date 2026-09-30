@@ -1,0 +1,269 @@
+@model FicheTerrainVm
+@using System.Globalization
+@using Yakkomom.Services
+@{
+    var m = Model;
+    ViewData["Title"] = $"{m.Titre} · {m.Reference}";
+    ViewData["Description"] = $"{m.Resume} — {Format.Fcfa(m.Prix)}. {m.Localisation}. Photos, carte, documents fonciers et contact WhatsApp. Réf. {m.Reference}.";
+    var prixM2 = Format.PrixAuM2(m.Prix, m.SurfaceM2);
+    var vendu = m.Statut == StatutTerrain.Vendu;
+    var classeStatut = m.Statut switch { StatutTerrain.Disponible => "statut--disponible", StatutTerrain.Reserve => "statut--reserve", _ => "statut--vendu" };
+    var documentLibelle = m.SituationFonciere is { } sf ? TerrainPublicService.NomType(sf) : null;
+    var lat = m.Latitude?.ToString("0.######", CultureInfo.InvariantCulture);
+    var lng = m.Longitude?.ToString("0.######", CultureInfo.InvariantCulture);
+    var texteRecommande = $"{m.Titre} — {Format.Fcfa(m.Prix)} ({m.Reference})";
+    var couverture = m.Photos.FirstOrDefault();
+
+    string Viab(bool? v) => v switch { true => "oui", false => "non", _ => "inconnu" };
+    string ViabTexte(bool? v, string oui, string non) => v switch { true => oui, false => non, _ => "Non renseigné" };
+}
+@section Head {
+    @if (couverture is not null)
+    {
+        <link rel="preload" as="image" href="@couverture.Src" imagesrcset="@couverture.Srcset" imagesizes="(min-width: 1024px) 760px, 100vw" fetchpriority="high">
+    }
+}
+
+@if (m.EstApercuAdmin)
+{
+    <div class="apercu-admin" role="status">Aperçu admin : ce terrain n'est pas visible par le public (statut « @Format.Statut(m.Statut) »).</div>
+}
+
+<article class="fiche">
+    @* --- Galerie ---------------------------------------------------------- *@
+    <div class="galerie" data-galerie>
+        @if (m.Photos.Count == 0)
+        {
+            <div class="galerie__vide"><icone nom="camera" /><span>Photos bientôt disponibles</span></div>
+        }
+        else
+        {
+            <ul class="galerie__piste" data-piste role="list" aria-label="Photos du terrain">
+                @for (var i = 0; i < m.Photos.Count; i++)
+                {
+                    var p = m.Photos[i];
+                    <li style="--couleur-dominante:@(p.Couleur ?? "var(--c-sable-fonce)")">
+                        <button type="button" class="galerie__photo" data-ouvrir="@i" aria-label="Agrandir la photo @(i + 1) sur @m.Photos.Count">
+                            <img src="@p.Src" srcset="@p.Srcset" sizes="(min-width: 1024px) 760px, 100vw" width="@p.Largeur" height="@p.Hauteur"
+                                 alt="@(p.Legende ?? $"{m.Titre}, photo {i + 1}")" loading="@(i == 0 ? "eager" : "lazy")" fetchpriority="@(i == 0 ? "high" : null)" decoding="async">
+                        </button>
+                        @if (!string.IsNullOrEmpty(p.Legende)) { <p class="galerie__legende">@p.Legende</p> }
+                    </li>
+                }
+            </ul>
+            <span class="galerie__compteur" data-compteur aria-hidden="true">1 / @m.Photos.Count</span>
+        }
+        @if (vendu) { <span class="galerie__bandeau">Vendu</span> }
+        else if (m.Statut == StatutTerrain.Reserve) { <span class="galerie__bandeau galerie__bandeau--reserve">Réservé</span> }
+        <div class="galerie__actions">
+            <button type="button" class="bouton-rond" data-favori="@m.Reference" aria-pressed="false" aria-label="Ajouter aux favoris"
+                    data-titre="@m.Titre" data-url="@(new Uri(m.UrlCanonique).AbsolutePath)" data-image="@couverture?.Src" data-couleur="@couverture?.Couleur"
+                    data-prix="@(m.Prix is null ? null : Format.Montant(m.Prix.Value))" data-surface="@Format.Surface(m.SurfaceM2)" data-lieu="@(m.QuartierVillage ?? m.Commune)">
+                <icone nom="favori" />
+            </button>
+            <a class="bouton-rond" href="@WhatsAppLiens.UrlPartage($"{texteRecommande} : {m.UrlCanonique}")" data-partager
+               data-titre="@m.Titre" data-texte="@texteRecommande" data-url="@m.UrlCanonique" target="_blank" rel="noopener nofollow" aria-label="Partager ce terrain">
+                <icone nom="partager" />
+            </a>
+        </div>
+    </div>
+
+    <div class="conteneur fiche__grille">
+        <div class="fiche__principal">
+            @* --- En-tête -------------------------------------------------- *@
+            <header class="fiche__entete">
+                <p class="fiche__ref"><span class="ref">@m.Reference</span> <span class="statut @classeStatut">@Format.Statut(m.Statut)</span></p>
+                <h1>@m.Titre</h1>
+                @if (!string.IsNullOrEmpty(m.Localisation)) { <p class="fiche__lieu"><icone nom="position" />@m.Localisation</p> }
+                <div class="badges-confiance">
+                    @if (m.AUnTitreFoncier) { <span class="badge badge--verifie"><icone nom="bouclier" />Titre foncier disponible</span> }
+                    else if (documentLibelle is not null) { <span class="badge badge--verifie"><icone nom="document" />@documentLibelle</span> }
+                    @if (m.NombrePanoramas > 0) { <span class="badge badge--ocre"><icone nom="vue360" />Visite 360°</span> }
+                    @if (m.VideoId is not null) { <span class="badge"><icone nom="video" />Vidéo</span> }
+                    @if (m.ContourGeoJson is not null) { <span class="badge"><icone nom="surface" />Parcelle géolocalisée</span> }
+                </div>
+            </header>
+
+            @* --- Prix (mobile ; sur ordinateur il est dans la colonne de contact) *@
+            <div class="fiche__prix mobile-seulement">
+                <partial name="_PrixFiche" model="m" />
+            </div>
+
+            @* --- Fiche technique ----------------------------------------- *@
+            <dl class="fiche-tech mt-6">
+                <div><dt>Prix</dt><dd>@(m.Prix is null ? "Sur demande" : Format.Fcfa(m.Prix))</dd></div>
+                <div><dt>Prix au m²</dt><dd>@(prixM2 is null ? "—" : Format.Fcfa(prixM2))</dd></div>
+                <div><dt>Surface</dt><dd>@Format.Surface(m.SurfaceM2)</dd></div>
+                <div><dt>Dimensions</dt><dd>@Format.Dimensions(m.LongueurM, m.LargeurM)</dd></div>
+                <div class="fiche-tech__large">
+                    <dt>Document foncier</dt>
+                    <dd class="flex">@if (documentLibelle is not null) { <icone nom="bouclier" /> @documentLibelle } else { <text>À demander</text> }</dd>
+                </div>
+            </dl>
+
+            @* --- Contacts (mobile) ---------------------------------------- *@
+            <section class="fiche__contacts-mobile mobile-seulement" id="contacter" aria-label="Contacter Yakkomom">
+                <partial name="_ContactsFiche" model="m" />
+            </section>
+
+            @* --- Visite 360° et vidéo --------------------------------------- *@
+            @if (m.NombrePanoramas > 0 || m.VideoId is not null)
+            {
+                <section class="fiche__section" aria-labelledby="titre-visite">
+                    <h2 id="titre-visite">Visiter à distance</h2>
+                    @if (m.Visite is { } visite)
+                    {
+                        <div class="visite" data-visite
+                             data-pannellum-js="@Assets["lib/pannellum/pannellum.js"]" data-pannellum-css="@Assets["lib/pannellum/pannellum.css"]">
+                            <script type="application/json" data-config>@Html.Raw(visite.ConfigJson)</script>
+                            <script type="application/json" data-urls-hd>@Html.Raw(visite.UrlsHdJson)</script>
+                            <button type="button" class="visite__lancer" data-lancer-visite>
+                                <img src="@visite.UrlVignette" alt="" width="640" height="320" loading="lazy" decoding="async">
+                                <span class="visite__appel">
+                                    <icone nom="vue360" />
+                                    <strong>Lancer la visite 360° <span class="visite__poids">(≈ @Yakkomom.Stockage.ReglesEnvoi.TailleLisible(visite.TailleLancement))</span></strong>
+                                    <small>@visite.NombreScenes vue@(visite.NombreScenes > 1 ? "s" : "") · départ : @visite.TitreDepart</small>
+                                </span>
+                            </button>
+                            <div class="visite__lecteur" data-lecteur hidden></div>
+                            <div class="visite__outils" data-outils-visite hidden>
+                                <button type="button" class="btn btn--contour btn--petit" data-hd>Haute définition (≈ @Yakkomom.Stockage.ReglesEnvoi.TailleLisible(visite.TailleHdDepart))</button>
+                                <span class="muet"><small>Astuce : sur téléphone, touchez l'icône boussole pour visiter en bougeant l'appareil.</small></span>
+                            </div>
+                        </div>
+                    }
+                    @if (m.VideoId is { } videoId)
+                    {
+                        <div class="video" data-video="@videoId">
+                            <button type="button" class="video__facade" data-lancer-video aria-label="Lire la vidéo (YouTube, chargée seulement au clic)">
+                                <img src="@YouTube.Miniature(videoId)" alt="" width="480" height="360" loading="lazy" decoding="async">
+                                <span class="video__jouer"><svg viewBox="0 0 68 48" width="68" height="48" aria-hidden="true"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6C12.7 47.7 34 47.7 34 47.7s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#B4441F"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>
+                                <span class="video__legende">Vidéo · chargée au clic</span>
+                            </button>
+                        </div>
+                    }
+                </section>
+            }
+
+            @* --- Description -------------------------------------------------- *@
+            @if (!string.IsNullOrWhiteSpace(m.Description))
+            {
+                <section class="fiche__section" aria-labelledby="titre-description">
+                    <h2 id="titre-description">Description</h2>
+                    <div class="texte-riche">
+                        @foreach (var paragraphe in m.Description.Split(["\r\n\r\n", "\n\n"], StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <p>@paragraphe</p>
+                        }
+                    </div>
+                </section>
+            }
+
+            @* --- Viabilisation ------------------------------------------------ *@
+            <section class="fiche__section" aria-labelledby="titre-viab">
+                <h2 id="titre-viab">Viabilisation</h2>
+                <ul class="viabilisation" role="list">
+                    <li class="viab--@Viab(m.AccesEau)"><icone nom="eau" /><span><strong>Eau</strong>@ViabTexte(m.AccesEau, "Raccordement possible", "Pas de raccordement")</span></li>
+                    <li class="viab--@Viab(m.AccesElectricite)"><icone nom="electricite" /><span><strong>Électricité</strong>@ViabTexte(m.AccesElectricite, "Réseau à proximité", "Pas de réseau")</span></li>
+                    <li class="viab--@Viab(m.RouteAcces)"><icone nom="route" /><span><strong>Accès</strong>@(m.RouteAccesDetail ?? ViabTexte(m.RouteAcces, "Route praticable", "Accès difficile"))</span></li>
+                </ul>
+            </section>
+
+            @* --- Carte ------------------------------------------------------------ *@
+            @if (lat is not null && lng is not null)
+            {
+                <section class="fiche__section" aria-labelledby="titre-carte">
+                    <h2 id="titre-carte">Emplacement</h2>
+                    <div class="carte-publique" data-carte-publique data-lat="@lat" data-lng="@lng" data-contour="@m.ContourGeoJson"
+                         data-leaflet-js="@Assets["lib/leaflet/leaflet.js"]" data-leaflet-css="@Assets["lib/leaflet/leaflet.css"]">
+                        <button type="button" class="carte-publique__lancer" data-lancer-carte>
+                            <icone nom="carte" /><span><strong>Afficher la carte</strong><small>Vue satellite et contour de la parcelle</small></span>
+                        </button>
+                    </div>
+                    <div class="flex mt-4">
+                        <a class="btn btn--contour" href="https://www.google.com/maps/dir/?api=1&destination=@lat,@lng" target="_blank" rel="noopener"><icone nom="itineraire" />Itinéraire</a>
+                        @if (m.SurfaceCalculeeM2 is { } sc) { <span class="muet"><small>Contour relevé : ≈ @Format.Surface(sc)</small></span> }
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(m.Adresse)) { <p class="muet mt-4"><small>Repère : @m.Adresse</small></p> }
+                </section>
+            }
+
+            @* --- Commodités ------------------------------------------------------ *@
+            @if (m.Commodites.Count > 0)
+            {
+                <section class="fiche__section" aria-labelledby="titre-commodites">
+                    <h2 id="titre-commodites">À proximité</h2>
+                    <ul class="commodites-liste" role="list">
+                        @foreach (var c in m.Commodites)
+                        {
+                            <li><span>@c.Libelle</span><span class="chiffres">@(c.DistanceKm is { } d ? (d < 1 ? $"{Math.Round(d * 1000):0} m" : $"{Format.Nombre(d, d % 1 == 0 ? 0 : 1)} km") : "—")</span></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @* --- Documents ------------------------------------------------------- *@
+            <section class="fiche__section" aria-labelledby="titre-documents">
+                <h2 id="titre-documents">Documents</h2>
+                <p class="muet">Tous nos terrains sont vendus avec leurs documents vérifiés. Les originaux se consultent sur rendez-vous et chez le notaire.</p>
+                @if (m.DocumentsPublics.Count > 0)
+                {
+                    <ul class="documents-publics" role="list">
+                        @foreach (var d in m.DocumentsPublics)
+                        {
+                            <li><a href="@d.Url" target="_blank" rel="noopener nofollow"><icone nom="document" /><span><strong>@(d.Titre ?? d.Type)</strong><small>@d.Type · consulter</small></span></a></li>
+                        }
+                    </ul>
+                }
+                @if (m.UrlDemandeDocument is not null)
+                {
+                    <a class="btn btn--contour mt-4" href="@m.UrlDemandeDocument&source=fiche" rel="nofollow" target="_blank"><icone nom="whatsapp" />Demander à consulter les documents</a>
+                }
+            </section>
+        </div>
+
+        @* --- Colonne contact (ordinateur) --------------------------------------- *@
+        <aside class="fiche__aside bureau-seulement" aria-label="Prix et contact">
+            <div class="fiche__carte-contact">
+                <partial name="_PrixFiche" model="m" />
+                <partial name="_ContactsFiche" model="m" />
+            </div>
+        </aside>
+    </div>
+
+    @if (m.Similaires.Count > 0)
+    {
+        <section class="section section--sable" aria-labelledby="titre-similaires">
+            <div class="conteneur">
+                <div class="titre-section"><h2 id="titre-similaires">Terrains proches</h2><a href="/terrains">Voir tout</a></div>
+                <div class="grille-cartes">
+                    @foreach (var c in m.Similaires) { <partial name="_CarteTerrain" model="c" /> }
+                </div>
+            </div>
+        </section>
+    }
+</article>
+
+@if (m.WhatsApp.Count > 0 && !vendu)
+{
+    <a class="btn btn--whatsapp wa-flottant" href="@m.WhatsApp[0].UrlSuivi?source=flottant" rel="nofollow" target="_blank" data-wa-flottant>
+        <icone nom="whatsapp" />Demander ce terrain sur WhatsApp
+    </a>
+}
+
+@if (m.Photos.Count > 0)
+{
+    <dialog class="visionneuse" data-visionneuse aria-label="Photos en grand">
+        <button type="button" class="visionneuse__fermer bouton-rond" data-fermer aria-label="Fermer"><icone nom="fermer" /></button>
+        <ul class="visionneuse__piste" data-piste-grande role="list">
+            @foreach (var p in m.Photos)
+            {
+                <li><img data-src="@p.UrlGrande" alt="@(p.Legende ?? m.Titre)" width="@p.Largeur" height="@p.Hauteur" decoding="async"></li>
+            }
+        </ul>
+    </dialog>
+}
+
+@section Scripts {
+    <script type="module" src="@Assets["js/public/fiche.js"]"></script>
+}

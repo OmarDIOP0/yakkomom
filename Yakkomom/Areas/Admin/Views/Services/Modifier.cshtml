@@ -1,0 +1,117 @@
+@model ServiceEditionVm
+@{
+    ViewData["Title"] = Model.Titre;
+    ViewData["DernierOnglet"] = true;
+    var total = Model.Photos.Count;
+}
+<div class="formulaire-terrain">
+    <a class="btn btn--discret btn--petit" href="/admin/services"><icone nom="retour" />Services</a>
+    <div class="terrain-entete__ligne mt-4">
+        @if (!Model.EstActif) { <span class="badge">Masqué</span> }
+        <a class="btn btn--discret btn--petit" href="/services/@Model.Slug" target="_blank" rel="noopener"><icone nom="partager" />Voir la page</a>
+    </div>
+    <h1>@Model.Titre</h1>
+</div>
+
+<form method="post" asp-action="Modifier" asp-route-id="@Model.Id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+    <section class="bloc-formulaire">
+        <h2>Textes</h2>
+        <div class="champ">
+            <label asp-for="Titre"></label>
+            <input asp-for="Titre" required maxlength="120">
+            <span class="aide">L'adresse de la page reste /services/@Model.Slug même si vous changez le titre.</span>
+            <span asp-validation-for="Titre" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="Resume"></label>
+            <input asp-for="Resume" maxlength="300">
+        </div>
+        <div class="champ">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" rows="10" maxlength="8000"></textarea>
+            <span class="aide">Laissez une ligne vide entre deux paragraphes.</span>
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
+        <h2>Présentation</h2>
+        <fieldset class="champ">
+            <legend class="libelle">Icône</legend>
+            <div class="choix-icones">
+                @foreach (var (nom, libelle) in ServiceEditionVm.Icones)
+                {
+                    <label title="@libelle">
+                        <input type="radio" name="Icone" value="@nom" checked="@(Model.Icone == nom)">
+                        <span><icone nom="@nom" libelle="@libelle" /></span>
+                    </label>
+                }
+            </div>
+            <span asp-validation-for="Icone" class="erreur"></span>
+        </fieldset>
+        <div class="champ">
+            <label asp-for="MessageWhatsApp"></label>
+            <textarea asp-for="MessageWhatsApp" rows="3" maxlength="500"></textarea>
+            <span class="aide">Message pré-rempli du bouton « Demander ce service sur WhatsApp ».</span>
+        </div>
+        <label class="interrupteur mt-4"><input asp-for="EstActif" role="switch"><span>@Html.DisplayNameFor(m => m.EstActif)</span></label>
+    </section>
+
+    <partial name="~/Areas/Admin/Views/Terrains/_BarreEnregistrer.cshtml" />
+</form>
+
+<section class="bloc-formulaire photos" id="photos" data-photos data-file="photos-service-@Model.Id"
+         data-url-envoi="/admin/services/@Model.Id/photos/envoi" data-url-ordre="/admin/services/@Model.Id/photos/ordre">
+    @Html.AntiForgeryToken()
+    <h2>Photos de réalisations <span class="muet">(@total)</span></h2>
+    <p class="aide">Chantiers, maisons livrées, champs aménagés… La <strong>première</strong> photo sert de couverture : glissez-la en tête pour la changer.</p>
+    <div class="depot" data-depot>
+        <icone nom="camera" />
+        <div class="depot__boutons">
+            <label class="btn btn--accent"><icone nom="plus" />Choisir des photos<input type="file" accept="image/*" multiple data-selection class="sr-only"></label>
+            <label class="btn btn--contour mobile-seulement"><icone nom="camera" />Prendre une photo<input type="file" accept="image/*" capture="environment" data-selection class="sr-only"></label>
+        </div>
+        <p class="alerte alerte--info" data-sans-js>L'envoi de photos nécessite JavaScript.</p>
+    </div>
+    <ul class="envois" data-envois role="list" aria-label="Envois en cours"></ul>
+    <p class="sr-only" data-annonce aria-live="polite"></p>
+
+    <ul class="photos-grille" data-grille role="list">
+        @if (total == 0) { <li class="photos-vide" data-vide>Aucune photo pour l'instant.</li> }
+        @for (var i = 0; i < total; i++)
+        {
+            var p = Model.Photos[i];
+            <li class="photo" data-id="@p.Id">
+                <div class="photo__media" style="background:@(p.CouleurDominante ?? "var(--c-sable-fonce)")">
+                    <a href="@p.UrlGrande" target="_blank" rel="noopener" aria-label="Voir la photo en grand">
+                        <img src="@p.UrlVignette" alt="@(p.Legende ?? $"Réalisation {i + 1}")" width="@p.Largeur" height="@p.Hauteur" loading="lazy">
+                    </a>
+                    @if (i == 0) { <span class="photo__couverture">Couverture</span> }
+                    <button type="button" class="photo__poignee" data-poignee aria-label="Déplacer la photo @(i + 1)"><span data-numero>@(i + 1)</span>
+                        <svg viewBox="0 0 24 24" class="ic" aria-hidden="true"><path d="M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01" stroke-width="3"/></svg></button>
+                </div>
+                <form method="post" action="/admin/services/@Model.Id/photos/@p.Id/legende" asp-antiforgery="true" class="photo__legende" data-form-legende>
+                    <label class="sr-only" for="legende-@p.Id">Légende</label>
+                    <input id="legende-@p.Id" name="legende" value="@p.Legende" maxlength="200" placeholder="Légende (facultatif)" autocomplete="off">
+                    <button type="submit" class="btn btn--discret btn--petit">OK</button>
+                    <span class="photo__etat muet" data-etat-legende aria-live="polite"></span>
+                </form>
+                <div class="photo__actions">
+                    <form method="post" action="/admin/services/@Model.Id/photos/@p.Id/deplacer" asp-antiforgery="true"><input type="hidden" name="decalage" value="-1"><button type="submit" class="btn btn--discret btn--petit btn--icone" aria-label="Avancer" disabled="@(i == 0)"><icone nom="retour" /></button></form>
+                    <form method="post" action="/admin/services/@Model.Id/photos/@p.Id/deplacer" asp-antiforgery="true"><input type="hidden" name="decalage" value="1"><button type="submit" class="btn btn--discret btn--petit btn--icone" aria-label="Reculer" disabled="@(i == total - 1)"><icone nom="suivant" /></button></form>
+                    <details class="admin-actions">
+                        <summary class="btn btn--discret btn--petit btn--icone" aria-label="Supprimer la photo"><icone nom="fermer" /></summary>
+                        <div class="admin-actions__menu">
+                            <form method="post" action="/admin/services/@Model.Id/photos/@p.Id/supprimer" asp-antiforgery="true"><button type="submit" class="danger">Supprimer cette photo</button></form>
+                        </div>
+                    </details>
+                </div>
+            </li>
+        }
+    </ul>
+</section>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+    <script type="module" src="@Assets["js/admin/photos.js"]"></script>
+}

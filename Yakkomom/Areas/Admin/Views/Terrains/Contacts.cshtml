@@ -1,0 +1,40 @@
+@model ContactsTerrainVm
+@{
+    ViewData["Title"] = $"{Model.EnTete!.Reference} · Contacts";
+    ViewData["DernierOnglet"] = true;
+    var d = Model.ContactsParDefaut;
+    var defautsListe = new List<(string? Numero, string? Libelle)>();
+    if (d is not null)
+    {
+        defautsListe.AddRange(new[] { (d.WhatsApp1, d.WhatsApp1Libelle), (d.WhatsApp2, d.WhatsApp2Libelle), (d.WhatsApp3, d.WhatsApp3Libelle) }
+            .Where(x => !string.IsNullOrEmpty(x.Item1)));
+    }
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<form method="post" asp-action="Contacts" asp-route-id="@Model.EnTete.Id" class="formulaire-terrain" data-formulaire-suivi novalidate>
+    <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
+
+    <div class="alerte alerte--info">
+        <icone nom="info" />
+        <div>
+            Tous les champs sont facultatifs. S'ils sont vides, le site utilise les <a href="/admin/parametres">contacts par défaut</a> :
+            @if (defautsListe.Count == 0 && string.IsNullOrEmpty(d?.Email))
+            {
+                <strong>aucun n'est encore configuré.</strong>
+            }
+            else
+            {
+                <strong>@string.Join(", ", defautsListe.Select(x => TelephoneSenegal.Afficher(x.Numero) + (x.Libelle is null ? "" : $" ({x.Libelle})")))@(string.IsNullOrEmpty(d?.Email) ? "" : $" · {d!.Email}")</strong>
+            }
+        </div>
+    </div>
+
+    <partial name="_ChampsContacts" model="Model" />
+
+    <partial name="_BarreEnregistrer" />
+</form>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+}

@@ -1,0 +1,8 @@
+# Compilation
+bin/
+obj/
+.vs/
+*.user
+
+# Fichiers envoyés en local (photos, documents privés) : jamais dans le dépôt
+Yakkomom/App_Data/

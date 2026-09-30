@@ -1,0 +1,147 @@
+@inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
+@inject Yakkomom.Stockage.IStorageService Stockage
+@{
+    var parametres = await ParametresSite.ObtenirAsync();
+    var urlLogo = parametres.CleLogo is null ? Assets["img/logo.svg"] : Stockage.UrlImage(parametres.CleLogo, 128);
+    var waGeneral = Yakkomom.Services.WhatsAppLiens.NumerosEffectifs(null, parametres.ContactsParDefaut).FirstOrDefault();
+    var urlContact = waGeneral is null ? "/contact" : $"/wa/general/{waGeneral.Index}?source=general";
+    var meta = ViewData[MetaPage.Cle] as MetaPage ?? new MetaPage();
+    var titre = ViewData["Title"] as string;
+    var titrePage = string.IsNullOrEmpty(titre) ? $"{parametres.NomSite} — Terrains vérifiés au Sénégal" : $"{titre} · {parametres.NomSite}";
+    var description = meta.Description ?? ViewData["Description"] as string
+        ?? "Terrains vérifiés à vendre au Sénégal, visite 360°, documents fonciers contrôlés et accompagnement jusqu'au notaire. Contact direct sur WhatsApp.";
+    meta.Description = description;
+    meta.Titre ??= string.IsNullOrEmpty(titre) ? $"{parametres.NomSite} — Terrains vérifiés au Sénégal" : titre;
+    ViewData["NomSite"] = parametres.NomSite;
+
+    // Rubrique active de la navigation : définie par la vue, sinon déduite du contrôleur.
+    var rubrique = ViewData["Rubrique"] as string ?? ViewContext.RouteData.Values["controller"]?.ToString() switch
+    {
+        "Home" => "accueil",
+        var c => c?.ToLowerInvariant()
+    };
+    string? Courant(string r) => rubrique == r ? "page" : null;
+
+    // Mode économie de données (Save-Data du téléphone ou choix du visiteur) : pas de police web, vignettes seules.
+    var economie = ModeEconomie.EstActif(Context);
+    var economieChoisie = ModeEconomie.ParLeVisiteur(Context);
+    var cheminCourant = Context.Request.Path + Context.Request.QueryString;
+}
+<!DOCTYPE html>
+<html lang="fr" class="@(economie ? "economie" : null)">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>@titrePage</title>
+    <meta name="description" content="@description">
+    <partial name="_Meta" model="meta" />
+    <meta name="theme-color" content="#FBF7F0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121A15" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+    @if (!economie)
+    {
+        <link rel="preload" href="@Assets["fonts/fraunces-latin.woff2"]" as="font" type="font/woff2" crossorigin>
+        <style>
+            @@font-face{font-family:"Fraunces";src:url("@Assets["fonts/fraunces-latin.woff2"]") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+            @@font-face{font-family:"Fraunces";src:url("@Assets["fonts/fraunces-latin-italic.woff2"]") format("woff2");font-weight:100 900;font-style:italic;font-display:swap}
+        </style>
+    }
+    @* <!script> : empêche le tag helper ImportMap d'ASP.NET de remplacer notre import map par la sienne (vide ici). *@
+    <!script type="importmap">@Html.Raw(Assets.ImportMap())</!script>
+    <link rel="stylesheet" href="@Assets["css/site.css"]">
+    <link rel="icon" href="@Assets["img/logo.svg"]" type="image/svg+xml">
+    <link rel="icon" href="@Assets["img/icones/favicon-32.png"]" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="@Assets["img/icones/apple-touch-icon.png"]">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="@parametres.NomSite">
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body>
+    <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+    <header class="entete">
+        <div class="conteneur entete__barre">
+            <a class="logo" href="/" aria-label="@parametres.NomSite — accueil">
+                <img class="logo__marque" src="@urlLogo" alt="" width="28" height="28">
+                <span>Yakko<em>mom</em></span>
+            </a>
+            <nav class="nav-principale" aria-label="Navigation principale">
+                <ul>
+                    <li><a href="/" aria-current="@Courant("accueil")">Accueil</a></li>
+                    <li><a href="/terrains" aria-current="@Courant("terrains")">Terrains</a></li>
+                    <li><a href="/services" aria-current="@Courant("services")">Services</a></li>
+                    <li><a href="/acheter-en-securite" aria-current="@Courant("securite")">Acheter en sécurité</a></li>
+                    <li><a href="/a-propos" aria-current="@Courant("apropos")">À propos</a></li>
+                    <li><a href="/favoris" aria-current="@Courant("favoris")">Favoris</a></li>
+                </ul>
+            </nav>
+            <div class="entete__actions">
+                <a class="btn btn--discret btn--icone mobile-seulement" href="/terrains" aria-label="Rechercher un terrain"><icone nom="recherche" /></a>
+                <a class="btn btn--whatsapp btn--petit bureau-seulement" href="@urlContact" rel="nofollow" target="@(waGeneral is null ? null : "_blank")"><icone nom="whatsapp" />Nous contacter</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="contenu" tabindex="-1">
+        @RenderBody()
+    </main>
+
+    <footer class="pied">
+        <div class="frise" role="presentation"></div>
+        <div class="conteneur pied__contenu">
+            <div class="pile">
+                <a class="logo" href="/"><span>Yakko<em>mom</em></span></a>
+                @if (!string.IsNullOrEmpty(parametres.Slogan))
+                {
+                    <p>@parametres.Slogan</p>
+                }
+                <p>Terrains vérifiés, construction et accompagnement foncier partout au Sénégal.</p>
+            </div>
+            <div>
+                <h2>Découvrir</h2>
+                <ul>
+                    <li><a href="/terrains">Tous les terrains</a></li>
+                    <li><a href="/services">Nos services</a></li>
+                    <li><a href="/acheter-en-securite">Acheter en toute sécurité</a></li>
+                    <li><a href="/a-propos">À propos</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2>Nous joindre</h2>
+                <ul>
+                    <li><a href="/contact">Contact et WhatsApp</a></li>
+                    @if (!string.IsNullOrEmpty(parametres.ContactsParDefaut.Email))
+                    {
+                        <li><a href="mailto:@parametres.ContactsParDefaut.Email">@parametres.ContactsParDefaut.Email</a></li>
+                    }
+                    @if (!string.IsNullOrEmpty(parametres.Adresse))
+                    {
+                        <li>@parametres.Adresse</li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="conteneur pied__bas">
+            <span>© @DateTime.UtcNow.Year @parametres.NomSite · Tous droits réservés</span>
+            <a class="pied__economie" href="/preferences/economie?actif=@(economieChoisie ? "false" : "true")&amp;retour=@Uri.EscapeDataString(cheminCourant)" rel="nofollow" data-economie>
+                <span class="pied__interrupteur" aria-hidden="true" data-actif="@(economie ? "oui" : "non")"></span>
+                Économie de données : @(economie ? (economieChoisie ? "activée" : "activée par votre téléphone") : "désactivée")
+            </a>
+        </div>
+    </footer>
+
+    <nav class="barre-bas" aria-label="Navigation mobile">
+        <a href="/" aria-current="@Courant("accueil")"><icone nom="accueil" />Accueil</a>
+        <a href="/terrains" aria-current="@Courant("terrains")"><icone nom="terrains" />Terrains</a>
+        <a href="/services" aria-current="@Courant("services")"><icone nom="services" />Services</a>
+        <a href="/favoris" aria-current="@Courant("favoris")"><icone nom="favori" />Favoris</a>
+        <a href="/contact" aria-current="@Courant("contact")"><icone nom="contact" />Contact</a>
+    </nav>
+
+    <script src="@Assets["js/site.js"]" type="module"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

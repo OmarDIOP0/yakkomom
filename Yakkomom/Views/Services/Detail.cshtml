@@ -1,0 +1,94 @@
+@model ServicePublicVm
+@{
+    ViewData["Title"] = Model.Titre;
+    ViewData["Description"] = Model.Resume ?? $"{Model.Titre} avec Yakkomom, au Sénégal.";
+    var couverture = Model.Photos.FirstOrDefault();
+}
+<article>
+    <header class="service-entete">
+        @if (couverture is not null)
+        {
+            <img class="service-entete__image" src="@couverture.Src" srcset="@couverture.Srcset" sizes="100vw" width="@couverture.Largeur" height="@couverture.Hauteur"
+                 alt="" fetchpriority="high" style="background:@(couverture.Couleur ?? "var(--c-sable-fonce)")">
+        }
+        <div class="conteneur service-entete__texte">
+            <a class="btn btn--discret btn--petit" href="/services"><icone nom="retour" />Tous les services</a>
+            <icone nom="@(Model.Icone ?? "terrain")" classe="service-entete__icone" />
+            <h1>@Model.Titre</h1>
+            @if (!string.IsNullOrEmpty(Model.Resume)) { <p class="service-entete__resume">@Model.Resume</p> }
+        </div>
+    </header>
+
+    <div class="conteneur service-corps">
+        <div class="service-corps__texte texte-riche">
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                @foreach (var paragraphe in Model.Description.Split(["\r\n\r\n", "\n\n"], StringSplitOptions.RemoveEmptyEntries))
+                {
+                    <p>@paragraphe</p>
+                }
+            }
+        </div>
+
+        <aside class="service-corps__contact">
+            <div class="fiche__carte-contact">
+                <p class="contacts-fiche__intro">Parlons de votre projet : devis et conseils gratuits, réponse rapide sur WhatsApp.</p>
+                @if (Model.WhatsApp.Count == 0)
+                {
+                    <a class="btn btn--contour btn--bloc" href="/contact">Nous contacter</a>
+                }
+                @for (var i = 0; i < Model.WhatsApp.Count; i++)
+                {
+                    var w = Model.WhatsApp[i];
+                    <a class="btn @(i == 0 ? "btn--whatsapp" : "btn--contour") btn--bloc contacts-fiche__wa" href="@w.UrlSuivi" rel="nofollow" target="_blank">
+                        <icone nom="whatsapp" /><span>@(i == 0 ? "Demander ce service sur WhatsApp" : $"WhatsApp · {w.Libelle ?? w.NumeroAffiche}")</span>
+                    </a>
+                }
+                @if (!string.IsNullOrEmpty(Model.Email))
+                {
+                    <a class="btn btn--discret btn--bloc" href="mailto:@Model.Email?subject=@Uri.EscapeDataString(Model.Titre)"><icone nom="email" />@Model.Email</a>
+                }
+            </div>
+        </aside>
+    </div>
+
+    @if (Model.Photos.Count > 0)
+    {
+        <section class="section section--sable" aria-labelledby="titre-realisations">
+            <div class="conteneur">
+                <h2 id="titre-realisations">Nos réalisations</h2>
+                <ul class="realisations mt-6" role="list">
+                    @foreach (var p in Model.Photos)
+                    {
+                        <li>
+                            <a href="@p.UrlGrande" target="_blank" rel="noopener" style="--couleur-dominante:@(p.Couleur ?? "var(--c-sable-fonce)")">
+                                <img src="@p.Src" srcset="@p.Srcset" sizes="(min-width: 900px) 33vw, 50vw" width="@p.Largeur" height="@p.Hauteur" alt="@(p.Legende ?? Model.Titre)" loading="lazy" decoding="async">
+                            </a>
+                            @if (!string.IsNullOrEmpty(p.Legende)) { <p class="muet"><small>@p.Legende</small></p> }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+    }
+
+    @if (Model.Autres.Count > 0)
+    {
+        <section class="section" aria-labelledby="titre-autres">
+            <div class="conteneur">
+                <h2 id="titre-autres">Nos autres services</h2>
+                <ul class="services-liste mt-6" role="list">
+                    @foreach (var s in Model.Autres)
+                    {
+                        <li><a href="/services/@s.Slug"><icone nom="@(s.Icone ?? "terrain")" /><span><strong>@s.Titre</strong><span>@s.Resume</span></span></a></li>
+                    }
+                </ul>
+            </div>
+        </section>
+    }
+</article>
+
+@if (Model.WhatsApp.Count > 0)
+{
+    <a class="btn btn--whatsapp wa-flottant" href="@Model.WhatsApp[0].UrlSuivi" rel="nofollow" target="_blank"><icone nom="whatsapp" />Demander ce service</a>
+}

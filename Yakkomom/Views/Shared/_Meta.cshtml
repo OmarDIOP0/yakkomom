@@ -1,0 +1,49 @@
+@* Métadonnées de référencement et de partage (WhatsApp, Facebook, X). Rendu dans <head>. *@
+@model MetaPage
+@inject Yakkomom.Services.UrlSite Urls
+@inject Yakkomom.Services.Seo SeoService
+@{
+    var nomSite = ViewData["NomSite"] as string ?? "Yakkomom";
+    var image = Model.Image ?? SeoService.ImageParDefaut(nomSite);
+    var canonique = Model.Canonique ?? Urls.Absolue(Context.Request.Path);
+    var robots = Model.Robots ?? ViewData["Robots"] as string;
+    // Espaces insécables (montants) → espaces simples : aperçus de partage plus propres
+    string Net(string? t) => (t ?? "").Replace('\u00A0', ' ').Replace('\u202F', ' ');
+    var titre = Net(Model.Titre);
+    var description = Net(Model.Description);
+    var alt = Net(image.Alt);
+}
+<link rel="canonical" href="@canonique">
+@if (robots is not null)
+{
+    <meta name="robots" content="@robots">
+}
+<meta property="og:site_name" content="@nomSite">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="@Model.Type">
+<meta property="og:title" content="@titre">
+<meta property="og:description" content="@description">
+<meta property="og:url" content="@canonique">
+<meta property="og:image" content="@image.Url">
+@if (image.Url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+{
+    <meta property="og:image:secure_url" content="@image.Url">
+}
+<meta property="og:image:type" content="@image.Type">
+<meta property="og:image:width" content="@image.Largeur">
+<meta property="og:image:height" content="@image.Hauteur">
+<meta property="og:image:alt" content="@alt">
+@if (Model.PrixFcfa is { } prix)
+{
+    <meta property="product:price:amount" content="@prix">
+    <meta property="product:price:currency" content="@Yakkomom.Services.Seo.DevisePaiement">
+}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="@titre">
+<meta name="twitter:description" content="@description">
+<meta name="twitter:image" content="@image.Url">
+<meta name="twitter:image:alt" content="@alt">
+@foreach (var jsonLd in Model.DonneesStructurees)
+{
+    <!script type="application/ld+json">@Html.Raw(jsonLd)</!script>
+}

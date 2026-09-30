@@ -1,0 +1,39 @@
+@model IReadOnlyList<ServiceCarteVm>
+@{
+    ViewData["Title"] = "Nos services";
+    ViewData["Description"] = "Vente de terrains, construction, accompagnement, sécurisation des transactions foncières et aménagement agricole au Sénégal.";
+}
+<section class="section">
+    <div class="conteneur">
+        <header class="liste-publique__entete">
+            <p class="surtitre">Du terrain à la maison</p>
+            <h1>Nos services</h1>
+            <p class="muet mt-4">Un seul interlocuteur pour acheter, sécuriser, construire et valoriser votre terrain, sur place ou depuis l'étranger.</p>
+        </header>
+
+        <ul class="services-grille mt-6" role="list">
+            @foreach (var s in Model)
+            {
+                <li>
+                    <a class="service-carte" href="/services/@s.Slug">
+                        <span class="service-carte__visuel" style="--couleur-dominante:@(s.Couverture?.Couleur ?? "var(--c-sable-fonce)")">
+                            @if (s.Couverture is { } c)
+                            {
+                                <img src="@c.Src" srcset="@c.Srcset" sizes="(min-width: 900px) 33vw, 100vw" width="@c.Largeur" height="@c.Hauteur" alt="" loading="lazy" decoding="async">
+                            }
+                            else
+                            {
+                                <icone nom="@(s.Icone ?? "terrain")" />
+                            }
+                        </span>
+                        <span class="service-carte__corps">
+                            <strong>@s.Titre</strong>
+                            <span>@s.Resume</span>
+                            <span class="service-carte__lien">Découvrir<icone nom="suivant" /></span>
+                        </span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</section>
