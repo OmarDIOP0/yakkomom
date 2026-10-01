@@ -26,6 +26,12 @@
     <link rel="stylesheet" href="@Assets["css/site.css"]">
     <link rel="stylesheet" href="@Assets["css/admin.css"]">
     <link rel="icon" href="@Assets["img/logo.svg"]" type="image/svg+xml">
+    @* Application installable « Yakkomom Admin » (portée /admin, distincte de l'application publique) *@
+    <link rel="manifest" href="/admin/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="@Assets["img/icones/admin-apple-touch-icon.png"]">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Yakkomom Admin">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body class="admin @(sansNavigation ? "admin--seul" : null)">
@@ -79,6 +85,7 @@
         </nav>
     }
 
+    <script type="module" src="@Assets["js/admin/application.js"]"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

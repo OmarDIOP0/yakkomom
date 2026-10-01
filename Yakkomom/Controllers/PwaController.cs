@@ -89,6 +89,53 @@ public class PwaController(IAssetsStatiques assets, IParametreSiteService parame
             "application/manifest+json; charset=utf-8");
     }
 
+    /// <summary>
+    /// Seconde application, réservée à l'équipe : portée limitée à /admin, ouverture sur le tableau de bord.
+    /// Public (comme le manifeste du site) : il ne contient aucune donnée, seulement le nom et les icônes,
+    /// et la page de connexion doit pouvoir le lire.
+    /// </summary>
+    [HttpGet("admin/manifest.webmanifest")]
+    public async Task<IActionResult> ManifesteAdmin(CancellationToken ct)
+    {
+        var p = await parametres.ObtenirAsync(ct);
+        object Icone(string chemin, int taille, string usage = "any") =>
+            new { src = assets[chemin], sizes = $"{taille}x{taille}", type = "image/png", purpose = usage };
+        object Raccourci(string nom, string url, string? icone = null) => icone is null
+            ? new { name = nom, short_name = nom, url }
+            : new { name = nom, short_name = nom, url, icons = new[] { new { src = assets[icone], sizes = "96x96", type = "image/png" } } };
+
+        var manifeste = new
+        {
+            id = "/admin",
+            name = $"{p.NomSite} Admin",
+            short_name = $"{p.NomSite} Admin",
+            description = "Gestion des terrains, photos, documents et statistiques WhatsApp.",
+            lang = "fr",
+            dir = "ltr",
+            start_url = "/admin?source=application",
+            scope = "/admin",
+            display = "standalone",
+            orientation = "portrait",
+            background_color = "#1C2A21",
+            theme_color = "#1C2A21",
+            icons = new[]
+            {
+                Icone("img/icones/admin-192.png", 192), Icone("img/icones/admin-512.png", 512),
+                Icone("img/icones/admin-maskable-192.png", 192, "maskable"), Icone("img/icones/admin-maskable-512.png", 512, "maskable")
+            },
+            shortcuts = new[]
+            {
+                Raccourci("Nouveau terrain", "/admin/terrains/nouveau"),
+                Raccourci("Terrains", "/admin/terrains", "img/icones/raccourci-terrains.png"),
+                Raccourci("Journal", "/admin/journal")
+            }
+        };
+
+        Response.Headers.CacheControl = "public, max-age=86400";
+        return Content(JsonSerializer.Serialize(manifeste, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }),
+            "application/manifest+json; charset=utf-8");
+    }
+
     [HttpGet("hors-ligne")]
     public IActionResult HorsLigne()
     {

@@ -532,3 +532,8 @@
   .journal-filtres__champs { display: grid; gap: 0 var(--e-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); padding: var(--e-4); margin-top: var(--e-3); border: 1px solid var(--c-filet); background: var(--c-surface); }
   .journal-filtres__actions { grid-column: 1 / -1; display: flex; gap: var(--e-3); flex-wrap: wrap; margin-top: var(--e-4); }
 }
+
+/* --- Application installable (admin) -------------------------------------------- */
+@layer components {
+  .admin-installer-connexion { text-align: center; margin-top: var(--e-4); }
+}
