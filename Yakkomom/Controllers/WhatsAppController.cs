@@ -66,7 +66,8 @@ public class WhatsAppController(
         var numero = WhatsAppLiens.NumerosEffectifs(null, p.ContactsParDefaut).FirstOrDefault(n => n.Index == index);
         if (numero is null) return Redirect("/contact");
 
-        var message = service.MessageWhatsApp ?? $"Bonjour {p.NomSite}, je souhaite en savoir plus sur votre service « {service.Titre} ».";
+        var message = (service.MessageWhatsApp ?? "Bonjour {site}, je souhaite en savoir plus sur votre service « " + service.Titre + " ».")
+            .Replace("{site}", p.NomSite);
         await EnregistrerClicAsync(null, service.Id, index, SourceClicWhatsApp.Service, ct);
         return Rediriger(WhatsAppLiens.UrlWhatsApp(numero.Numero, message));
     }

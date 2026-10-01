@@ -40,7 +40,7 @@ public static class WhatsAppLiens
         MotifWhatsApp.Document =>
             $"Bonjour {nomSite}, je souhaite consulter les documents fonciers du terrain {reference} ({resume}) : {lien}. Est-ce possible ?",
         MotifWhatsApp.General => $"Bonjour {nomSite}, je souhaite avoir des informations sur vos terrains et services.",
-        _ => modeleTerrain.Replace("{reference}", reference).Replace("{resume}", resume).Replace("{lien}", lien)
+        _ => modeleTerrain.Replace("{site}", nomSite).Replace("{reference}", reference).Replace("{resume}", resume).Replace("{lien}", lien)
     };
 
     public static string UrlWhatsApp(string numeroNormalise, string message) =>

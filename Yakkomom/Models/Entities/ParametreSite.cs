@@ -14,10 +14,10 @@ public class ParametreSite
     public Contact ContactsParDefaut { get; set; } = new();
 
     /// <summary>
-    /// Modèle du message WhatsApp pré-rempli. Jetons : {reference}, {resume}, {lien}.
+    /// Modèle du message WhatsApp pré-rempli. Jetons : {site}, {reference}, {resume}, {lien}.
     /// </summary>
     public string MessageWhatsAppTerrain { get; set; } =
-        "Bonjour Yakkomom, je suis intéressé(e) par le terrain {reference} ({resume}) : {lien}. Est-il toujours disponible ?";
+        "Bonjour {site}, je suis intéressé(e) par le terrain {reference} ({resume}) : {lien}. Est-il toujours disponible ?";
 
     public string? Adresse { get; set; }
     public string? HorairesOuverture { get; set; }

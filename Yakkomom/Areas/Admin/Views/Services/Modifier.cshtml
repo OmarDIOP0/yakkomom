@@ -52,7 +52,7 @@
         <div class="champ">
             <label asp-for="MessageWhatsApp"></label>
             <textarea asp-for="MessageWhatsApp" rows="3" maxlength="500"></textarea>
-            <span class="aide">Message pré-rempli du bouton « Demander ce service sur WhatsApp ».</span>
+            <span class="aide">Message pré-rempli du bouton « Demander ce service sur WhatsApp ». <code>{site}</code> est remplacé par le nom du site.</span>
         </div>
         <label class="interrupteur mt-4"><input asp-for="EstActif" role="switch"><span>@Html.DisplayNameFor(m => m.EstActif)</span></label>
     </section>

@@ -75,7 +75,7 @@ public class DbSeeder(YakkomomDbContext db, ILogger<DbSeeder> logger)
                 Icone = s.Icone,
                 Resume = s.Resume,
                 Description = s.Description,
-                MessageWhatsApp = $"Bonjour Yakkomom, je souhaite en savoir plus sur votre service « {s.Titre} ».",
+                MessageWhatsApp = $"Bonjour {{site}}, je souhaite en savoir plus sur votre service « {s.Titre} ».",
                 Ordre = ordre
             });
             ajouts++;
