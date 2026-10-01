@@ -117,7 +117,7 @@ public class TerrainAdminService(
         var nombreLots = await db.Lots.CountAsync(l => l.TerrainId == id, ct);
         return new EnTeteTerrainVm
         {
-            AfficherLots = t.Type == TypeTerrain.Lotissement || nombreLots > 0 || onglet == OngletTerrain.Lots,
+            AfficherLots = true, // toujours visible : un grand terrain se découpe directement depuis l'onglet
             NombreLots = nombreLots,
             Id = t.Id, Reference = t.Reference, Titre = t.Titre, Statut = t.Statut, ModifieLe = t.ModifieLe,
             UrlPublique = UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune?.Nom),

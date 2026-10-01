@@ -79,6 +79,7 @@ public partial class LotissementService(YakkomomDbContext db, IJournalService jo
         if (existants.Count > LotsMax) return ResultatOperation.Echec($"{LotsMax} lots au plus par lotissement.");
         if (crees == 0) return ResultatOperation.Echec("Tous ces numéros de lots existent déjà.");
 
+        t.Type = TypeTerrain.Lotissement; // découpé en lots : c'est un lotissement
         await db.SaveChangesAsync(ct);
         await SynchroniserParentAsync(t, ct);
         await journal.EnregistrerAsync(TypeAction.Creation, nameof(Lot), terrainId.ToString(),
