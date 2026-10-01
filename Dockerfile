@@ -5,9 +5,11 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 # Restauration séparée : la couche est réutilisée tant que le .csproj ne change pas
 COPY Yakkomom/Yakkomom.csproj Yakkomom/
-RUN dotnet restore Yakkomom/Yakkomom.csproj
+RUN dotnet restore Yakkomom/Yakkomom.csproj -r linux-x64 -p:PublishReadyToRun=true
 COPY Yakkomom/ Yakkomom/
-RUN dotnet publish Yakkomom/Yakkomom.csproj -c Release -o /app --no-restore
+# ReadyToRun : code précompilé, démarrage bien plus rapide sur un petit processeur (offre gratuite)
+RUN dotnet publish Yakkomom/Yakkomom.csproj -c Release -o /app --no-restore \
+    -r linux-x64 --self-contained false -p:PublishReadyToRun=true
 
 # --- Exécution -------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

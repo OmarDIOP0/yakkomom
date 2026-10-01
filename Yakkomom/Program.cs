@@ -88,19 +88,25 @@ builder.Services.Configure<WebEncoderOptions>(o => o.TextEncoderSettings = new T
 
 var app = builder.Build();
 
-// --- Migrations + données de départ au démarrage ---------------------------
-if (app.Configuration.GetValue("Database:MigrerAuDemarrage", true))
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<YakkomomDbContext>();
-    await db.Database.MigrateAsync();
-    await scope.ServiceProvider.GetRequiredService<DbSeeder>().SeedAsync();
-    await scope.ServiceProvider.GetRequiredService<AdminInitialSeeder>().SeedAsync();
-    await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
-}
+// Les migrations s'exécutent APRÈS l'ouverture du port (voir la fin du fichier) : sur un petit serveur,
+// l'hébergeur abandonne le déploiement si le port n'est pas ouvert rapidement.
+var demarrage = new TaskCompletionSource();
 
 // --- Pipeline HTTP ---------------------------------------------------------
 app.UseForwardedHeaders(); // en premier : vraie IP et schéma HTTPS derrière Render
+
+// Pendant les migrations du démarrage : réponse d'attente (sauf /health, pour l'hébergeur).
+app.Use(async (contexte, suivant) =>
+{
+    if (!demarrage.Task.IsCompleted && !contexte.Request.Path.StartsWithSegments("/health"))
+    {
+        contexte.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        contexte.Response.Headers.RetryAfter = "5";
+        await contexte.Response.WriteAsync("Démarrage en cours, réessayez dans quelques secondes.");
+        return;
+    }
+    await suivant(contexte);
+});
 
 // Site de démonstration ou de recette : rien n'est indexé par les moteurs de recherche.
 if (!app.Configuration.GetValue("Site:Indexable", true))
@@ -161,4 +167,26 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.Run();
+// --- Démarrage : port ouvert d'abord, puis migrations et données de départ ---------
+await app.StartAsync();
+try
+{
+    if (app.Configuration.GetValue("Database:MigrerAuDemarrage", true))
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<YakkomomDbContext>();
+        await db.Database.MigrateAsync();
+        await scope.ServiceProvider.GetRequiredService<DbSeeder>().SeedAsync();
+        await scope.ServiceProvider.GetRequiredService<AdminInitialSeeder>().SeedAsync();
+        await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync();
+    }
+    demarrage.SetResult();
+}
+catch (Exception ex)
+{
+    // Base inaccessible ou migration en échec : on s'arrête pour que l'hébergeur le signale.
+    app.Logger.LogCritical(ex, "Échec des migrations au démarrage.");
+    await app.StopAsync();
+    throw;
+}
+await app.WaitForShutdownAsync();
