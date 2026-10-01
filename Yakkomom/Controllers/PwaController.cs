@@ -13,7 +13,7 @@ public class PwaController(IAssetsStatiques assets, IParametreSiteService parame
     /// <summary>Fichiers mis en cache dès l'installation (légers, utilisés sur toutes les pages publiques).</summary>
     private static readonly string[] Precache =
     [
-        "css/site.css", "js/site.js", "js/pwa.js", "js/chargeur.js", "js/carte/leaflet.js",
+        "css/site.css", "js/site.js", "js/clavier.js", "js/pwa.js", "js/chargeur.js", "js/carte/leaflet.js",
         "js/public/fiche.js", "js/public/filtres.js", "js/public/favoris-page.js", "js/public/hors-ligne.js",
         "fonts/fraunces-latin.woff2", "img/icons.svg", "img/logo.svg", "img/icones/icone-192.png"
     ];

@@ -1,6 +1,7 @@
 // Yakkomom — script global, volontairement minuscule (≈ 2 Ko).
 // Les fonctionnalités lourdes (carte, 360°, envois…) sont des modules chargés uniquement sur leurs pages.
 document.documentElement.classList.add('js');
+import './clavier.js';
 
 // --- Favoris (sur l'appareil, sans compte) -----------------------------------
 const CLE = 'yk.favoris';

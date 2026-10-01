@@ -3,6 +3,7 @@
    Pensé pour un usage d'une main sur téléphone : actions en bas, zones ≥ 48 px.
    ========================================================================== */
 @layer components {
+  .clavier-ouvert body.admin { padding-bottom: 0; }
   body.admin { padding-bottom: calc(var(--barre-bas) + env(safe-area-inset-bottom)); background: var(--c-papier); }
   body.admin--seul { padding-bottom: 0; }
   @media (min-width: 768px) { body.admin { padding-bottom: 0; } }
@@ -244,6 +245,7 @@
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     border-top: 1px solid var(--c-filet);
   }
+  .clavier-ouvert .barre-enregistrer { bottom: 0; }
   .barre-enregistrer .btn { flex: 1 1 0; padding-inline: var(--e-3); }
   .barre-enregistrer .btn[aria-disabled="true"] { opacity: .6; pointer-events: none; }
   @media (min-width: 768px) {

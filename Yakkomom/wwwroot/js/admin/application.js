@@ -1,6 +1,8 @@
 // Application « Yakkomom Admin » : installation sur l'écran d'accueil de l'équipe.
 // Le service worker est le même que celui du site ; il ne met jamais l'admin en cache (données toujours à jour).
 
+import '../clavier.js';
+
 const autonome = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
