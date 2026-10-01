@@ -75,6 +75,38 @@
     </section>
 
     <section class="bloc-formulaire">
+        <h2>Informations légales</h2>
+        <p class="aide">Affichées sur la page <a href="/mentions-legales" target="_blank">Mentions légales</a>. L'adresse de l'agence ci-dessus sert d'adresse du siège.</p>
+        <div class="champ">
+            <label asp-for="RaisonSociale"></label>
+            <input asp-for="RaisonSociale" maxlength="150" placeholder="Ex. Yakkomom SARL">
+            <span asp-validation-for="RaisonSociale" class="erreur"></span>
+        </div>
+        <div class="champ">
+            <label asp-for="FormeJuridique"></label>
+            <input asp-for="FormeJuridique" maxlength="60" list="formes-juridiques" placeholder="Ex. SARL">
+            <datalist id="formes-juridiques">
+                <option value="Entreprise individuelle"></option><option value="SUARL"></option><option value="SARL"></option>
+                <option value="SAS"></option><option value="SA"></option><option value="GIE"></option>
+            </datalist>
+        </div>
+        <div class="grille-2">
+            <div class="champ">
+                <label asp-for="Ninea"></label>
+                <input asp-for="Ninea" maxlength="30" inputmode="numeric" autocomplete="off">
+            </div>
+            <div class="champ">
+                <label asp-for="Rccm"></label>
+                <input asp-for="Rccm" maxlength="60" autocomplete="off" placeholder="Ex. SN-DKR-2024-B-12345">
+            </div>
+        </div>
+        <div class="champ">
+            <label asp-for="ResponsablePublication"></label>
+            <input asp-for="ResponsablePublication" maxlength="120" placeholder="Nom du gérant ou du responsable">
+        </div>
+    </section>
+
+    <section class="bloc-formulaire">
         <h2>Réseaux sociaux</h2>
         @foreach (var reseau in new[] { nameof(Model.Facebook), nameof(Model.Instagram), nameof(Model.TikTok), nameof(Model.YouTube), nameof(Model.LinkedIn) })
         {

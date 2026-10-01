@@ -3,7 +3,7 @@ using Yakkomom.Services.Interfaces;
 
 namespace Yakkomom.Controllers;
 
-/// <summary>Pages de contenu : À propos, Acheter en toute sécurité, Contact.</summary>
+/// <summary>Pages de contenu : À propos, Acheter en toute sécurité, Contact, Mentions légales, CGU.</summary>
 public class PagesController(IParametreSiteService parametres) : Controller
 {
     [HttpGet("a-propos")]
@@ -26,4 +26,12 @@ public class PagesController(IParametreSiteService parametres) : Controller
         ViewData["Rubrique"] = "contact";
         return View(await parametres.ObtenirAsync(ct));
     }
+
+    [HttpGet("mentions-legales")]
+    public async Task<IActionResult> MentionsLegales(CancellationToken ct) =>
+        View(await parametres.ObtenirAsync(ct));
+
+    [HttpGet("conditions-utilisation")]
+    public async Task<IActionResult> ConditionsUtilisation(CancellationToken ct) =>
+        View(await parametres.ObtenirAsync(ct));
 }

@@ -858,6 +858,11 @@
   .page-contenu__section h2 { display: flex; align-items: baseline; gap: var(--e-3); font-size: var(--t-lg); margin-bottom: var(--e-4); }
   .page-contenu__section h2 > span { font: 600 var(--t-xl)/1 var(--f-titre); color: var(--c-ocre-texte); }
   .page-contenu__section p + p { margin-top: var(--e-3); }
+  .mentions { display: grid; border-top: 1px solid var(--c-filet); margin-top: var(--e-3); }
+  .mentions > div { display: grid; gap: 2px var(--e-4); padding: var(--e-3) 0; border-bottom: 1px solid var(--c-filet); }
+  .mentions dt { font-size: var(--t-sm); color: var(--c-muet); }
+  .mentions dd { margin: 0; overflow-wrap: anywhere; }
+  @media (min-width: 600px) { .mentions > div { grid-template-columns: 14rem 1fr; } }
   .page-contenu__avertissement { padding-block: var(--e-5) var(--e-7); border-top: 1px solid var(--c-filet); }
   .types-documents { display: grid; gap: 0; border: 1px solid var(--c-filet); margin-top: var(--e-4); }
   .types-documents > div { padding: var(--e-4); }

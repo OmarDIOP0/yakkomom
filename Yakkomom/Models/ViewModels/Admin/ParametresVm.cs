@@ -38,6 +38,18 @@ public class ParametresVm : IChampsContacts
     [Display(Name = "Horaires d'ouverture")]
     public string? HorairesOuverture { get; set; }
 
+    // Informations légales
+    [StringLength(150)][Display(Name = "Raison sociale")]
+    public string? RaisonSociale { get; set; }
+    [StringLength(60)][Display(Name = "Forme juridique")]
+    public string? FormeJuridique { get; set; }
+    [StringLength(30)][Display(Name = "NINEA")]
+    public string? Ninea { get; set; }
+    [StringLength(60)][Display(Name = "RCCM")]
+    public string? Rccm { get; set; }
+    [StringLength(120)][Display(Name = "Responsable de la publication")]
+    public string? ResponsablePublication { get; set; }
+
     [Url(ErrorMessage = "Lien invalide (commencez par https://).")][StringLength(300)][Display(Name = "Facebook")]
     public string? Facebook { get; set; }
     [Url(ErrorMessage = "Lien invalide (commencez par https://).")][StringLength(300)][Display(Name = "Instagram")]

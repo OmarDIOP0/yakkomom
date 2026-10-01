@@ -98,6 +98,8 @@ public class SeoController(YakkomomDbContext db, UrlSite urls, IStorageService s
             Url("/acheter-en-securite", null, "yearly", "0.6");
             Url("/a-propos", null, "yearly", "0.4");
             Url("/contact", null, "yearly", "0.5");
+            Url("/mentions-legales", null, "yearly", "0.2");
+            Url("/conditions-utilisation", null, "yearly", "0.2");
             foreach (var t in terrains)
                 Url(UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune), t.ModifieLe,
                     t.Statut == StatutTerrain.Vendu ? "monthly" : "weekly", t.Statut == StatutTerrain.Vendu ? "0.3" : "0.8",

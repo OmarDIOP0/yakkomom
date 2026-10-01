@@ -22,6 +22,15 @@ public class ParametreSite
     public string? Adresse { get; set; }
     public string? HorairesOuverture { get; set; }
 
+    // --- Informations légales (page Mentions légales) ---------------------
+    /// <summary>Nom officiel de l'entreprise (ex. « Yakkomom SARL »).</summary>
+    public string? RaisonSociale { get; set; }
+    /// <summary>SARL, SAS, SUARL, entreprise individuelle, GIE…</summary>
+    public string? FormeJuridique { get; set; }
+    public string? Ninea { get; set; }
+    public string? Rccm { get; set; }
+    public string? ResponsablePublication { get; set; }
+
     public string? Facebook { get; set; }
     public string? Instagram { get; set; }
     public string? TikTok { get; set; }

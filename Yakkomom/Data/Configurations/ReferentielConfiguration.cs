@@ -63,6 +63,11 @@ public class ParametreSiteConfiguration : IEntityTypeConfiguration<ParametreSite
         b.Property(p => p.MessageWhatsAppTerrain).HasMaxLength(500).IsRequired();
         b.Property(p => p.Adresse).HasMaxLength(300);
         b.Property(p => p.HorairesOuverture).HasMaxLength(200);
+        b.Property(p => p.RaisonSociale).HasMaxLength(150);
+        b.Property(p => p.FormeJuridique).HasMaxLength(60);
+        b.Property(p => p.Ninea).HasMaxLength(30);
+        b.Property(p => p.Rccm).HasMaxLength(60);
+        b.Property(p => p.ResponsablePublication).HasMaxLength(120);
         foreach (var reseau in new[] { nameof(ParametreSite.Facebook), nameof(ParametreSite.Instagram), nameof(ParametreSite.TikTok), nameof(ParametreSite.YouTube), nameof(ParametreSite.LinkedIn) })
             b.Property(reseau).HasMaxLength(300);
 

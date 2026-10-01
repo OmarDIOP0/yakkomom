@@ -1,0 +1,81 @@
+@model Yakkomom.Models.Entities.ParametreSite
+@{
+    ViewData["Title"] = "Mentions légales et données personnelles";
+    ViewData["Description"] = $"Éditeur, hébergement, propriété intellectuelle, données personnelles et cookies du site {Model.NomSite}.";
+    var c = Model.ContactsParDefaut;
+    var telephone = TelephoneSenegal.Afficher(c.WhatsApp1);
+    const string NonRenseigne = "non renseigné";
+}
+<article class="page-contenu">
+    <header class="section">
+        <div class="conteneur conteneur--texte">
+            <p class="surtitre">Informations légales</p>
+            <h1>Mentions légales</h1>
+            <p class="page-contenu__chapo">Qui édite ce site, où il est hébergé et comment vos données sont traitées.</p>
+        </div>
+    </header>
+
+    <div class="conteneur conteneur--texte">
+        <section class="page-contenu__section" aria-labelledby="t-editeur">
+            <h2 id="t-editeur">Éditeur du site</h2>
+            <dl class="mentions">
+                <div><dt>Nom commercial</dt><dd>@Model.NomSite</dd></div>
+                <div><dt>Raison sociale</dt><dd>@(Model.RaisonSociale ?? NonRenseigne)</dd></div>
+                <div><dt>Forme juridique</dt><dd>@(Model.FormeJuridique ?? NonRenseigne)</dd></div>
+                <div><dt>NINEA</dt><dd class="chiffres">@(Model.Ninea ?? NonRenseigne)</dd></div>
+                <div><dt>RCCM</dt><dd class="chiffres">@(Model.Rccm ?? NonRenseigne)</dd></div>
+                <div><dt>Siège</dt><dd>@(Model.Adresse ?? NonRenseigne)</dd></div>
+                @if (!string.IsNullOrEmpty(c.Email)) { <div><dt>E-mail</dt><dd><a href="mailto:@c.Email">@c.Email</a></dd></div> }
+                @if (!string.IsNullOrEmpty(telephone)) { <div><dt>Téléphone</dt><dd class="chiffres">@telephone</dd></div> }
+                <div><dt>Responsable de la publication</dt><dd>@(Model.ResponsablePublication ?? NonRenseigne)</dd></div>
+            </dl>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="t-hebergement">
+            <h2 id="t-hebergement">Hébergement</h2>
+            <dl class="mentions">
+                <div><dt>Application</dt><dd>Render Services, Inc., San Francisco, États-Unis (render.com)</dd></div>
+                <div><dt>Base de données</dt><dd>Neon, Inc., États-Unis (neon.tech)</dd></div>
+                <div><dt>Photos et documents</dt><dd>Cloudinary Ltd. (cloudinary.com)</dd></div>
+            </dl>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="t-realisation">
+            <h2 id="t-realisation">Conception et réalisation</h2>
+            <p>Lumaya Tech, <a href="mailto:lumayatech@gmail.com">lumayatech@gmail.com</a>. Voir aussi <a href="/a-propos#realisation">la page À propos</a>.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="t-propriete">
+            <h2 id="t-propriete">Propriété intellectuelle</h2>
+            <p>Les textes, la marque, le logo, la mise en page et les photographies publiés sur ce site appartiennent à @Model.NomSite ou à leurs auteurs. Toute reproduction sans autorisation écrite est interdite.</p>
+            <p>Certaines photos d'illustration proviennent de banques d'images sous licence libre ; leur auteur et leur licence sont alors indiqués dans la légende.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="t-donnees">
+            <h2 id="t-donnees">Données personnelles</h2>
+            <p>Le site est conçu pour collecter <strong>le moins de données possible</strong>, conformément à la loi sénégalaise n° 2008-12 du 25 janvier 2008 sur la protection des données à caractère personnel.</p>
+            <ul class="liste-coches">
+                <li><strong>Aucun compte visiteur</strong> : vous consultez les terrains sans inscription.</li>
+                <li><strong>Favoris</strong> : enregistrés uniquement sur votre téléphone ou ordinateur, jamais envoyés à nos serveurs.</li>
+                <li><strong>Boutons WhatsApp</strong> : nous comptons les clics pour savoir quels terrains intéressent (terrain, numéro choisi, page, date), sans aucune donnée sur vous : ni adresse IP, ni identifiant.</li>
+                <li><strong>Échanges sur WhatsApp</strong> : quand vous nous écrivez, vos messages sont traités par WhatsApp (Meta) selon ses propres conditions, puis par notre équipe uniquement pour répondre à votre demande.</li>
+                <li><strong>Pas de publicité ni d'outil de suivi</strong> : aucun traceur publicitaire ou de mesure d'audience tiers.</li>
+            </ul>
+            <p>Vous pouvez demander l'accès, la rectification ou la suppression des informations vous concernant (par exemple vos échanges avec nous) en écrivant à @(string.IsNullOrEmpty(c.Email) ? "notre équipe via la page Contact" : c.Email). Vous pouvez aussi saisir la Commission de protection des données personnelles (CDP).</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="t-cookies">
+            <h2 id="t-cookies">Cookies et stockage local</h2>
+            <p>Seuls des éléments <strong>techniques, indispensables au fonctionnement</strong> du site sont utilisés ; ils ne nécessitent pas votre consentement :</p>
+            <ul class="liste-coches">
+                <li>la préférence « Économie de données », si vous l'activez ;</li>
+                <li>vos favoris et les terrains déjà consultés, gardés sur votre appareil ;</li>
+                <li>la version enregistrée des pages, pour l'accès hors connexion ;</li>
+                <li>un cookie de sécurité des formulaires, et la session de connexion de l'espace réservé à l'équipe.</li>
+            </ul>
+            <p>Les cartes (imagerie satellite Esri, plan OpenStreetMap) et les vidéos YouTube sont chargées depuis leurs services : ces derniers peuvent alors recevoir votre adresse IP, comme pour tout site consulté.</p>
+        </section>
+
+        <p class="page-contenu__avertissement muet"><small>Voir aussi les <a href="/conditions-utilisation">conditions générales d'utilisation</a>. Dernière mise à jour : 1er octobre 2026.</small></p>
+    </div>
+</article>

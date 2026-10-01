@@ -44,6 +44,11 @@ public class ParametreSiteService(YakkomomDbContext db, IMemoryCache cache, IJou
         p.MessageWhatsAppTerrain = vm.MessageWhatsAppTerrain.Trim();
         p.Adresse = Nettoyer(vm.Adresse);
         p.HorairesOuverture = Nettoyer(vm.HorairesOuverture);
+        p.RaisonSociale = Nettoyer(vm.RaisonSociale);
+        p.FormeJuridique = Nettoyer(vm.FormeJuridique);
+        p.Ninea = Nettoyer(vm.Ninea);
+        p.Rccm = Nettoyer(vm.Rccm);
+        p.ResponsablePublication = Nettoyer(vm.ResponsablePublication);
         p.Facebook = Nettoyer(vm.Facebook);
         p.Instagram = Nettoyer(vm.Instagram);
         p.TikTok = Nettoyer(vm.TikTok);

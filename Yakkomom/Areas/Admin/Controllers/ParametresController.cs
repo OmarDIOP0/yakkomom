@@ -24,6 +24,8 @@ public class ParametresController(IParametreSiteService parametres, IMediaServic
             WhatsApp3 = TelephoneSenegal.Afficher(c.WhatsApp3), WhatsApp3Libelle = c.WhatsApp3Libelle,
             Email = c.Email, MessageWhatsAppTerrain = p.MessageWhatsAppTerrain,
             Adresse = p.Adresse, HorairesOuverture = p.HorairesOuverture,
+            RaisonSociale = p.RaisonSociale, FormeJuridique = p.FormeJuridique, Ninea = p.Ninea, Rccm = p.Rccm,
+            ResponsablePublication = p.ResponsablePublication,
             Facebook = p.Facebook, Instagram = p.Instagram, TikTok = p.TikTok, YouTube = p.YouTube, LinkedIn = p.LinkedIn
         });
     }

@@ -1,0 +1,76 @@
+@model Yakkomom.Models.Entities.ParametreSite
+@{
+    ViewData["Title"] = "Conditions générales d'utilisation";
+    ViewData["Description"] = $"Règles d'utilisation du site {Model.NomSite} : annonces de terrains, mise en relation, responsabilités et droit applicable.";
+    var nom = Model.NomSite;
+    var n = 0;
+}
+<article class="page-contenu">
+    <header class="section">
+        <div class="conteneur conteneur--texte">
+            <p class="surtitre">Informations légales</p>
+            <h1>Conditions générales d'utilisation</h1>
+            <p class="page-contenu__chapo">Ces conditions s'appliquent à toute personne qui consulte le site @nom ou l'application installée sur son téléphone. En les utilisant, vous les acceptez.</p>
+        </div>
+    </header>
+
+    <div class="conteneur conteneur--texte">
+        <section class="page-contenu__section" aria-labelledby="cgu-objet">
+            <h2 id="cgu-objet"><span>@(++n)</span>Objet du site</h2>
+            <p>@nom présente des terrains à vendre au Sénégal et des services immobiliers (accompagnement, sécurisation, construction). Le site permet de consulter les annonces et de <strong>contacter notre équipe</strong>, principalement par WhatsApp.</p>
+            <p>Aucune vente, réservation ni paiement ne se fait sur le site.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-acces">
+            <h2 id="cgu-acces"><span>@(++n)</span>Accès</h2>
+            <p>Le site est gratuit et accessible sans inscription. Nous faisons notre possible pour qu'il reste disponible, mais il peut être interrompu pour maintenance ou en cas de panne, sans que notre responsabilité soit engagée.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-annonces">
+            <h2 id="cgu-annonces"><span>@(++n)</span>Informations publiées</h2>
+            <p>Nous vérifions les terrains avant de les publier et soignons l'exactitude des annonces. Les informations restent toutefois <strong>données à titre indicatif</strong> et peuvent évoluer :</p>
+            <ul class="liste-coches">
+                <li><strong>Prix</strong> : indicatifs et susceptibles de changer jusqu'à la signature ; ils n'incluent pas les frais de notaire, d'enregistrement ou de mutation, sauf mention contraire.</li>
+                <li><strong>Surfaces, dimensions, position GPS et contour</strong> : relevés avec soin mais approximatifs ; seuls le plan de bornage d'un géomètre et les documents officiels font foi.</li>
+                <li><strong>Disponibilité</strong> : un terrain peut être réservé ou vendu entre deux mises à jour.</li>
+                <li><strong>Photos, visite 360° et vidéos</strong> : elles présentent le terrain ou ses environs à la date de prise de vue ; certaines photos d'illustration sont signalées comme telles.</li>
+                <li><strong>Documents fonciers affichés</strong> : présentés pour information ; ils doivent être vérifiés par votre notaire auprès des services compétents (cadastre, conservation foncière, commune).</li>
+            </ul>
+            <p>Seul l'acte signé devant notaire engage les parties. Nous vous invitons à lire notre guide <a href="/acheter-en-securite">Acheter en toute sécurité</a>.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-relation">
+            <h2 id="cgu-relation"><span>@(++n)</span>Contact et mise en relation</h2>
+            <p>Les boutons WhatsApp ouvrent une conversation avec notre équipe, avec un message pré-rempli qui indique la référence du terrain. L'utilisation de WhatsApp est soumise aux conditions de son éditeur.</p>
+            <div class="alerte alerte--info"><icone nom="bouclier" /><strong>Vigilance.</strong> @nom ne vous demandera jamais de payer un terrain par transfert d'argent avant la signature chez le notaire. En cas de doute sur un message reçu en notre nom, contactez-nous uniquement par les numéros affichés sur ce site.</div>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-usage">
+            <h2 id="cgu-usage"><span>@(++n)</span>Bon usage</h2>
+            <p>Vous vous engagez à ne pas utiliser le site de façon abusive : extraction massive des annonces, tentative d'accès à l'espace réservé à l'équipe, envoi de contenus illicites ou atteinte au fonctionnement du site.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-propriete">
+            <h2 id="cgu-propriete"><span>@(++n)</span>Propriété intellectuelle</h2>
+            <p>Les contenus du site (textes, photos, logo, visites 360°) sont protégés. Vous pouvez partager le lien d'une annonce ; toute autre reproduction nécessite notre accord écrit. Voir les <a href="/mentions-legales">mentions légales</a>.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-donnees">
+            <h2 id="cgu-donnees"><span>@(++n)</span>Données personnelles</h2>
+            <p>Le site ne demande aucune inscription et ne collecte que le strict nécessaire. Le détail figure dans la rubrique <a href="/mentions-legales#t-donnees">Données personnelles</a> des mentions légales.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-responsabilite">
+            <h2 id="cgu-responsabilite"><span>@(++n)</span>Responsabilité et liens externes</h2>
+            <p>@nom ne saurait être tenu responsable d'une décision prise sur la seule base des informations du site, sans les vérifications d'usage, ni d'un dommage lié à une interruption ou à un usage du site non conforme aux présentes conditions.</p>
+            <p>Les liens vers des services tiers (WhatsApp, cartes, YouTube, réseaux sociaux) sont fournis pour votre confort ; leur contenu relève de leurs éditeurs.</p>
+        </section>
+
+        <section class="page-contenu__section" aria-labelledby="cgu-modification">
+            <h2 id="cgu-modification"><span>@(++n)</span>Modification et droit applicable</h2>
+            <p>Ces conditions peuvent être modifiées à tout moment ; la version en ligne est celle qui s'applique. Elles sont régies par le droit sénégalais. En cas de litige, une solution amiable sera recherchée en priorité ; à défaut, les tribunaux de Dakar seront compétents.</p>
+        </section>
+
+        <p class="page-contenu__avertissement muet"><small>Dernière mise à jour : 1er octobre 2026. Pour toute question : <a href="/contact">page Contact</a>.</small></p>
+    </div>
+</article>

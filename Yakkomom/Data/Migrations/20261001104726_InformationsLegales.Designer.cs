@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Yakkomom.Data;
@@ -11,9 +12,11 @@ using Yakkomom.Data;
 namespace Yakkomom.Data.Migrations
 {
     [DbContext(typeof(YakkomomDbContext))]
-    partial class YakkomomDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261001104726_InformationsLegales")]
+    partial class InformationsLegales
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
