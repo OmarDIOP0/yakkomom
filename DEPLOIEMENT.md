@@ -109,3 +109,18 @@ Un seul service allumé en permanence consomme environ 720 heures par mois, dans
 - **Les photos disparaissent après un redéploiement** : `Stockage__Fournisseur` n'est pas `Cloudinary`. Le disque de Render est effacé à chaque déploiement.
 - **Mot de passe SuperAdmin oublié** : un autre SuperAdmin peut le réinitialiser depuis **Utilisateurs**.
   Changer `AdminInitial__MotDePasse` n'a aucun effet si le compte existe déjà : c'est voulu.
+
+## Tests automatiques
+
+```bash
+dotnet test
+```
+
+- **Tests unitaires** (sans base) : formats FCFA et téléphones, saisies, URL, liens et messages WhatsApp, complétude des fiches, surfaces GPS, reconnaissance des fichiers envoyés, politique de sécurité.
+- **Tests d'intégration** : l'application complète, sur une base PostgreSQL jetable créée puis supprimée automatiquement. Ils vérifient notamment :
+  - les documents privés, jamais accessibles sans connexion admin ;
+  - les filtres et les brouillons, jamais visibles du public ;
+  - les clics WhatsApp, sans donnée personnelle et sans doublon ;
+  - l'admin, le jeton anti-falsification et les en-têtes de sécurité.
+
+La connexion au serveur PostgreSQL de test est lue dans la variable `YK_TESTS_DB` (chaîne Npgsql, avec le droit de créer des bases), ou à défaut dans les user-secrets de développement.

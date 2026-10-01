@@ -1,4 +1,7 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 using Yakkomom.Data;
 using Yakkomom.Helpers;
@@ -19,8 +22,12 @@ public class WhatsAppController(
     YakkomomDbContext db,
     IParametreSiteService parametres,
     UrlSite urls,
+    IMemoryCache cache,
     ILogger<WhatsAppController> logger) : Controller
 {
+    /// <summary>Un même visiteur sur le même bouton n'est compté qu'une fois pendant cette durée.</summary>
+    internal static readonly TimeSpan FenetreDoublons = TimeSpan.FromMinutes(10);
+
     [HttpGet("{reference:regex(^YK-\\d{{4,}}$)}/{index:int:range(1,3)}")]
     public async Task<IActionResult> Terrain(string reference, int index, string? source, string? motif, CancellationToken ct)
     {
@@ -105,6 +112,12 @@ public class WhatsAppController(
     private async Task EnregistrerClicAsync(int? terrainId, int? serviceId, int index, SourceClicWhatsApp source, CancellationToken ct)
     {
         if (EstPrechargementOuRobot()) return;
+
+        // Anti-gonflement : empreinte irréversible (IP + bouton) gardée 10 min en mémoire, jamais en base.
+        var empreinte = EmpreinteClic(HttpContext.Connection.RemoteIpAddress?.ToString(), terrainId, serviceId, index);
+        if (cache.TryGetValue(empreinte, out _)) return;
+        cache.Set(empreinte, true, FenetreDoublons);
+
         try
         {
             db.ClicsWhatsApp.Add(new ClicWhatsApp { TerrainId = terrainId, ServiceId = serviceId, NumeroIndex = (short)index, Source = source });
@@ -116,6 +129,9 @@ public class WhatsAppController(
             logger.LogWarning(ex, "Clic WhatsApp non enregistré.");
         }
     }
+
+    internal static string EmpreinteClic(string? ip, int? terrainId, int? serviceId, int index) =>
+        "clic:" + Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{ip}|{terrainId}|{serviceId}|{index}")))[..24];
 
     private static SourceClicWhatsApp LireSource(string? source) => source switch
     {

@@ -32,4 +32,9 @@
     <None Include="Demo/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Les tests accèdent aux méthodes internes (validation, empreintes, nettoyage) -->
+    <InternalsVisibleTo Include="Yakkomom.Tests" />
+  </ItemGroup>
+
 </Project>

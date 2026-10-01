@@ -47,7 +47,7 @@
         </style>
     }
     @* <!script> : empêche le tag helper ImportMap d'ASP.NET de remplacer notre import map par la sienne (vide ici). *@
-    <!script type="importmap">@Html.Raw(Assets.ImportMap())</!script>
+    <!script type="importmap" nonce="@Context.NonceCsp()">@Html.Raw(Assets.ImportMap())</!script>
     <link rel="stylesheet" href="@Assets["css/site.css"]">
     <link rel="icon" href="@Assets["img/logo.svg"]" type="image/svg+xml">
     <link rel="icon" href="@Assets["img/icones/favicon-32.png"]" type="image/png" sizes="32x32">

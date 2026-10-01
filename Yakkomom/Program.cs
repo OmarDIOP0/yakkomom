@@ -13,6 +13,7 @@ using Yakkomom.Services.Interfaces;
 using Yakkomom.Stockage;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false); // ne pas annoncer le serveur utilisé
 
 // Render (et la plupart des hébergeurs de conteneurs) imposent le port d'écoute via PORT.
 if (Environment.GetEnvironmentVariable("PORT") is { Length: > 0 } port)
@@ -94,6 +95,7 @@ var demarrage = new TaskCompletionSource();
 
 // --- Pipeline HTTP ---------------------------------------------------------
 app.UseForwardedHeaders(); // en premier : vraie IP et schéma HTTPS derrière Render
+app.UseEnTetesSecurite(app.Environment.IsDevelopment());
 
 // Pendant les migrations du démarrage : réponse d'attente (sauf /health, pour l'hébergeur).
 app.Use(async (contexte, suivant) =>

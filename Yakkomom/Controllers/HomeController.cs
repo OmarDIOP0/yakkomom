@@ -24,8 +24,10 @@ namespace Yakkomom.Controllers
 
         /// <summary>Pages d'erreur HTTP (404…) servies via UseStatusCodePagesWithReExecute.</summary>
         [Route("erreur/{code:int}")]
-        public IActionResult CodeStatut(int code)
+        public IActionResult CodeStatut([FromRoute] int code)
         {
+            // Page rejouée après une autre requête (parfois un envoi de fichier) : on ne se fie qu'à l'URL, bornée.
+            if (code is < 400 or > 599) code = StatusCodes.Status404NotFound;
             Response.StatusCode = code;
             ViewData["Robots"] = "noindex";
             return View(code == 404 ? "Introuvable" : "Error", new ErrorViewModel { RequestId = HttpContext.TraceIdentifier });

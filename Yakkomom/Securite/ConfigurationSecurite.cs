@@ -109,7 +109,12 @@ public static class ConfigurationSecurite
     private static Task RepondreOuRediriger(Microsoft.AspNetCore.Authentication.RedirectContext<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> ctx, int code)
     {
         if (ctx.Request.Headers.Accept.ToString().Contains("application/json"))
+        {
             ctx.Response.StatusCode = code;
+            // Réponse brute pour le script d'envoi (session expirée), pas la page d'erreur HTML.
+            var pages = ctx.HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodePagesFeature>();
+            if (pages is not null) pages.Enabled = false;
+        }
         else
             ctx.Response.Redirect(ctx.RedirectUri);
         return Task.CompletedTask;

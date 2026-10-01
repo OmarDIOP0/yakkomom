@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Yakkomom.Tests/Yakkomom.Tests.csproj" />
   <Project Path="Yakkomom/Yakkomom.csproj" />
 </Solution>
