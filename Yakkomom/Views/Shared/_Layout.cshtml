@@ -125,7 +125,7 @@
             </div>
         </div>
         <div class="conteneur pied__bas">
-            <span>© @DateTime.UtcNow.Year @parametres.NomSite · Tous droits réservés</span>
+            <span>© @DateTime.UtcNow.Year @parametres.NomSite · Tous droits réservés · Réalisation : <a class="pied__credit" href="/a-propos#realisation">Lumaya Tech</a></span>
             <button type="button" class="pied__installer" data-installer-app hidden><icone nom="telephone" />Installer l'application</button>
             <a class="pied__economie" href="/preferences/economie?actif=@(economieChoisie ? "false" : "true")&amp;retour=@Uri.EscapeDataString(cheminCourant)" rel="nofollow" data-economie>
                 <span class="pied__interrupteur" aria-hidden="true" data-actif="@(economie ? "oui" : "non")"></span>

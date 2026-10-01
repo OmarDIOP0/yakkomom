@@ -912,6 +912,11 @@
   .ic--partage-ios { width: 16px; height: 16px; vertical-align: -3px; display: inline; }
 
   .pied__bas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--e-3); align-items: center; }
+  .pied__credit { color: inherit; text-underline-offset: 3px; }
+  .realisation { border-top: 1px solid var(--c-filet); }
+  .realisation__titre { font: 600 var(--t-xs)/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--c-muet); margin-bottom: var(--e-3); }
+  .realisation__contacts { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); margin-top: var(--e-3); }
+  .realisation__contacts a { display: inline-flex; align-items: center; gap: var(--e-2); min-height: var(--tactile); font-weight: 600; }
   .pied__installer { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 44px; padding: 0 var(--e-3); color: inherit; font: inherit; font-weight: 600; border: 1px solid color-mix(in srgb, var(--c-pied-texte) 40%, transparent); background: none; cursor: pointer; }
   .pied__installer:hover { border-color: var(--c-pied-texte); }
   .pied__installer[hidden] { display: none; }
