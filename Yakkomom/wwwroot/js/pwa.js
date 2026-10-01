@@ -91,3 +91,24 @@ if (iOS && bonMoment() && /safari/i.test(navigator.userAgent) && !/crios|fxios/i
     document.body.append(el);
   }, 15000);
 }
+
+// --- Bouton permanent « Installer l'application » (pied de page) ------------------------------
+// La bannière ci-dessus attend la 2e visite ; ce bouton permet d'installer à tout moment.
+const boutonInstaller = document.querySelector('[data-installer-app]');
+if (boutonInstaller && !autonome) {
+  boutonInstaller.hidden = false;
+  boutonInstaller.addEventListener('click', async () => {
+    if (invitation) {
+      invitation.prompt();
+      const { outcome } = await invitation.userChoice;
+      invitation = null;
+      if (outcome === 'accepted') boutonInstaller.hidden = true;
+      return;
+    }
+    // Pas d'invitation disponible : on explique le geste propre au navigateur.
+    message(iOS
+      ? 'Dans Safari, touchez le bouton Partager (carré avec une flèche), puis « Sur l\'écran d\'accueil ».'
+      : 'Ouvrez le menu du navigateur (⋮ en haut à droite), puis « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».');
+  });
+  window.addEventListener('appinstalled', () => { boutonInstaller.hidden = true; });
+}

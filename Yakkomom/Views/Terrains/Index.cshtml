@@ -25,8 +25,26 @@
     if (f.Commune is { } c) actifs.Add((Model.Communes.FirstOrDefault(x => x.Id == c)?.Nom ?? "Commune", Sans("commune")));
     if (f.Type is { } ty) actifs.Add((types.First(x => x.Valeur == ty).Libelle, Sans("type")));
     if (f.Statut == "disponible") actifs.Add(("Disponibles", Sans("statut")));
-    if (!string.IsNullOrWhiteSpace(f.PrixMin)) actifs.Add(($"≥ {f.PrixMin} F", Sans("prixmin")));
-    if (!string.IsNullOrWhiteSpace(f.PrixMax)) actifs.Add(($"≤ {f.PrixMax} F", Sans("prixmax")));
+    string Montant(string saisie) => Nombres.LireMontant(saisie, out var m) && m is { } v ? Format.Fcfa(v) : saisie + " F";
+    if (!string.IsNullOrWhiteSpace(f.PrixMin)) actifs.Add(($"≥ {Montant(f.PrixMin)}", Sans("prixmin")));
+    if (!string.IsNullOrWhiteSpace(f.PrixMax)) actifs.Add(($"≤ {Montant(f.PrixMax)}", Sans("prixmax")));
+
+    // Raccourcis de budget (le détail reste possible dans « Filtres »)
+    var budgets = new (string Libelle, long? Min, long? Max)[]
+    {
+        ("Moins de 5 M", null, 5_000_000), ("5 à 15 M", 5_000_000, 15_000_000),
+        ("15 à 30 M", 15_000_000, 30_000_000), ("Plus de 30 M", 30_000_000, null)
+    };
+    Nombres.LireMontant(f.PrixMin, out var prixMinActuel);
+    Nombres.LireMontant(f.PrixMax, out var prixMaxActuel);
+    string Budget(long? min, long? max)
+    {
+        var u = Sans("prixmin", "prixmax");
+        var q = new List<string>();
+        if (min is not null) q.Add($"prixmin={min}");
+        if (max is not null) q.Add($"prixmax={max}");
+        return u + (u.Contains('?') ? "&" : "?") + string.Join("&", q);
+    }
     if (!string.IsNullOrWhiteSpace(f.SurfaceMin)) actifs.Add(($"≥ {f.SurfaceMin} m²", Sans("surfacemin")));
     if (!string.IsNullOrWhiteSpace(f.SurfaceMax)) actifs.Add(($"≤ {f.SurfaceMax} m²", Sans("surfacemax")));
     if (f.Visite360) actifs.Add(("Visite 360°", Sans("visite360")));
@@ -104,6 +122,15 @@
             </div>
         </details>
     </form>
+
+    <nav class="puces filtres__budget" aria-label="Budget">
+        @foreach (var b in budgets)
+        {
+            var actif = b.Min == prixMinActuel && b.Max == prixMaxActuel;
+            <a class="puce @(actif ? "est-active" : null)" href="@(actif ? Sans("prixmin", "prixmax") : Budget(b.Min, b.Max))"
+               aria-current="@(actif ? "true" : null)" rel="nofollow">@b.Libelle</a>
+        }
+    </nav>
 
     @if (actifs.Count > 0)
     {

@@ -56,6 +56,11 @@
     <section class="bloc-formulaire">
         <h2>Position et contour</h2>
 
+        <div class="position-terrain">
+            <button type="button" class="btn btn--accent btn--bloc" data-position-gps hidden><icone nom="position" />Je suis sur le terrain : enregistrer ma position</button>
+            <p class="aide" data-position-gps-etat role="status">Sur place, au milieu de la parcelle et à découvert : la latitude et la longitude se remplissent toutes seules. Pensez à enregistrer ensuite.</p>
+        </div>
+
         <div class="carte-edition" data-carte-edition hidden
              data-leaflet-js="@Assets["lib/leaflet/leaflet.js"]" data-leaflet-css="@Assets["lib/leaflet/leaflet.css"]">
             <div class="carte-edition__outils" role="toolbar" aria-label="Outils de la carte">
@@ -97,8 +102,6 @@
                 <span asp-validation-for="Longitude" class="erreur"></span>
             </div>
         </div>
-        <button type="button" class="btn btn--contour btn--petit mt-4" data-position-gps hidden><icone nom="position" />Utiliser ma position actuelle</button>
-        <p class="aide" data-position-gps-etat role="status"></p>
     </section>
 
     <section class="bloc-formulaire">

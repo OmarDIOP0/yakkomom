@@ -126,6 +126,7 @@
         </div>
         <div class="conteneur pied__bas">
             <span>© @DateTime.UtcNow.Year @parametres.NomSite · Tous droits réservés</span>
+            <button type="button" class="pied__installer" data-installer-app hidden><icone nom="telephone" />Installer l'application</button>
             <a class="pied__economie" href="/preferences/economie?actif=@(economieChoisie ? "false" : "true")&amp;retour=@Uri.EscapeDataString(cheminCourant)" rel="nofollow" data-economie>
                 <span class="pied__interrupteur" aria-hidden="true" data-actif="@(economie ? "oui" : "non")"></span>
                 Économie de données : @(economie ? (economieChoisie ? "activée" : "activée par votre téléphone") : "désactivée")

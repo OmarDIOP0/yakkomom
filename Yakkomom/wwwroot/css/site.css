@@ -677,6 +677,7 @@
   .filtres__plage legend { margin-bottom: 6px; }
   .filtres__cases { display: flex; flex-wrap: wrap; gap: 0 var(--e-5); }
   .filtres__actions { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+  .filtres__budget { margin-block: var(--e-3); }
   .filtres__actifs { margin-bottom: var(--e-4); }
   .filtres__actifs .ic { width: 14px; height: 14px; }
 
@@ -904,6 +905,9 @@
   .ic--partage-ios { width: 16px; height: 16px; vertical-align: -3px; display: inline; }
 
   .pied__bas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--e-3); align-items: center; }
+  .pied__installer { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 44px; padding: 0 var(--e-3); color: inherit; font: inherit; font-weight: 600; border: 1px solid color-mix(in srgb, var(--c-pied-texte) 40%, transparent); background: none; cursor: pointer; }
+  .pied__installer:hover { border-color: var(--c-pied-texte); }
+  .pied__installer[hidden] { display: none; }
   .pied__economie { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 40px; color: inherit; text-decoration: none; }
   .pied__interrupteur { width: 34px; height: 20px; border-radius: 10px; background: color-mix(in srgb, var(--c-pied-texte) 30%, transparent); position: relative; flex: none; }
   .pied__interrupteur::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--c-pied-texte); transition: transform var(--transition); }

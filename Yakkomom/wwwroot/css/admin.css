@@ -380,6 +380,7 @@
 
 /* --- Éditeur de carte (onglet Localisation) --------------------------------- */
 @layer components {
+  .position-terrain { margin-bottom: var(--e-5); }
   .carte-edition { display: grid; gap: var(--e-3); margin-bottom: var(--e-4); }
   .carte-edition__outils { display: flex; flex-wrap: wrap; gap: var(--e-2); }
   .carte-edition__outils .puce[aria-pressed="true"] { background: var(--c-encre); color: var(--c-papier); border-color: var(--c-encre); }
