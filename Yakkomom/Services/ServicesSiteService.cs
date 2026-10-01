@@ -89,7 +89,7 @@ public class ServicesSiteService(
         var service = new Service
         {
             Titre = titre, Slug = slug, Ordre = ordre + 1, EstActif = false, Icone = "terrain",
-            MessageWhatsApp = $"Bonjour Yakkomom, je souhaite en savoir plus sur votre service « {titre} »."
+            MessageWhatsApp = null // message par défaut composé avec le nom du site au moment du clic
         };
         db.Services.Add(service);
         await db.SaveChangesAsync(ct);

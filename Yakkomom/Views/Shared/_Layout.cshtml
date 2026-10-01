@@ -66,7 +66,7 @@
         <div class="conteneur entete__barre">
             <a class="logo" href="/" aria-label="@parametres.NomSite — accueil">
                 <img class="logo__marque" src="@urlLogo" alt="" width="28" height="28">
-                <span>Yakko<em>mom</em></span>
+                <span>@LogoTexte.Html(parametres.NomSite)</span>
             </a>
             <nav class="nav-principale" aria-label="Navigation principale">
                 <ul>
@@ -93,7 +93,7 @@
         <div class="frise" role="presentation"></div>
         <div class="conteneur pied__contenu">
             <div class="pile">
-                <a class="logo" href="/"><span>Yakko<em>mom</em></span></a>
+                <a class="logo" href="/"><span>@LogoTexte.Html(parametres.NomSite)</span></a>
                 @if (!string.IsNullOrEmpty(parametres.Slogan))
                 {
                     <p>@parametres.Slogan</p>

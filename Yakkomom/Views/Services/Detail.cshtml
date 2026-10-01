@@ -1,7 +1,7 @@
 @model ServicePublicVm
 @{
     ViewData["Title"] = Model.Titre;
-    ViewData["Description"] = Model.Resume ?? $"{Model.Titre} avec Yakkomom, au Sénégal.";
+    ViewData["Description"] = Model.Resume ?? $"{Model.Titre} au Sénégal.";
     var couverture = Model.Photos.FirstOrDefault();
 }
 <article>

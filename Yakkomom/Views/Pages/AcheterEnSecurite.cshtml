@@ -1,4 +1,6 @@
+@inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
 @{
+    var nomSite = (await ParametresSite.ObtenirAsync()).NomSite;
     ViewData["Title"] = "Acheter un terrain en toute sécurité au Sénégal";
     ViewData["Description"] = "Titre foncier, bail, délibération, état des droits réels, notaire : les étapes d'un achat de terrain sûr au Sénégal, expliquées simplement.";
 }
@@ -74,11 +76,11 @@
 
         <section class="page-contenu__section" aria-labelledby="t-diaspora">
             <h2 id="t-diaspora">Vous êtes à l'étranger ?</h2>
-            <p>Vous pouvez acheter à distance grâce à une <strong>procuration notariée</strong> donnée à une personne de confiance. Chez Yakkomom, chaque terrain est présenté avec photos récentes, visite 360°, position GPS et contour de la parcelle : vous voyez ce que vous achetez avant de vous engager.</p>
+            <p>Vous pouvez acheter à distance grâce à une <strong>procuration notariée</strong> donnée à une personne de confiance. Chez @nomSite, chaque terrain est présenté avec photos récentes, visite 360°, position GPS et contour de la parcelle : vous voyez ce que vous achetez avant de vous engager.</p>
         </section>
 
         <section class="page-contenu__section" aria-labelledby="t-yakkomom">
-            <h2 id="t-yakkomom">Ce que fait Yakkomom pour vous</h2>
+            <h2 id="t-yakkomom">Ce que fait @nomSite pour vous</h2>
             <ul class="liste-coches">
                 <li>Nous vérifions les documents de chaque terrain avant de le publier.</li>
                 <li>Nous relevons la position et le contour de la parcelle sur place.</li>

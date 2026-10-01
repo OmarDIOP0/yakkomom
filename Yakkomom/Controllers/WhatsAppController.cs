@@ -35,7 +35,7 @@ public class WhatsAppController(
         if (numero is null) return NotFound();
 
         var lien = urls.Absolue(UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune));
-        var message = WhatsAppLiens.Message(motif == "document" ? MotifWhatsApp.Document : MotifWhatsApp.Terrain,
+        var message = WhatsAppLiens.Message(motif == "document" ? MotifWhatsApp.Document : MotifWhatsApp.Terrain, p.NomSite,
             p.MessageWhatsAppTerrain, t.Reference, WhatsAppLiens.Resume(t.SurfaceM2, t.Commune ?? t.QuartierVillage), lien);
 
         await EnregistrerClicAsync(t.Id, null, index, LireSource(source), ct);
@@ -51,7 +51,7 @@ public class WhatsAppController(
 
         var origine = LireSource(source);
         await EnregistrerClicAsync(null, null, index, origine == SourceClicWhatsApp.FicheTerrain ? SourceClicWhatsApp.General : origine, ct);
-        return Rediriger(WhatsAppLiens.UrlWhatsApp(numero.Numero, WhatsAppLiens.Message(MotifWhatsApp.General, "", "", "", "")));
+        return Rediriger(WhatsAppLiens.UrlWhatsApp(numero.Numero, WhatsAppLiens.Message(MotifWhatsApp.General, p.NomSite, "", "", "", "")));
     }
 
     /// <summary>Bouton « Demander ce service sur WhatsApp ».</summary>
@@ -66,7 +66,7 @@ public class WhatsAppController(
         var numero = WhatsAppLiens.NumerosEffectifs(null, p.ContactsParDefaut).FirstOrDefault(n => n.Index == index);
         if (numero is null) return Redirect("/contact");
 
-        var message = service.MessageWhatsApp ?? $"Bonjour Yakkomom, je souhaite en savoir plus sur votre service « {service.Titre} ».";
+        var message = service.MessageWhatsApp ?? $"Bonjour {p.NomSite}, je souhaite en savoir plus sur votre service « {service.Titre} ».";
         await EnregistrerClicAsync(null, service.Id, index, SourceClicWhatsApp.Service, ct);
         return Rediriger(WhatsAppLiens.UrlWhatsApp(numero.Numero, message));
     }
@@ -83,7 +83,7 @@ public class WhatsAppController(
         if (numero is null) return Redirect("/contact");
 
         static string? Court(string? s, int max) => string.IsNullOrWhiteSpace(s) ? null : (s.Trim().Length > max ? s.Trim()[..max] : s.Trim());
-        var lignes = new List<string> { "Bonjour Yakkomom," };
+        var lignes = new List<string> { $"Bonjour {p.NomSite}," };
         if (Court(d.Nom, 80) is { } nom) lignes.Add($"je m'appelle {nom}.");
         lignes.Add(Court(d.Besoin, 80) is { } besoin ? $"Je suis intéressé(e) par : {besoin}." : "Je souhaite des informations.");
         if (Court(d.Zone, 80) is { } zone) lignes.Add($"Zone souhaitée : {zone}.");

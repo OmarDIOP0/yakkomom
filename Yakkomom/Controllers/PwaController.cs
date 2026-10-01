@@ -84,7 +84,7 @@ public class PwaController(IAssetsStatiques assets, IParametreSiteService parame
             }
         };
 
-        Response.Headers.CacheControl = "public, max-age=86400";
+        Response.Headers.CacheControl = "public, max-age=3600"; // un changement de nom dans l'admin se propage vite
         return Content(JsonSerializer.Serialize(manifeste, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }),
             "application/manifest+json; charset=utf-8");
     }
@@ -131,7 +131,7 @@ public class PwaController(IAssetsStatiques assets, IParametreSiteService parame
             }
         };
 
-        Response.Headers.CacheControl = "public, max-age=86400";
+        Response.Headers.CacheControl = "public, max-age=3600"; // un changement de nom dans l'admin se propage vite
         return Content(JsonSerializer.Serialize(manifeste, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }),
             "application/manifest+json; charset=utf-8");
     }

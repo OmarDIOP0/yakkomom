@@ -35,11 +35,11 @@ public static class WhatsAppLiens
         return morceaux.Count > 0 ? string.Join(" ", morceaux) : "terrain";
     }
 
-    public static string Message(MotifWhatsApp motif, string modeleTerrain, string reference, string resume, string lien) => motif switch
+    public static string Message(MotifWhatsApp motif, string nomSite, string modeleTerrain, string reference, string resume, string lien) => motif switch
     {
         MotifWhatsApp.Document =>
-            $"Bonjour Yakkomom, je souhaite consulter les documents fonciers du terrain {reference} ({resume}) : {lien}. Est-ce possible ?",
-        MotifWhatsApp.General => "Bonjour Yakkomom, je souhaite avoir des informations sur vos terrains et services.",
+            $"Bonjour {nomSite}, je souhaite consulter les documents fonciers du terrain {reference} ({resume}) : {lien}. Est-ce possible ?",
+        MotifWhatsApp.General => $"Bonjour {nomSite}, je souhaite avoir des informations sur vos terrains et services.",
         _ => modeleTerrain.Replace("{reference}", reference).Replace("{resume}", resume).Replace("{lien}", lien)
     };
 

@@ -4,6 +4,7 @@
 import '../clavier.js';
 
 const autonome = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const nomAdmin = document.querySelector('meta[name="apple-mobile-web-app-title"]')?.content || 'Yakkomom Admin';
 const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
@@ -50,7 +51,7 @@ if (autonome) {
         return;
       }
       message(iOS
-        ? 'Dans Safari : bouton Partager (carré avec une flèche), puis « Sur l\'écran d\'accueil ». L\'icône « Yakkomom Admin » s\'ouvrira directement sur l\'administration.'
+        ? 'Dans Safari : bouton Partager (carré avec une flèche), puis « Sur l\'écran d\'accueil ». L\'icône « ' + nomAdmin + ' » s\'ouvrira directement sur l\'administration.'
         : 'Menu du navigateur (⋮ en haut à droite), puis « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».');
     });
   }

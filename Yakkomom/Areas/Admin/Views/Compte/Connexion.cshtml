@@ -1,12 +1,14 @@
+@inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
 @model ConnexionVm
 @{
     ViewData["Title"] = "Connexion";
     ViewData["SansNavigation"] = true;
+    var NomSite = (await ParametresSite.ObtenirAsync()).NomSite;
 }
 <div class="admin-carte-seule">
     <p class="surtitre">Espace réservé</p>
     <h1>Connexion</h1>
-    <p class="muet">Accès réservé à l'équipe Yakkomom.</p>
+    <p class="muet">Accès réservé à l'équipe @NomSite.</p>
 
     <form method="post" asp-action="Connexion" asp-route-retour="@Model.Retour" class="mt-6" novalidate>
         <div asp-validation-summary="ModelOnly" class="alerte alerte--erreur" role="alert"></div>
@@ -33,5 +35,5 @@
 </div>
 
 <p class="admin-installer-connexion" data-installer-conteneur hidden>
-    <button type="button" class="btn btn--discret btn--petit" data-installer-admin><icone nom="telephone" />Installer « Yakkomom Admin » sur ce téléphone</button>
+    <button type="button" class="btn btn--discret btn--petit" data-installer-admin><icone nom="telephone" />Installer « @NomSite Admin » sur ce téléphone</button>
 </p>

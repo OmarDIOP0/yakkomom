@@ -2,7 +2,9 @@
 @inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
 @inject Yakkomom.Stockage.IStorageService Stockage
 @{
-    var cleLogo = (await ParametresSite.ObtenirAsync()).CleLogo;
+    var parametresSite = await ParametresSite.ObtenirAsync();
+    var cleLogo = parametresSite.CleLogo;
+    var nomAdmin = $"{parametresSite.NomSite} Admin";
     var urlLogo = cleLogo is null ? Assets["img/logo.svg"] : Stockage.UrlImage(cleLogo, 128);
     var sansNavigation = ViewData["SansNavigation"] is true;
     var titre = ViewData["Title"] as string ?? "Administration";
@@ -14,7 +16,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>@titre · Yakkomom Admin</title>
+    <title>@titre · @nomAdmin</title>
     @* Barre d'état du téléphone de la couleur de l'en-tête (comme le site public) *@
     <meta name="theme-color" content="#FBF7F0" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#121A15" media="(prefers-color-scheme: dark)">
@@ -32,7 +34,7 @@
     <link rel="manifest" href="/admin/manifest.webmanifest">
     <link rel="apple-touch-icon" href="@Assets["img/icones/admin-apple-touch-icon.png"]">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Yakkomom Admin">
+    <meta name="apple-mobile-web-app-title" content="@nomAdmin">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     @await RenderSectionAsync("Head", required: false)
 </head>
@@ -42,7 +44,7 @@
     <header class="admin-entete">
         <a class="logo" href="@(sansNavigation ? "/" : "/admin")">
             <img class="logo__marque" src="@urlLogo" alt="" width="28" height="28">
-            <span>Yakko<em>mom</em></span>
+            <span>@LogoTexte.Html(parametresSite.NomSite)</span>
             <span class="admin-entete__badge">Admin</span>
         </a>
         @if (!sansNavigation && User.Identity?.IsAuthenticated == true)

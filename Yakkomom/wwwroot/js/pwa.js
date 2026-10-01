@@ -2,6 +2,8 @@
 const $ = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
 const lire = (cle, defaut) => { try { return JSON.parse(localStorage.getItem(cle)) ?? defaut; } catch { return defaut; } };
 const ecrire = (cle, valeur) => { try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch { /* ignoré */ } };
+// Nom configuré dans l'admin (repris de l'en-tête de la page)
+const nomSite = document.querySelector('meta[name="apple-mobile-web-app-title"]')?.content || 'Yakkomom';
 const autonome = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 // --- Petits messages en bas d'écran ---------------------------------------------------
@@ -65,7 +67,7 @@ function proposer() {
   if (!invitation || document.querySelector('.installation')) return;
   const el = $(`<aside class="installation" aria-label="Installer l'application">
     <img src="${document.querySelector('link[rel=apple-touch-icon]')?.href ?? ''}" alt="" width="48" height="48">
-    <div><strong>Installer Yakkomom</strong><span>Accès direct depuis l'écran d'accueil, même avec une connexion faible.</span></div>
+    <div><strong>Installer ${nomSite}</strong><span>Accès direct depuis l'écran d'accueil, même avec une connexion faible.</span></div>
     <button type="button" class="btn btn--accent btn--petit" data-installer>Installer</button>
     <button type="button" class="message-pwa__fermer" aria-label="Plus tard" data-plus-tard>×</button></aside>`);
   el.querySelector('[data-installer]').addEventListener('click', async () => {
@@ -84,7 +86,7 @@ if (iOS && bonMoment() && /safari/i.test(navigator.userAgent) && !/crios|fxios/i
   setTimeout(() => {
     const el = $(`<aside class="installation" aria-label="Installer l'application">
       <img src="${document.querySelector('link[rel=apple-touch-icon]')?.href ?? ''}" alt="" width="48" height="48">
-      <div><strong>Ajoutez Yakkomom à votre écran d'accueil</strong>
+      <div><strong>Ajoutez ${nomSite} à votre écran d'accueil</strong>
       <span>Touchez <svg class="ic ic--partage-ios" viewBox="0 0 24 24" aria-label="Partager"><path d="M12 3v12M8 7l4-4 4 4M5 11v9h14v-9"/></svg> puis « Sur l'écran d'accueil ».</span></div>
       <button type="button" class="message-pwa__fermer" aria-label="Plus tard" data-plus-tard>×</button></aside>`);
     el.querySelector('[data-plus-tard]').addEventListener('click', () => refuser(el));
