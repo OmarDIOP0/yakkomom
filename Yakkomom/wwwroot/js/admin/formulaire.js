@@ -56,10 +56,9 @@ if (boutonGps && 'geolocation' in navigator) {
           (precision > 30 ? ' Précision faible : réessayez dans quelques secondes.' : '');
         boutonGps.removeAttribute('aria-disabled');
       },
-      (err) => {
-        etat.textContent = err.code === err.PERMISSION_DENIED
-          ? 'Accès à la position refusé. Autorisez la localisation pour ce site dans les réglages du navigateur.'
-          : 'Position introuvable. Vérifiez que la localisation (GPS) du téléphone est activée.';
+      async (err) => {
+        const { expliquerErreurPosition } = await import('./position.js');
+        etat.textContent = await expliquerErreurPosition(err);
         boutonGps.removeAttribute('aria-disabled');
       },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }

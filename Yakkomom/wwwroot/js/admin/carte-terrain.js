@@ -160,8 +160,9 @@ function initialiser(bloc) {
           etat.textContent = `Sommet ${sommets.length} ajouté (précision ± ${precision} m).` +
             (precision > 10 ? ' Précision moyenne : patientez quelques secondes sur la borne puis réessayez si besoin.' : ' Allez à la borne suivante.');
           boutons.sommetGps.disabled = false;
-        }, () => {
-          etat.textContent = 'Position introuvable : activez la localisation du téléphone.';
+        }, async (err) => {
+          const { expliquerErreurPosition } = await import('./position.js');
+          etat.textContent = await expliquerErreurPosition(err);
           boutons.sommetGps.disabled = false;
         }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
       });
