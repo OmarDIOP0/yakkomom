@@ -26,11 +26,15 @@
             <input asp-for="Titre" required maxlength="200">
             <span asp-validation-for="Titre" class="erreur"></span>
         </div>
-        <div class="champ">
+        <div class="champ champ-type">
             <label asp-for="Type"></label>
             <select asp-for="Type" asp-items="Html.GetEnumSelectList<TypeTerrain>()">
                 <option value="">— Non précisé —</option>
             </select>
+            @* Visible dès que « Lotissement » est choisi (CSS :has, sans JavaScript) *@
+            <a class="appel-lots" asp-action="Lots" asp-route-id="@Model.EnTete.Id">
+                <icone nom="surface" /><span><strong>Découper en lots</strong> Numéros, surfaces, prix au m² et statut de chaque lot.</span><icone nom="suivant" />
+            </a>
         </div>
         <div class="champ">
             <label asp-for="Description"></label>

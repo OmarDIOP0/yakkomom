@@ -570,3 +570,14 @@
   .lot-admin__statuts .puce { min-height: 36px; font-size: var(--t-xs); }
   @media (min-width: 900px) { .lot-admin__chiffres { flex: 1 1 auto; order: 0; } }
 }
+
+/* Raccourci « Découper en lots » sous le type de terrain (valeur 3 = TypeTerrain.Lotissement) */
+@layer components {
+  .appel-lots { display: none; align-items: center; gap: var(--e-3); margin-top: var(--e-3); padding: var(--e-3) var(--e-4); min-height: var(--tactile);
+    border: 1.5px solid var(--c-laterite); color: var(--c-encre); text-decoration: none; }
+  .appel-lots:hover { background: var(--c-sable); color: var(--c-encre); }
+  .appel-lots > span { flex: 1; font-size: var(--t-sm); }
+  .appel-lots strong { display: block; font-size: var(--t-md); color: var(--c-laterite); }
+  .appel-lots .ic { width: 22px; height: 22px; flex: none; color: var(--c-laterite); }
+  .champ-type:has(option[value="3"]:checked) .appel-lots { display: flex; }
+}
