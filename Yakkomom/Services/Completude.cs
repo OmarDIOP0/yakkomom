@@ -4,7 +4,8 @@ using Yakkomom.Models.Enums;
 namespace Yakkomom.Services;
 
 /// <summary>Onglets du formulaire terrain (l'ordre est celui de l'affichage).</summary>
-public enum OngletTerrain { Infos, Localisation, Photos, Visite360, Documents, Contacts }
+/// <remarks>Lots est en dernier : « Enregistrer et continuer » s'arrête à Contacts.</remarks>
+public enum OngletTerrain { Infos, Localisation, Photos, Visite360, Documents, Contacts, Lots }
 
 /// <summary>Données nécessaires au calcul (projection légère, utilisable dans une liste).</summary>
 public record EntreeCompletude(

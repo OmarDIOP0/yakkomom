@@ -160,6 +160,11 @@
             }
 
             @* --- Viabilisation ------------------------------------------------ *@
+            @if (m.ResumeLots.EstLotissement)
+            {
+                <partial name="_LotsFiche" model="m" />
+            }
+
             <section class="fiche__section" aria-labelledby="titre-viab">
                 <h2 id="titre-viab">Viabilisation</h2>
                 <ul class="viabilisation" role="list">
@@ -196,7 +201,7 @@
                     <ul class="commodites-liste" role="list">
                         @foreach (var c in m.Commodites)
                         {
-                            <li><span>@c.Libelle</span><span class="chiffres">@(c.DistanceKm is { } d ? (d < 1 ? $"{Math.Round(d * 1000):0} m" : $"{Format.Nombre(d, d % 1 == 0 ? 0 : 1)} km") : "—")</span></li>
+                            <li><span>@c.Libelle</span><span class="chiffres">@(c.Texte.Length > 0 ? c.Texte : "—")</span></li>
                         }
                     </ul>
                 </section>

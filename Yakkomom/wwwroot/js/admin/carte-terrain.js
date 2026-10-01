@@ -169,12 +169,23 @@ function initialiser(bloc) {
     }
 
     // Coller des coordonnées ou un lien Google Maps
-    collage?.addEventListener('change', () => {
-      const c = lireCoordonnees(collage.value);
+    collage?.addEventListener('change', async () => {
+      let c = lireCoordonnees(collage.value);
+      // Lien court du bouton « Partager » de Google Maps : le serveur suit le lien pour y lire la position
+      if (!c && /^https:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)\//.test(collage.value.trim())) {
+        etat.textContent = 'Lecture du lien Google Maps…';
+        try {
+          const r = await fetch('/admin/outils/lien-carte?url=' + encodeURIComponent(collage.value.trim()), { headers: { Accept: 'application/json' } });
+          const corps = await r.json().catch(() => ({}));
+          if (r.ok) c = corps;
+          else { etat.textContent = corps.erreur ?? 'Lien illisible.'; return; }
+        } catch {
+          etat.textContent = 'Connexion impossible pour lire le lien : réessayez, ou collez les chiffres de la position.';
+          return;
+        }
+      }
       if (!c) {
-        etat.textContent = /goo\.gl|maps\.app/.test(collage.value)
-          ? 'Les liens courts ne sont pas lisibles : ouvrez-le, puis copiez les chiffres de la position (ex. 14.5198, -17.0021).'
-          : 'Coordonnées non reconnues. Exemple : 14.5198, -17.0021';
+        etat.textContent = 'Coordonnées non reconnues. Exemple : 14.5198, -17.0021, ou un lien Google Maps.';
         return;
       }
       placerRepere(L.latLng(c.lat, c.lng));

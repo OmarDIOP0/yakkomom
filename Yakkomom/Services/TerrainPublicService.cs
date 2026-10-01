@@ -109,6 +109,8 @@ public class TerrainPublicService(
         var chemin = UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune?.Nom);
         var nbPanoramas = await db.Panoramas.CountAsync(x => x.TerrainId == t.Id, ct);
         var numeros = WhatsAppLiens.NumerosEffectifs(t.Contacts, p.ContactsParDefaut);
+        var lots = LotissementService.Trier(await db.Lots.AsNoTracking().Where(l => l.TerrainId == t.Id).ToListAsync(ct)).ToList();
+        var plan = t.Documents.Where(d => d.Type == TypeDocumentFoncier.PlanLotissement).OrderByDescending(d => d.TypeMime.StartsWith("image/")).FirstOrDefault();
 
         return new FicheTerrainVm
         {
@@ -119,7 +121,8 @@ public class TerrainPublicService(
             QuartierVillage = t.QuartierVillage, Adresse = t.Adresse,
             Latitude = t.Latitude, Longitude = t.Longitude, ContourGeoJson = t.ContourGeoJson,
             AccesEau = t.AccesEau, AccesElectricite = t.AccesElectricite, RouteAcces = t.RouteAcces, RouteAccesDetail = t.RouteAccesDetail,
-            Commodites = t.Commodites.OrderBy(c => c.DistanceKm ?? decimal.MaxValue).Select(c => new CommoditeVm(c.Libelle, c.DistanceKm)).ToList(),
+            Commodites = t.Commodites.OrderBy(c => c.DistanceKm ?? decimal.MaxValue).ThenBy(c => c.DureeMinutes ?? int.MaxValue)
+                .Select(c => new CommoditeVm(c.Libelle, c.DistanceKm, c.DureeMinutes, c.Mode)).ToList(),
             Photos = t.Photos.Select(images.Photo).ToList(),
             NombrePanoramas = nbPanoramas,
             Visite = nbPanoramas > 0 ? await visite360.VisitePubliqueAsync(t.Id, ct) : null,
@@ -128,6 +131,11 @@ public class TerrainPublicService(
                 .Select(d => new DocumentPublicVm(d.Id, NomType(d.Type), d.Titre, $"/documents/{d.Id}")).ToList(),
             AUnTitreFoncier = t.SituationFonciere == TypeDocumentFoncier.TitreFoncier
                 || await db.DocumentsFonciers.AnyAsync(d => d.TerrainId == t.Id && d.Type == TypeDocumentFoncier.TitreFoncier, ct),
+            Lots = lots.Select(l => new LotPublicVm(l.Numero, l.SurfaceM2, l.PrixM2Effectif, l.PrixEffectif, l.Position, l.Statut,
+                numeros.Count > 0 && l.Statut != StatutLot.Vendu ? $"/wa/{t.Reference}/{numeros[0].Index}?source=fiche&lot={Uri.EscapeDataString(l.Numero)}" : null)).ToList(),
+            ResumeLots = ResumeLots.Calculer(lots, t.PrixM2Min, t.PrixM2Max),
+            PlanLotissement = plan is null ? null : new DocumentPublicVm(plan.Id, NomType(plan.Type), plan.Titre, $"/documents/{plan.Id}"),
+            PlanEstImage = plan?.TypeMime.StartsWith("image/") == true,
             WhatsApp = numeros.Select(n => new ContactWhatsAppVm(n.Index, TelephoneSenegal.Afficher(n.Numero), n.Libelle,
                 $"/wa/{t.Reference}/{n.Index}")).ToList(),
             UrlDemandeDocument = numeros.Count > 0 ? $"/wa/{t.Reference}/{numeros[0].Index}?motif=document" : null,
@@ -215,6 +223,8 @@ public class TerrainPublicService(
             Departement = t.Departement != null ? t.Departement.Nom : null,
             Couverture = t.Photos.OrderByDescending(p => p.EstCouverture).ThenBy(p => p.Ordre).FirstOrDefault(),
             TitreFoncier = t.SituationFonciere == TypeDocumentFoncier.TitreFoncier || t.Documents.Any(d => d.Type == TypeDocumentFoncier.TitreFoncier),
+            Lots = t.Lots.Select(l => new { l.Statut, l.Prix, l.PrixM2, l.SurfaceM2 }).ToList(),
+            t.PrixM2Min, t.PrixM2Max,
             Visite360 = t.Panoramas.Any()
         }).ToListAsync(ct);
 
@@ -237,7 +247,9 @@ public class TerrainPublicService(
                 ImageHauteur = photo?.Hauteur ?? 600,
                 CouleurDominante = photo?.Couleur,
                 TitreFoncier = l.TitreFoncier,
-                Visite360 = l.Visite360
+                Visite360 = l.Visite360,
+                Lots = ResumeLots.Calculer(l.Lots.Select(x => new Lot { Statut = x.Statut, Prix = x.Prix, PrixM2 = x.PrixM2, SurfaceM2 = x.SurfaceM2 }).ToList(),
+                    l.PrixM2Min, l.PrixM2Max)
             };
         }).ToList();
     }
@@ -246,7 +258,7 @@ public class TerrainPublicService(
     {
         Reference = c.Reference, Titre = c.Titre, Url = c.Url, Localisation = c.Localisation, Prix = c.Prix, SurfaceM2 = c.SurfaceM2,
         Statut = c.Statut, ImageUrl = c.ImageUrl, ImageSrcset = c.ImageSrcset, ImageLargeur = c.ImageLargeur, ImageHauteur = c.ImageHauteur,
-        CouleurDominante = c.CouleurDominante, TitreFoncier = c.TitreFoncier, Visite360 = c.Visite360, Prioritaire = true
+        CouleurDominante = c.CouleurDominante, TitreFoncier = c.TitreFoncier, Visite360 = c.Visite360, Lots = c.Lots, Prioritaire = true
     };
 
     public static string NomType(TypeDocumentFoncier type) => type switch

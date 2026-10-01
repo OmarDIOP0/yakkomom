@@ -1,0 +1,50 @@
+@model FicheTerrainVm
+@{
+    var r = Model.ResumeLots;
+    string Classe(StatutLot s) => s switch { StatutLot.Reserve => "lot--reserve", StatutLot.Vendu => "lot--vendu", _ => "lot--disponible" };
+    string Statut(StatutLot s) => s switch { StatutLot.Reserve => "statut--reserve", StatutLot.Vendu => "statut--vendu", _ => "statut--disponible" };
+}
+<section class="fiche__section lots" id="lots" aria-labelledby="titre-lots">
+    <h2 id="titre-lots">Les lots</h2>
+    <p class="muet"><strong>@r.Disponibles disponible@(r.Disponibles > 1 ? "s" : "")</strong> sur @r.Total@(r.Reserves > 0 ? $" · {r.Reserves} réservé{(r.Reserves > 1 ? "s" : "")}" : "")@(r.Vendus > 0 ? $" · {r.Vendus} vendu{(r.Vendus > 1 ? "s" : "")}" : ""). Le prix de chaque lot dépend de sa position (angle, bord de route…).</p>
+
+    @if (Model.PlanLotissement is { } plan)
+    {
+        @if (Model.PlanEstImage)
+        {
+            <figure class="lots__plan">
+                <a href="@plan.Url" target="_blank" rel="noopener"><img src="@plan.Url" alt="Plan de lotissement" loading="lazy" decoding="async"></a>
+                <figcaption class="muet"><small>Plan de lotissement : touchez pour l'agrandir.</small></figcaption>
+            </figure>
+        }
+        else
+        {
+            <a class="btn btn--contour mt-4" href="@plan.Url" target="_blank" rel="noopener"><icone nom="document" />Voir le plan de lotissement (PDF)</a>
+        }
+    }
+
+    @* Filtre sans JavaScript : la case masque les lots réservés et vendus (CSS :has) *@
+    <label class="interrupteur lots__filtre"><input type="checkbox" role="switch" data-lots-dispo checked="@(r.Disponibles > 0)"><span>Lots disponibles uniquement</span></label>
+
+    <ul class="lots__liste" role="list">
+        @foreach (var lot in Model.Lots)
+        {
+            <li class="lot @Classe(lot.Statut)">
+                <div class="lot__tete">
+                    <strong class="lot__numero">Lot @lot.Numero</strong>
+                    <span class="statut @Statut(lot.Statut)">@LotissementService.Libelle(lot.Statut)</span>
+                </div>
+                <p class="lot__chiffres">
+                    @(lot.SurfaceM2 is null ? "" : Format.Surface(lot.SurfaceM2))@if (lot.PrixM2 is not null) {<text> · @Format.Fcfa(lot.PrixM2)/m²</text>}
+                    @if (!string.IsNullOrEmpty(lot.Position)) {<br><span class="muet">@lot.Position</span>}
+                </p>
+                <p class="lot__prix chiffres">@(lot.Prix is null ? "Prix sur demande" : Format.Fcfa(lot.Prix))</p>
+                @if (lot.UrlWhatsApp is not null)
+                {
+                    <a class="btn btn--whatsapp btn--petit lot__wa" href="@lot.UrlWhatsApp" rel="nofollow" target="_blank" aria-label="Demander le lot @lot.Numero sur WhatsApp"><icone nom="whatsapp" />Ce lot</a>
+                }
+            </li>
+        }
+    </ul>
+    <p class="lots__vide muet">Aucun lot disponible pour le moment : <a href="#contacter">contactez-nous</a> pour être prévenu.</p>
+</section>

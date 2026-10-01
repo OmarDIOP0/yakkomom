@@ -20,6 +20,9 @@ public class CarteTerrainVm
     public int ImageHauteur { get; init; } = 600;
     public string? CouleurDominante { get; init; }
 
+    /// <summary>Lotissement découpé : nombre de lots disponibles, fourchettes (sinon <see cref="ResumeLots.Aucun"/>).</summary>
+    public Services.ResumeLots Lots { get; init; } = Services.ResumeLots.Aucun;
+
     public bool TitreFoncier { get; init; }
     public bool Visite360 { get; init; }
     /// <summary>La première carte visible ne doit pas être en lazy-loading (LCP).</summary>

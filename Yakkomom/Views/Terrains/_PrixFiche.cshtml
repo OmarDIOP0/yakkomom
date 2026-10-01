@@ -1,15 +1,37 @@
 @model FicheTerrainVm
 @{
-    var prixM2 = Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+    var lots = Model.ResumeLots;
+    var lotissement = lots.EstLotissement || lots.PrixM2Min is not null;
+    var prixM2 = lotissement ? null : Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+    string Fourchette(long? min, long? max) => min == max || max is null ? Format.Fcfa(min) : $"{Format.Montant(min!.Value)} à {Format.Fcfa(max)}";
 }
 <div class="prix-fiche">
-    @if (Model.Prix is null)
+    @if (Model.Prix is null && lots.PrixM2Min is null)
     {
         <p class="prix-fiche__montant">Prix sur demande</p>
     }
+    else if (lotissement)
+    {
+        @if (Model.Prix is not null)
+        {
+            <p class="prix-fiche__montant chiffres"><small class="prix-fiche__des">À partir de</small>@Format.Montant(Model.Prix.Value)<small>FCFA</small></p>
+        }
+        <p class="prix-fiche__detail muet">
+            @if (lots.PrixM2Min is not null) {<text>@Fourchette(lots.PrixM2Min, lots.PrixM2Max) le m²</text>}
+            @if (lots.EstLotissement)
+            {
+                <text> · lots de @(lots.SurfaceMin == lots.SurfaceMax ? Format.Surface(lots.SurfaceMin) : $"{Format.Surface(lots.SurfaceMin)} à {Format.Surface(lots.SurfaceMax)}")</text>
+            }
+            @if (Model.PrixNegociable) { <span class="badge badge--ocre">Négociable</span> }
+        </p>
+        @if (lots.EstLotissement)
+        {
+            <p class="prix-fiche__lots"><a href="#lots"><strong>@lots.Disponibles lot@(lots.Disponibles > 1 ? "s" : "") disponible@(lots.Disponibles > 1 ? "s" : "")</strong> sur @lots.Total</a></p>
+        }
+    }
     else
     {
-        <p class="prix-fiche__montant chiffres">@Format.Montant(Model.Prix.Value)<small>FCFA</small></p>
+        <p class="prix-fiche__montant chiffres">@Format.Montant(Model.Prix!.Value)<small>FCFA</small></p>
         <p class="prix-fiche__detail muet">
             @Format.Surface(Model.SurfaceM2)@if (prixM2 is not null) {<text> · soit @Format.Fcfa(prixM2) le m²</text>}
             @if (Model.PrixNegociable) { <span class="badge badge--ocre">Négociable</span> }

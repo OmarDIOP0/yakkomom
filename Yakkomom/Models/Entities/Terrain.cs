@@ -26,6 +26,12 @@ public class Terrain
     public decimal? LongueurM { get; set; }
     public decimal? LargeurM { get; set; }
 
+    // --- Lotissement ----------------------------------------------------------
+    /// <summary>Fourchette de prix au m² annoncée, utilisée tant que les lots ne sont pas tous chiffrés.</summary>
+    public long? PrixM2Min { get; set; }
+    public long? PrixM2Max { get; set; }
+    public List<Lot> Lots { get; set; } = [];
+
     // --- Situation foncière -------------------------------------------------
     /// <summary>Type de document foncier déclaré (même si le fichier n'est pas encore téléversé).</summary>
     public TypeDocumentFoncier? SituationFonciere { get; set; }
@@ -86,4 +92,7 @@ public class Commodite
 {
     public string Libelle { get; set; } = string.Empty;
     public decimal? DistanceKm { get; set; }
+    /// <summary>Temps de trajet, souvent plus parlant que la distance (« 5 min à pied »).</summary>
+    public int? DureeMinutes { get; set; }
+    public ModeTrajet? Mode { get; set; }
 }

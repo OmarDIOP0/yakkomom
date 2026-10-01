@@ -74,7 +74,10 @@ public partial class TerrainsController(
             QuartierVillage = t.QuartierVillage, Adresse = t.Adresse,
             Latitude = Nombres.PourSaisie(t.Latitude), Longitude = Nombres.PourSaisie(t.Longitude),
             ContourGeoJson = t.ContourGeoJson, SurfaceCalculeeM2 = t.SurfaceCalculeeM2,
-            Commodites = t.Commodites.Select(c => new CommoditeSaisie { Libelle = c.Libelle, DistanceKm = Nombres.PourSaisie(c.DistanceKm) }).ToList()
+            Commodites = t.Commodites.Select(c => new CommoditeSaisie
+            {
+                Libelle = c.Libelle, DistanceKm = Nombres.PourSaisie(c.DistanceKm), DureeMinutes = c.DureeMinutes?.ToString(), Mode = c.Mode
+            }).ToList()
         }, ct);
     }
 

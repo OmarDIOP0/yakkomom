@@ -1,6 +1,6 @@
 @model EnTeteTerrainVm
 @{
-    var onglets = new (OngletTerrain Onglet, string Action, string Libelle)[]
+    var onglets = new List<(OngletTerrain Onglet, string Action, string Libelle)>
     {
         (OngletTerrain.Infos, "Infos", "Infos générales"),
         (OngletTerrain.Localisation, "Localisation", "Localisation"),
@@ -9,6 +9,7 @@
         (OngletTerrain.Documents, "Documents", "Documents"),
         (OngletTerrain.Contacts, "Contacts", "Contacts"),
     };
+    if (Model.AfficherLots) onglets.Insert(2, (OngletTerrain.Lots, "Lots", Model.NombreLots > 0 ? $"Lots ({Model.NombreLots})" : "Lots"));
     var c = Model.Completude;
     var niveau = c.Pourcentage >= 100 ? "complet" : c.Pourcentage >= 60 ? "moyen" : "faible";
 }

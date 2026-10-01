@@ -1,0 +1,158 @@
+@model LotsAdminVm
+@{
+    ViewData["Title"] = $"{Model.Reference} · Lots";
+    var r = Model.Resume;
+    string Statut(StatutLot s) => s switch { StatutLot.Reserve => "statut--reserve", StatutLot.Vendu => "statut--vendu", _ => "statut--disponible" };
+    string Fourchette(long? min, long? max) => min is null ? "—" : min == max || max is null ? Format.Fcfa(min) : $"{Format.Fcfa(min)} à {Format.Fcfa(max)}";
+}
+<partial name="_EnTeteTerrain" model="Model.EnTete" />
+
+<section class="bloc-formulaire">
+    <h2>Lotissement</h2>
+    @if (r.EstLotissement)
+    {
+        <dl class="lots-resume">
+            <div><dt>Lots</dt><dd><strong class="chiffres">@r.Disponibles</strong> disponible@(r.Disponibles > 1 ? "s" : "") sur @r.Total · @r.Reserves réservé@(r.Reserves > 1 ? "s" : "") · @r.Vendus vendu@(r.Vendus > 1 ? "s" : "")</dd></div>
+            <div><dt>Prix au m²</dt><dd>@Fourchette(r.PrixM2Min, r.PrixM2Max)</dd></div>
+            <div><dt>Prix des lots</dt><dd>@Fourchette(r.PrixMin, r.PrixMax)</dd></div>
+            <div><dt>Surfaces</dt><dd>@(r.SurfaceMin is null ? "—" : r.SurfaceMin == r.SurfaceMax ? Format.Surface(r.SurfaceMin) : $"{Format.Surface(r.SurfaceMin)} à {Format.Surface(r.SurfaceMax)}")</dd></div>
+        </dl>
+        <p class="aide">Sur le site, le prix affiché est « à partir de » celui du lot disponible le moins cher ; il est mis à jour automatiquement.
+            @if (r.Disponibles == 0 && Model.StatutTerrain == StatutTerrain.Disponible) { <strong>Tous les lots sont réservés ou vendus : pensez à changer le statut du lotissement.</strong> }</p>
+    }
+    else
+    {
+        <p class="aide">Découpez ce terrain en lots : chacun aura son numéro, sa surface, son prix (selon sa position) et son statut, avec son propre bouton WhatsApp sur le site.
+            Ajoutez le <strong>plan de lotissement</strong> (image ou PDF) dans l'onglet <a asp-action="Documents" asp-route-id="@Model.TerrainId">Documents</a>, en le rendant visible par le public.</p>
+    }
+</section>
+
+<section class="bloc-formulaire">
+    <h2>Ajouter des lots</h2>
+    <form method="post" action="/admin/terrains/@Model.TerrainId/lots/serie" asp-antiforgery="true" class="lots-serie">
+        <div class="champ">
+            <label asp-for="Serie.Debut"></label>
+            <input asp-for="Serie.Debut" type="number" min="0" inputmode="numeric">
+        </div>
+        <div class="champ">
+            <label asp-for="Serie.Fin"></label>
+            <input asp-for="Serie.Fin" type="number" min="0" inputmode="numeric" placeholder="40" required>
+        </div>
+        <div class="champ">
+            <label asp-for="Serie.Prefixe"></label>
+            <input asp-for="Serie.Prefixe" maxlength="10" placeholder="A-">
+        </div>
+        <div class="champ">
+            <label asp-for="Serie.SurfaceM2"></label>
+            <input asp-for="Serie.SurfaceM2" inputmode="decimal" placeholder="300">
+        </div>
+        <div class="champ">
+            <label asp-for="Serie.PrixM2"></label>
+            <input asp-for="Serie.PrixM2" inputmode="numeric" placeholder="15 000" data-format-montant>
+        </div>
+        <div class="lots-serie__action">
+            <button class="btn btn--accent" type="submit"><icone nom="plus" />Créer les lots</button>
+        </div>
+    </form>
+    <p class="aide">Les numéros déjà existants ne sont pas modifiés. Ajustez ensuite chaque lot ci-dessous (lots d'angle, bord de route…).</p>
+</section>
+
+@if (Model.Lots.Count > 0)
+{
+    <section class="bloc-formulaire">
+        <h2>Les lots</h2>
+        <ul class="lots-admin" role="list">
+            @foreach (var lot in Model.Lots)
+            {
+                <li id="lot-@lot.Id" class="lot-admin">
+                    <details>
+                        <summary class="lot-admin__resume">
+                            <strong class="lot-admin__numero">Lot @lot.Numero</strong>
+                            <span class="statut @Statut(lot.Statut)">@LotissementService.Libelle(lot.Statut)</span>
+                            <span class="lot-admin__chiffres muet">
+                                @(lot.SurfaceM2 is null ? "surface ?" : Format.Surface(lot.SurfaceM2))
+                                · @(lot.PrixM2Effectif is null ? "prix ?" : $"{Format.Fcfa(lot.PrixM2Effectif)}/m²")
+                                @if (lot.PrixEffectif is not null) {<text> · <strong>@Format.Fcfa(lot.PrixEffectif)</strong></text>}
+                                @if (!string.IsNullOrEmpty(lot.Position)) {<text> · @lot.Position</text>}
+                            </span>
+                            <span class="lot-admin__modifier btn btn--discret btn--petit">Modifier</span>
+                        </summary>
+                        <form method="post" action="/admin/terrains/@Model.TerrainId/lots/@lot.Id" asp-antiforgery="true" class="lot-admin__formulaire">
+                            <div class="champ">
+                                <label for="numero-@lot.Id">Numéro</label>
+                                <input id="numero-@lot.Id" name="Numero" value="@lot.Numero" maxlength="20" required>
+                            </div>
+                            <div class="champ">
+                                <label for="surface-@lot.Id">Surface (m²)</label>
+                                <input id="surface-@lot.Id" name="SurfaceM2" value="@Nombres.PourSaisie(lot.SurfaceM2)" inputmode="decimal">
+                            </div>
+                            <div class="champ">
+                                <label for="prixm2-@lot.Id">Prix au m² (FCFA)</label>
+                                <input id="prixm2-@lot.Id" name="PrixM2" value="@Nombres.PourSaisie(lot.PrixM2)" inputmode="numeric" data-format-montant>
+                            </div>
+                            <div class="champ">
+                                <label for="prix-@lot.Id">Prix fixe (FCFA, facultatif)</label>
+                                <input id="prix-@lot.Id" name="Prix" value="@Nombres.PourSaisie(lot.Prix)" inputmode="numeric" data-format-montant>
+                                <span class="aide">Remplace surface × prix au m².</span>
+                            </div>
+                            <div class="champ">
+                                <label for="position-@lot.Id">Position</label>
+                                <input id="position-@lot.Id" name="Position" value="@lot.Position" maxlength="120" list="positions-lots" placeholder="Angle, bord de route…">
+                            </div>
+                            <div class="champ">
+                                <label for="statut-@lot.Id">Statut</label>
+                                <select id="statut-@lot.Id" name="Statut">
+                                    @foreach (var s in Enum.GetValues<StatutLot>())
+                                    {
+                                        <option value="@s" selected="@(s == lot.Statut)">@LotissementService.Libelle(s)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="lot-admin__actions">
+                                <button class="btn btn--accent btn--petit" type="submit">Enregistrer</button>
+                            </div>
+                        </form>
+                        <form method="post" action="/admin/terrains/@Model.TerrainId/lots/@lot.Id/supprimer" asp-antiforgery="true" class="lot-admin__suppression">
+                            <button class="btn btn--discret btn--petit danger" type="submit">Supprimer le lot @lot.Numero</button>
+                        </form>
+                    </details>
+                    <div class="lot-admin__statuts" role="group" aria-label="Statut du lot @lot.Numero">
+                        @foreach (var s in Enum.GetValues<StatutLot>().Where(s => s != lot.Statut))
+                        {
+                            <form method="post" action="/admin/terrains/@Model.TerrainId/lots/@lot.Id/statut" asp-antiforgery="true">
+                                <input type="hidden" name="statut" value="@s">
+                                <button class="puce" type="submit">@LotissementService.Libelle(s)</button>
+                            </form>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+        <datalist id="positions-lots">
+            <option value="Angle"></option><option value="Bord de route"></option><option value="Bord de route goudronnée"></option>
+            <option value="Face mer"></option><option value="Intérieur"></option><option value="Proche entrée"></option>
+        </datalist>
+    </section>
+}
+
+<section class="bloc-formulaire">
+    <h2>Fourchette annoncée</h2>
+    <p class="aide">Facultatif : affichée sur le site tant que les lots ne sont pas chiffrés. Dès qu'un lot a un prix, la fourchette est calculée à partir des lots.</p>
+    <form method="post" action="/admin/terrains/@Model.TerrainId/lots/fourchette" asp-antiforgery="true">
+        <div class="grille-2">
+            <div class="champ">
+                <label asp-for="Fourchette.PrixM2Min"></label>
+                <input asp-for="Fourchette.PrixM2Min" inputmode="numeric" placeholder="12 000" data-format-montant>
+            </div>
+            <div class="champ">
+                <label asp-for="Fourchette.PrixM2Max"></label>
+                <input asp-for="Fourchette.PrixM2Max" inputmode="numeric" placeholder="18 000" data-format-montant>
+            </div>
+        </div>
+        <button class="btn btn--contour btn--petit mt-4" type="submit">Enregistrer la fourchette</button>
+    </form>
+</section>
+
+@section Scripts {
+    <script type="module" src="@Assets["js/admin/formulaire.js"]"></script>
+}

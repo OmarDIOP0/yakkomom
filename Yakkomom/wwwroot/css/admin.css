@@ -221,7 +221,12 @@
   .tri-etat input:focus-visible + span { outline: 2px solid var(--c-focus); outline-offset: -4px; }
 
   .commodites { display: grid; gap: var(--e-2); }
-  .commodites__ligne { display: grid; grid-template-columns: 1fr 120px; gap: var(--e-2); }
+  .commodites__ligne { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--e-2); padding-bottom: var(--e-2); border-bottom: 1px dashed var(--c-filet); }
+  .commodites__ligne > .champ:first-child { grid-column: 1 / -1; }
+  @media (min-width: 700px) {
+    .commodites__ligne { grid-template-columns: minmax(0, 2fr) 110px 100px 130px; border-bottom: 0; padding-bottom: 0; }
+    .commodites__ligne > .champ:first-child { grid-column: auto; }
+  }
   .commodites__ligne .champ + .champ { margin-top: 0; }
   .saisie-unite { display: flex; align-items: stretch; }
   .saisie-unite input { border-right: 0 !important; }
@@ -540,4 +545,28 @@
 /* --- Application installable (admin) -------------------------------------------- */
 @layer components {
   .admin-installer-connexion { text-align: center; margin-top: var(--e-4); }
+}
+
+/* --- Lotissement : onglet Lots ------------------------------------------------------ */
+@layer components {
+  .lots-resume { display: grid; gap: 0; border-top: 1px solid var(--c-filet); }
+  .lots-resume > div { display: grid; grid-template-columns: 9rem 1fr; gap: var(--e-3); padding: var(--e-2) 0; border-bottom: 1px solid var(--c-filet); }
+  .lots-resume dt { color: var(--c-muet); font-size: var(--t-sm); }
+  .lots-resume dd { margin: 0; }
+  .lots-serie { display: grid; gap: 0 var(--e-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); align-items: end; }
+  .lots-serie__action { padding-bottom: var(--e-3); }
+  .lots-admin { border-top: 1px solid var(--c-filet); }
+  .lot-admin { border-bottom: 1px solid var(--c-filet); padding: var(--e-2) 0; }
+  .lot-admin__resume { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); min-height: var(--tactile); cursor: pointer; list-style: none; }
+  .lot-admin__resume::-webkit-details-marker { display: none; }
+  .lot-admin__numero { font: 600 var(--t-md)/1.2 var(--f-titre); }
+  .lot-admin__chiffres { flex: 1 1 100%; font-size: var(--t-sm); order: 3; }
+  .lot-admin__modifier { margin-left: auto; }
+  .lot-admin details[open] .lot-admin__modifier { visibility: hidden; }
+  .lot-admin__formulaire { display: grid; gap: 0 var(--e-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); padding: var(--e-3); background: var(--c-sable); margin-top: var(--e-2); }
+  .lot-admin__actions { grid-column: 1 / -1; padding-top: var(--e-2); }
+  .lot-admin__suppression { padding: var(--e-2) var(--e-3) 0; }
+  .lot-admin__statuts { display: flex; gap: var(--e-2); flex-wrap: wrap; margin-top: var(--e-2); }
+  .lot-admin__statuts .puce { min-height: 36px; font-size: var(--t-xs); }
+  @media (min-width: 900px) { .lot-admin__chiffres { flex: 1 1 auto; order: 0; } }
 }

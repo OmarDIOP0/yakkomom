@@ -115,7 +115,7 @@ public sealed partial class SiteDeTest : WebApplicationFactory<Program>, IAsyncL
 
     /// <summary>Jeu de données connu, créé une fois pour toute la série de tests.</summary>
     public sealed record Donnees(
-        Terrain Abordable, Terrain Cher, Terrain Brouillon,
+        Terrain Abordable, Terrain Cher, Terrain Brouillon, Terrain Lotissement,
         DocumentFoncier DocPublic, DocumentFoncier DocPrive, DocumentFoncier DocPublicSurBrouillon)
     {
         public static async Task<Donnees> CreerAsync(IServiceProvider services)
@@ -133,7 +133,17 @@ public sealed partial class SiteDeTest : WebApplicationFactory<Program>, IAsyncL
             var abordable = Terrain("YK-9001", "Terrain test abordable", 10_000_000, StatutTerrain.Disponible);
             var cher = Terrain("YK-9002", "Terrain test cher", 25_000_000, StatutTerrain.Disponible);
             var brouillon = Terrain("YK-9003", "Terrain test brouillon", 5_000_000, StatutTerrain.Brouillon);
-            db.Terrains.AddRange(abordable, cher, brouillon);
+            var lotissement = Terrain("YK-9004", "Lotissement test", 0, StatutTerrain.Disponible);
+            lotissement.Type = TypeTerrain.Lotissement;
+            lotissement.SurfaceM2 = 10_000;
+            lotissement.Lots =
+            [
+                new Lot { Numero = "1", SurfaceM2 = 300, PrixM2 = 15_000 },
+                new Lot { Numero = "2", SurfaceM2 = 300, PrixM2 = 18_000, Position = "Angle" },
+                new Lot { Numero = "3", SurfaceM2 = 300, PrixM2 = 12_000, Statut = StatutLot.Vendu }
+            ];
+            lotissement.Prix = 4_500_000; // « à partir de » (lot 1)
+            db.Terrains.AddRange(abordable, cher, brouillon, lotissement);
             await db.SaveChangesAsync();
 
             async Task<DocumentFoncier> Document(Terrain t, bool estPublic, string nom)
@@ -151,7 +161,7 @@ public sealed partial class SiteDeTest : WebApplicationFactory<Program>, IAsyncL
                 return d;
             }
 
-            return new Donnees(abordable, cher, brouillon,
+            return new Donnees(abordable, cher, brouillon, lotissement,
                 await Document(abordable, true, "plan-de-bornage.pdf"),
                 await Document(abordable, false, "titre-foncier-confidentiel.pdf"),
                 await Document(brouillon, true, "document-brouillon.pdf"));

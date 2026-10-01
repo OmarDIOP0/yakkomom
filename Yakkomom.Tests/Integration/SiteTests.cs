@@ -279,3 +279,68 @@ public class SecuriteTests(SiteDeTest site)
         Assert.Equal(HttpStatusCode.OK, (await c.GetAsync("/health")).StatusCode); // sonde de l'hébergeur en HTTP
     }
 }
+
+/// <summary>Grand terrain découpé en lots.</summary>
+[Collection(CollectionSite.Nom)]
+public class LotissementTests(SiteDeTest site)
+{
+    [Fact]
+    public async Task Fiche_affiche_les_lots_la_fourchette_et_un_bouton_whatsapp_par_lot_disponible()
+    {
+        var html = await site.Client().GetStringAsync(UrlTerrain.Chemin("YK-9004", 10_000, null));
+        Assert.Contains("À partir de", html);
+        Assert.Contains("2 lots disponibles", html);
+        Assert.Contains("Lot 2", html);
+        Assert.Contains("lot=2", html);
+        Assert.DoesNotContain("lot=3", html); // lot vendu : pas de bouton WhatsApp
+    }
+
+    [Fact]
+    public async Task Message_whatsapp_precise_le_lot()
+    {
+        var r = await site.Client().GetAsync("/wa/YK-9004/1?source=fiche&lot=2");
+        Assert.Contains("(lot 2, 300", Uri.UnescapeDataString(r.Headers.Location!.ToString()));
+    }
+
+    [Fact]
+    public async Task Carte_de_la_liste_annonce_les_lots_disponibles()
+    {
+        var html = await site.Client().GetStringAsync("/terrains?q=YK-9004");
+        Assert.Contains("2 lots disponibles", html);
+        var e = Format.Insecable;
+        Assert.Contains($"15{e}000 à 18{e}000{e}FCFA/m²", WebUtility.HtmlDecode(html)); // fourchette au m² des lots disponibles
+    }
+
+    [Fact]
+    public async Task Admin_cree_une_serie_de_lots_et_le_prix_a_partir_de_suit()
+    {
+        // Terrain dédié : ne pas modifier ceux des autres tests (filtres de prix)
+        int id;
+        using (var s = site.Services.CreateScope())
+        {
+            var db0 = s.ServiceProvider.GetRequiredService<YakkomomDbContext>();
+            var t = new Models.Entities.Terrain
+            {
+                Reference = "YK-9010", Titre = "Grand terrain à découper", Statut = Models.Enums.StatutTerrain.Disponible,
+                Type = Models.Enums.TypeTerrain.Lotissement, Prix = 99_000_000, PublieLe = DateTime.UtcNow
+            };
+            db0.Terrains.Add(t);
+            await db0.SaveChangesAsync();
+            id = t.Id;
+        }
+        var admin = await site.ClientAdminAsync();
+
+        var page = await admin.GetStringAsync($"/admin/terrains/{id}/lots");
+        var r = await admin.PostAsync($"/admin/terrains/{id}/lots/serie", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["Serie.Debut"] = "1", ["Serie.Fin"] = "5", ["Serie.SurfaceM2"] = "400", ["Serie.PrixM2"] = "10 000",
+            ["__RequestVerificationToken"] = SiteDeTest.Jeton(page)
+        }));
+        Assert.Equal(HttpStatusCode.Redirect, r.StatusCode);
+
+        using var scope = site.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<YakkomomDbContext>();
+        Assert.Equal(5, await db.Lots.CountAsync(l => l.TerrainId == id));
+        Assert.Equal(4_000_000, (await db.Terrains.AsNoTracking().SingleAsync(t => t.Id == id)).Prix);
+    }
+}

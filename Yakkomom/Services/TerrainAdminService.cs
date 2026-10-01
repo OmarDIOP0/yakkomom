@@ -114,8 +114,11 @@ public class TerrainAdminService(
         var t = await ObtenirAsync(id, ct);
         if (t is null) return null;
         var contactsDefaut = (await parametres.ObtenirAsync(ct)).ContactsParDefaut;
+        var nombreLots = await db.Lots.CountAsync(l => l.TerrainId == id, ct);
         return new EnTeteTerrainVm
         {
+            AfficherLots = t.Type == TypeTerrain.Lotissement || nombreLots > 0 || onglet == OngletTerrain.Lots,
+            NombreLots = nombreLots,
             Id = t.Id, Reference = t.Reference, Titre = t.Titre, Statut = t.Statut, ModifieLe = t.ModifieLe,
             UrlPublique = UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune?.Nom),
             Completude = Completude.Calculer(EntreeCompletude.Depuis(t, contactsDefaut)),
@@ -167,7 +170,8 @@ public class TerrainAdminService(
         terrain.Titre = vm.Titre.Trim();
         terrain.Type = vm.Type;
         terrain.Description = Nettoyer(vm.Description);
-        terrain.Prix = prix;
+        // Lotissement découpé : le prix « à partir de » est calculé à partir des lots, pas saisi.
+        if (!await db.Lots.AnyAsync(l => l.TerrainId == id, ct)) terrain.Prix = prix;
         terrain.PrixNegociable = vm.PrixNegociable;
         terrain.SurfaceM2 = surface;
         terrain.LongueurM = longueur;
@@ -204,7 +208,7 @@ public class TerrainAdminService(
         for (var i = 0; i < vm.Commodites.Count; i++)
         {
             var c = vm.Commodites[i];
-            if (string.IsNullOrWhiteSpace(c.Libelle) && string.IsNullOrWhiteSpace(c.DistanceKm)) continue;
+            if (string.IsNullOrWhiteSpace(c.Libelle) && string.IsNullOrWhiteSpace(c.DistanceKm) && string.IsNullOrWhiteSpace(c.DureeMinutes)) continue;
             if (string.IsNullOrWhiteSpace(c.Libelle))
             {
                 r.AjouterErreur($"Commodites[{i}].Libelle", "Indiquez le nom de la commodité.");
@@ -215,7 +219,17 @@ public class TerrainAdminService(
                 r.AjouterErreur($"Commodites[{i}].DistanceKm", "Distance invalide (en km), ex. 1,5.");
                 continue;
             }
-            commodites.Add(new Commodite { Libelle = c.Libelle.Trim(), DistanceKm = km });
+            int? minutes = null;
+            if (!string.IsNullOrWhiteSpace(c.DureeMinutes))
+            {
+                if (!int.TryParse(c.DureeMinutes.Trim().TrimEnd('m', 'n', 'i', ' '), out var m) || m is < 0 or > 600)
+                {
+                    r.AjouterErreur($"Commodites[{i}].DureeMinutes", "Durée invalide (en minutes), ex. 5.");
+                    continue;
+                }
+                minutes = m;
+            }
+            commodites.Add(new Commodite { Libelle = c.Libelle.Trim(), DistanceKm = km, DureeMinutes = minutes, Mode = minutes is null ? null : c.Mode });
         }
         if (!r.Reussi) return r;
 

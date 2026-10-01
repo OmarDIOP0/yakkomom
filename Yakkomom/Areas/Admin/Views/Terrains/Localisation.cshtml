@@ -106,7 +106,7 @@
 
     <section class="bloc-formulaire">
         <h2>Distances aux commodités</h2>
-        <p class="aide">Laissez vides les lignes inutiles.</p>
+        <p class="aide">Distance, durée du trajet, ou les deux (ex. « École · 1,5 km · 5 min en voiture »). Laissez vides les lignes inutiles.</p>
         <datalist id="suggestions-commodites">
             <option value="École"></option><option value="Marché"></option><option value="Route nationale"></option>
             <option value="Centre de santé"></option><option value="Mosquée"></option><option value="Église"></option>
@@ -125,6 +125,19 @@
                         <label for="Commodites_@(i)__DistanceKm" class="sr-only">Distance en km</label>
                         <div class="saisie-unite"><input asp-for="Commodites[i].DistanceKm" inputmode="decimal" placeholder="1,5"><span>km</span></div>
                         <span asp-validation-for="Commodites[i].DistanceKm" class="erreur"></span>
+                    </div>
+                    <div class="champ">
+                        <label for="Commodites_@(i)__DureeMinutes" class="sr-only">Durée en minutes</label>
+                        <div class="saisie-unite"><input asp-for="Commodites[i].DureeMinutes" inputmode="numeric"><span>min</span></div>
+                        <span asp-validation-for="Commodites[i].DureeMinutes" class="erreur"></span>
+                    </div>
+                    <div class="champ">
+                        <label for="Commodites_@(i)__Mode" class="sr-only">Trajet</label>
+                        <select asp-for="Commodites[i].Mode">
+                            <option value="">—</option>
+                            <option value="@ModeTrajet.APied">à pied</option>
+                            <option value="@ModeTrajet.Voiture">en voiture</option>
+                        </select>
                     </div>
                 </div>
             }

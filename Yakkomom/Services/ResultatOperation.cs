@@ -7,6 +7,8 @@ public class ResultatOperation
 
     public bool Reussi => _erreurs.Count == 0 && Erreur is null;
     public string? Erreur { get; private set; }
+    /// <summary>Message de succès facultatif (ex. « 40 lots ajoutés. »).</summary>
+    public string? Message { get; set; }
     public IReadOnlyDictionary<string, string> Erreurs => _erreurs;
 
     public ResultatOperation AjouterErreur(string champ, string message)

@@ -45,8 +45,16 @@
         <h2>Prix et dimensions</h2>
         <div class="champ">
             <label asp-for="Prix"></label>
-            <input asp-for="Prix" inputmode="numeric" autocomplete="off" placeholder="12 500 000" data-format-montant>
-            <span class="aide">Laissez vide pour afficher « Prix sur demande ».</span>
+            @if (Model.EnTete!.NombreLots > 0)
+            {
+                <input asp-for="Prix" readonly aria-describedby="aide-prix-lots">
+                <span class="aide" id="aide-prix-lots">Calculé à partir des lots (« à partir de » : lot disponible le moins cher). Modifiez les prix dans l'onglet <a asp-action="Lots" asp-route-id="@Model.EnTete.Id">Lots</a>.</span>
+            }
+            else
+            {
+                <input asp-for="Prix" inputmode="numeric" autocomplete="off" placeholder="12 500 000" data-format-montant>
+                <span class="aide">Laissez vide pour afficher « Prix sur demande ». Grand terrain à découper ? Choisissez le type « Lotissement » : un onglet Lots apparaît.</span>
+            }
             <span asp-validation-for="Prix" class="erreur"></span>
         </div>
         <label class="interrupteur"><input asp-for="PrixNegociable" role="switch"><span>@Html.DisplayNameFor(m => m.PrixNegociable)</span></label>

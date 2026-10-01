@@ -33,6 +33,19 @@ public enum TypeDocumentFoncier
     [Display(Name = "Autre")] Autre = 99
 }
 
+public enum StatutLot
+{
+    [Display(Name = "Disponible")] Disponible = 0,
+    [Display(Name = "Réservé")] Reserve = 1,
+    [Display(Name = "Vendu")] Vendu = 2
+}
+
+public enum ModeTrajet
+{
+    [Display(Name = "à pied")] APied = 0,
+    [Display(Name = "en voiture")] Voiture = 1
+}
+
 public enum TypeLocalite
 {
     [Display(Name = "Région")] Region = 0,

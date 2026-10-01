@@ -29,7 +29,7 @@ public class WhatsAppController(
     internal static readonly TimeSpan FenetreDoublons = TimeSpan.FromMinutes(10);
 
     [HttpGet("{reference:regex(^YK-\\d{{4,}}$)}/{index:int:range(1,3)}")]
-    public async Task<IActionResult> Terrain(string reference, int index, string? source, string? motif, CancellationToken ct)
+    public async Task<IActionResult> Terrain(string reference, int index, string? source, string? motif, string? lot, CancellationToken ct)
     {
         var t = await db.Terrains.AsNoTracking()
             .Where(x => x.Reference == reference && (x.Statut == StatutTerrain.Disponible || x.Statut == StatutTerrain.Reserve || x.Statut == StatutTerrain.Vendu))
@@ -42,8 +42,16 @@ public class WhatsAppController(
         if (numero is null) return NotFound();
 
         var lien = urls.Absolue(UrlTerrain.Chemin(t.Reference, t.SurfaceM2, t.Commune));
+        var resume = WhatsAppLiens.Resume(t.SurfaceM2, t.Commune ?? t.QuartierVillage);
+
+        // Lot d'un lotissement : le message précise le lot (« lot 12, 300 m² à Diass »). Numéro inconnu : message du terrain.
+        if (!string.IsNullOrWhiteSpace(lot) && lot.Length <= 20 &&
+            await db.Lots.AsNoTracking().Where(l => l.TerrainId == t.Id && l.Numero == lot)
+                .Select(l => new { l.Numero, l.SurfaceM2 }).FirstOrDefaultAsync(ct) is { } choisi)
+            resume = $"lot {choisi.Numero}, " + WhatsAppLiens.Resume(choisi.SurfaceM2, t.Commune ?? t.QuartierVillage);
+
         var message = WhatsAppLiens.Message(motif == "document" ? MotifWhatsApp.Document : MotifWhatsApp.Terrain, p.NomSite,
-            p.MessageWhatsAppTerrain, t.Reference, WhatsAppLiens.Resume(t.SurfaceM2, t.Commune ?? t.QuartierVillage), lien);
+            p.MessageWhatsAppTerrain, t.Reference, resume, lien);
 
         await EnregistrerClicAsync(t.Id, null, index, LireSource(source), ct);
         return Rediriger(WhatsAppLiens.UrlWhatsApp(numero.Numero, message));

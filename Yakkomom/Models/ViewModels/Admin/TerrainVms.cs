@@ -67,6 +67,9 @@ public class EnTeteTerrainVm
     public required string UrlPublique { get; init; }
     public required ResultatCompletude Completude { get; init; }
     public OngletTerrain OngletActif { get; set; }
+    /// <summary>Onglet « Lots » proposé pour les lotissements (ou dès qu'il existe des lots).</summary>
+    public bool AfficherLots { get; init; }
+    public int NombreLots { get; init; }
 }
 
 public abstract class OngletTerrainVm
@@ -131,6 +134,8 @@ public class CommoditeSaisie
     [StringLength(100)]
     public string? Libelle { get; set; }
     public string? DistanceKm { get; set; }
+    public string? DureeMinutes { get; set; }
+    public ModeTrajet? Mode { get; set; }
 }
 
 public class LocalisationTerrainVm : OngletTerrainVm

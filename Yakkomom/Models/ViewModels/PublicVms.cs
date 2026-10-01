@@ -10,7 +10,15 @@ public record ContactWhatsAppVm(int Index, string NumeroAffiche, string? Libelle
 
 public record DocumentPublicVm(int Id, string Type, string? Titre, string Url);
 
-public record CommoditeVm(string Libelle, decimal? DistanceKm);
+public record CommoditeVm(string Libelle, decimal? DistanceKm, int? DureeMinutes = null, ModeTrajet? Mode = null)
+{
+    /// <summary>« 1,5 km · 5 min en voiture », « 300 m · 4 min à pied ».</summary>
+    public string Texte => string.Join(" · ", new[]
+    {
+        DistanceKm is { } d ? (d < 1 ? $"{Math.Round(d * 1000):0} m" : $"{Helpers.Format.Nombre(d, d % 1 == 0 ? 0 : 1)} km") : null,
+        DureeMinutes is { } m ? $"{m} min{(Mode == ModeTrajet.APied ? " à pied" : Mode == ModeTrajet.Voiture ? " en voiture" : "")}" : null
+    }.Where(x => x is not null));
+}
 
 public class FiltreTerrainsPublic
 {
@@ -87,6 +95,13 @@ public class FicheTerrainVm
     public IReadOnlyList<DocumentPublicVm> DocumentsPublics { get; init; } = [];
     public bool AUnTitreFoncier { get; init; }
 
+    // Lotissement
+    public IReadOnlyList<LotPublicVm> Lots { get; init; } = [];
+    public Services.ResumeLots ResumeLots { get; init; } = Services.ResumeLots.Aucun;
+    /// <summary>Plan de lotissement public : affiché dans la page si c'est une image, lien sinon.</summary>
+    public DocumentPublicVm? PlanLotissement { get; init; }
+    public bool PlanEstImage { get; init; }
+
     public IReadOnlyList<ContactWhatsAppVm> WhatsApp { get; init; } = [];
     public string? UrlDemandeDocument { get; init; }
     public string? Email { get; init; }
@@ -104,6 +119,9 @@ public class FicheTerrainVm
     public string Localisation => string.Join(", ", new[] { QuartierVillage, Commune, Departement, Region }
         .Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
 }
+
+/// <summary>Lot affiché sur la fiche d'un lotissement, avec son lien WhatsApp (message « lot 12 »).</summary>
+public record LotPublicVm(string Numero, decimal? SurfaceM2, long? PrixM2, long? Prix, string? Position, StatutLot Statut, string? UrlWhatsApp);
 
 public record ServiceResumeVm(string Titre, string Slug, string? Resume, string? Icone);
 

@@ -7,7 +7,13 @@
         StatutTerrain.Reserve => "statut--reserve",
         _ => "statut--vendu"
     };
-    var prixM2 = Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+    var lots = Model.Lots;
+    // Lotissement : prix « à partir de » et fourchette au m² (le prix au m² du terrain entier n'aurait pas de sens)
+    var lotissement = lots.EstLotissement || lots.PrixM2Min is not null;
+    var prixM2 = lotissement ? null : Format.PrixAuM2(Model.Prix, Model.SurfaceM2);
+    string? fourchetteM2 = lots.PrixM2Min is null ? null
+        : lots.PrixM2Min == lots.PrixM2Max || lots.PrixM2Max is null ? $"{Format.Fcfa(lots.PrixM2Min)}/m²"
+        : $"{Format.Montant(lots.PrixM2Min.Value)} à {Format.Fcfa(lots.PrixM2Max)}/m²";
 }
 <article class="carte-terrain @(vendu ? "carte-terrain--vendu" : null)">
     <div class="carte-terrain__media" style="--couleur-dominante:@(Model.CouleurDominante ?? "var(--c-sable-fonce)")">
@@ -24,7 +30,7 @@
         }
         @if (Model.Prix is not null)
         {
-            <span class="carte-terrain__prix chiffres">@Format.Montant(Model.Prix.Value)<small>FCFA</small></span>
+            <span class="carte-terrain__prix chiffres">@if (lots.EstLotissement) {<small class="carte-terrain__des">dès</small>}@Format.Montant(Model.Prix.Value)<small>FCFA</small></span>
         }
         <button type="button" class="carte-terrain__fav" data-favori="@Model.Reference" aria-pressed="false" aria-label="Ajouter @Model.Reference aux favoris"
                 data-titre="@Model.Titre" data-url="@Model.Url" data-image="@Model.ImageUrl" data-couleur="@Model.CouleurDominante"
@@ -36,7 +42,16 @@
         <span class="statut @classeStatut">@Format.Statut(Model.Statut)</span>
         <h3 class="carte-terrain__titre"><a href="@Model.Url">@Model.Titre</a></h3>
         <p class="carte-terrain__lieu">
-            @Format.Surface(Model.SurfaceM2)@if (prixM2 is not null) {<text> · @Format.Fcfa(prixM2)/m²</text>}@if (!string.IsNullOrEmpty(Model.Localisation)) {<text> · @Model.Localisation</text>}
+            @if (lotissement)
+            {
+                @if (lots.EstLotissement) {<strong>@lots.Disponibles lot@(lots.Disponibles > 1 ? "s" : "") disponible@(lots.Disponibles > 1 ? "s" : "")</strong>}
+                else {<text>Lotissement · @Format.Surface(Model.SurfaceM2)</text>}
+                @if (fourchetteM2 is not null) {<text> · @fourchetteM2</text>}
+            }
+            else
+            {
+                @Format.Surface(Model.SurfaceM2)@if (prixM2 is not null) {<text> · @Format.Fcfa(prixM2)/m²</text>}
+            }@if (!string.IsNullOrEmpty(Model.Localisation)) {<text> · @Model.Localisation</text>}
         </p>
         @if (Model.TitreFoncier || Model.Visite360)
         {

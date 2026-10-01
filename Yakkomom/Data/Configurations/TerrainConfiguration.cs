@@ -85,6 +85,23 @@ public class DocumentFoncierConfiguration : IEntityTypeConfiguration<DocumentFon
     }
 }
 
+public class LotConfiguration : IEntityTypeConfiguration<Lot>
+{
+    public void Configure(EntityTypeBuilder<Lot> b)
+    {
+        b.ToTable("lots");
+        b.Property(l => l.Numero).HasMaxLength(20).IsRequired();
+        b.Property(l => l.SurfaceM2).HasPrecision(12, 2);
+        b.Property(l => l.Position).HasMaxLength(120);
+        b.Ignore(l => l.PrixEffectif);
+        b.Ignore(l => l.PrixM2Effectif);
+        b.HasOne(l => l.Terrain).WithMany(t => t.Lots).HasForeignKey(l => l.TerrainId).OnDelete(DeleteBehavior.Cascade);
+        // Un numéro de lot n'apparaît qu'une fois par lotissement
+        b.HasIndex(l => new { l.TerrainId, l.Numero }).IsUnique();
+        b.HasIndex(l => new { l.TerrainId, l.Statut });
+    }
+}
+
 public class PanoramaConfiguration : IEntityTypeConfiguration<Panorama>
 {
     public void Configure(EntityTypeBuilder<Panorama> b)

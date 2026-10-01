@@ -420,6 +420,7 @@
     font-variant-numeric: lining-nums;
   }
   .carte-terrain__prix small { font: 700 .625rem/1 var(--f-texte); letter-spacing: .1em; color: var(--c-ocre); margin-left: 2px; }
+  .carte-terrain__prix small.carte-terrain__des { margin: 0 4px 0 0; text-transform: uppercase; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .carte-terrain__prix { background: #0B100D; color: #EDE4D3; }
   }
@@ -739,6 +740,8 @@
   .badges-confiance .badge { padding: 5px 9px; }
   .fiche__prix { margin-top: var(--e-5); padding-top: var(--e-4); border-top: 1px solid var(--c-filet); }
   .prix-fiche__montant { font: 650 clamp(1.9rem, 1.5rem + 2vw, 2.4rem)/1 var(--f-titre); letter-spacing: -.02em; }
+  .prix-fiche__des { display: block; font: 700 var(--t-xs)/1.4 var(--f-texte); letter-spacing: .1em; text-transform: uppercase; color: var(--c-muet); margin-bottom: 4px; }
+  .prix-fiche__lots { margin-top: var(--e-2); }
   .prix-fiche__montant small { font: 700 var(--t-xs)/1 var(--f-texte); letter-spacing: .1em; color: var(--c-ocre-texte); margin-left: 6px; }
   .prix-fiche__detail { margin-top: var(--e-2); font-size: var(--t-sm); display: flex; flex-wrap: wrap; gap: var(--e-2); align-items: center; }
   .fiche__section { padding-top: var(--e-6); margin-top: var(--e-6); border-top: 1px solid var(--c-filet); }
@@ -937,4 +940,25 @@
   .ligne-hors-ligne > span:last-child { display: grid; gap: 2px; }
   .ligne-hors-ligne small { color: var(--c-muet); }
   .ligne-hors-ligne--indisponible { opacity: .55; }
+}
+
+/* --- Lotissement : lots sur la fiche ----------------------------------------------- */
+@layer components {
+  .lots__plan { margin: var(--e-4) 0 0; border: 1px solid var(--c-filet); background: var(--c-surface); }
+  .lots__plan img { display: block; width: 100%; height: auto; }
+  .lots__plan figcaption { padding: var(--e-2) var(--e-3); }
+  .lots__filtre { margin-top: var(--e-4); }
+  .lots__liste { display: grid; gap: var(--e-2); margin-top: var(--e-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+  .lot { display: grid; gap: var(--e-1); padding: var(--e-3); border: 1px solid var(--c-filet); background: var(--c-surface); }
+  .lot__tete { display: flex; justify-content: space-between; align-items: baseline; gap: var(--e-2); }
+  .lot__numero { font: 600 var(--t-md)/1.2 var(--f-titre); }
+  .lot__chiffres { margin: 0; font-size: var(--t-sm); }
+  .lot__prix { margin: 0; font-weight: 700; }
+  .lot__wa { justify-self: start; margin-top: var(--e-1); }
+  .lot--vendu { opacity: .55; }
+  .lot--vendu .lot__prix { text-decoration: line-through; }
+  .lots__vide { display: none; }
+  /* Filtre « disponibles uniquement », sans JavaScript */
+  .lots:has([data-lots-dispo]:checked) .lot:not(.lot--disponible) { display: none; }
+  .lots:has([data-lots-dispo]:checked):not(:has(.lot--disponible)) .lots__vide { display: block; }
 }

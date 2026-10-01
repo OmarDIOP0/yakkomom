@@ -37,6 +37,12 @@ builder.Services.AjouterSecuriteAdmin(builder.Environment);
 
 // --- Services métier --------------------------------------------------------
 builder.Services.AddMemoryCache();
+// Résolution des liens courts Google Maps (admin) : redirections suivies une à une, sans cookie, délai court
+builder.Services.AddHttpClient("LienCarte", c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(8);
+    c.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; Yakkomom)");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
 builder.Services.AddScoped<IParametreSiteService, ParametreSiteService>();
 builder.Services.AddSingleton<IAssetsStatiques, AssetsStatiques>();
 builder.Services.AddHttpContextAccessor();
@@ -44,6 +50,7 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IGestionComptesService, GestionComptesService>();
 builder.Services.AddScoped<ILocaliteService, LocaliteService>();
 builder.Services.AddScoped<ITerrainAdminService, TerrainAdminService>();
+builder.Services.AddScoped<ILotissementService, LotissementService>();
 builder.Services.AddScoped<ITableauDeBordService, TableauDeBordService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IVisite360Service, Visite360Service>();

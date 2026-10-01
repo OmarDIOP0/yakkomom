@@ -16,6 +16,7 @@ public class YakkomomDbContext(DbContextOptions<YakkomomDbContext> options)
     public DbSet<Panorama> Panoramas => Set<Panorama>();
     public DbSet<Hotspot> Hotspots => Set<Hotspot>();
     public DbSet<DocumentFoncier> DocumentsFonciers => Set<DocumentFoncier>();
+    public DbSet<Lot> Lots => Set<Lot>();
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ServicePhoto> ServicePhotos => Set<ServicePhoto>();
     public DbSet<Localite> Localites => Set<Localite>();

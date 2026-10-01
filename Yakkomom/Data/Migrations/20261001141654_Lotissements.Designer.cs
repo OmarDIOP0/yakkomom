@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Yakkomom.Data;
@@ -11,9 +12,11 @@ using Yakkomom.Data;
 namespace Yakkomom.Data.Migrations
 {
     [DbContext(typeof(YakkomomDbContext))]
-    partial class YakkomomDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261001141654_Lotissements")]
+    partial class Lotissements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1539,14 +1542,9 @@ namespace Yakkomom.Data.Migrations
                             b1.Property<decimal?>("DistanceKm")
                                 .HasPrecision(14, 2);
 
-                            b1.Property<int?>("DureeMinutes");
-
                             b1.Property<string>("Libelle")
                                 .IsRequired()
                                 .HasMaxLength(100);
-
-                            b1.Property<string>("Mode")
-                                .HasMaxLength(40);
 
                             b1.HasKey("TerrainId", "__synthesizedOrdinal")
                                 .HasName("pk_terrains");
