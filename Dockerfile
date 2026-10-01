@@ -11,9 +11,10 @@ RUN dotnet publish Yakkomom/Yakkomom.csproj -c Release -o /app --no-restore
 
 # --- Exécution -------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
-# Fuseau Africa/Dakar ; ICU (formats et comparaisons en français) est déjà dans l'image Debian
+# Fuseau Africa/Dakar, et Kerberos que Npgsql tente de charger au démarrage ;
+# ICU (formats et comparaisons en français) est déjà dans l'image
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tzdata \
+    && apt-get install -y --no-install-recommends tzdata libgssapi-krb5-2 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /app .

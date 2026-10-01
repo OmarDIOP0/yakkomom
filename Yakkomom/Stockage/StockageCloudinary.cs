@@ -22,9 +22,13 @@ public class StockageCloudinary : IStorageService
 
     public StockageCloudinary(IOptions<OptionsStockage> options, IConfiguration configuration, ILogger<StockageCloudinary> logger)
     {
-        var url = configuration["CLOUDINARY_URL"];
-        if (string.IsNullOrWhiteSpace(url))
+        var url = NettoyerUrl(configuration["CLOUDINARY_URL"]);
+        if (string.IsNullOrEmpty(url))
             throw new InvalidOperationException("Stockage Cloudinary choisi mais la variable CLOUDINARY_URL est absente.");
+        // Message sans la valeur : elle contient le secret de l'API.
+        if (!url.StartsWith("cloudinary://", StringComparison.Ordinal) || url.Contains('<'))
+            throw new InvalidOperationException(
+                "CLOUDINARY_URL invalide : attendu « cloudinary://cle:secret@nom-du-cloud » (copiez la ligne « API environment variable », secret affiché).");
         _cloudinary = new Cloudinary(url) { Api = { Secure = true } };
         _dossier = options.Value.DossierCloudinary.Trim('/');
         _logger = logger;
@@ -32,6 +36,18 @@ public class StockageCloudinary : IStorageService
 
     public string Fournisseur => "Cloudinary";
     public bool RedimensionneALaVolee => true;
+
+    /// <summary>
+    /// Tolère les copier-coller courants : « CLOUDINARY_URL=cloudinary://… », guillemets, espaces ou retour à la ligne.
+    /// </summary>
+    internal static string NettoyerUrl(string? brute)
+    {
+        var url = (brute ?? "").Trim().Trim('"', '\'').Trim();
+        const string Prefixe = "CLOUDINARY_URL=";
+        if (url.StartsWith(Prefixe, StringComparison.OrdinalIgnoreCase))
+            url = url[Prefixe.Length..].Trim().Trim('"', '\'').Trim();
+        return url;
+    }
 
     public async Task EnregistrerAsync(Stream contenu, string cle, string typeMime, ZoneStockage zone, CancellationToken ct = default)
     {
