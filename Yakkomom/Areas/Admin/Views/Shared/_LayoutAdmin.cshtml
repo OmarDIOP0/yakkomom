@@ -15,7 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
     <title>@titre · Yakkomom Admin</title>
-    <meta name="theme-color" content="#1C2A21">
+    @* Barre d'état du téléphone de la couleur de l'en-tête (comme le site public) *@
+    <meta name="theme-color" content="#FBF7F0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121A15" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
     <link rel="preload" href="@Assets["fonts/fraunces-latin.woff2"]" as="font" type="font/woff2" crossorigin>
     <style>
@@ -31,7 +33,7 @@
     <link rel="apple-touch-icon" href="@Assets["img/icones/admin-apple-touch-icon.png"]">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Yakkomom Admin">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body class="admin @(sansNavigation ? "admin--seul" : null)">

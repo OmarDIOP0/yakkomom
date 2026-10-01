@@ -116,8 +116,8 @@ public class PwaController(IAssetsStatiques assets, IParametreSiteService parame
             scope = "/admin",
             display = "standalone",
             orientation = "portrait",
-            background_color = "#1C2A21",
-            theme_color = "#1C2A21",
+            background_color = "#FBF7F0",
+            theme_color = "#FBF7F0",
             icons = new[]
             {
                 Icone("img/icones/admin-192.png", 192), Icone("img/icones/admin-512.png", 512),
