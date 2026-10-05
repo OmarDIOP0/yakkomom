@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>YakkoMoM — Bannière web mobile</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  /* Bannière web mobile : 1080 × 1350 px. QR code : qr-web.svg. Fichier généré par scripts/formats-ecran.py. */
+  html, body { width: 1080px; height: 1350px; }
+  .page { position: relative; width: 1080px; height: 1350px; overflow: hidden; background: var(--papier); }
+  .a { position: absolute; }
+  .accroche span { display: block; }
+  .accroche { font-family: var(--f-titre); font-weight: 600; letter-spacing: -.035em; line-height: .9; }
+  .accroche .accent { color: var(--laterite); }
+  .sous-titre { font: italic 380 1em/1.2 var(--f-titre); color: var(--muet); letter-spacing: -.01em; }
+  .appel { color: var(--papier); }
+  .appel h2 { font-family: var(--f-titre); font-weight: 600; line-height: 1; letter-spacing: -.02em; }
+  .appel .url { font-family: var(--f-mono); font-weight: 600; border-top: 1px solid rgb(244 236 221 / .35); }
+  .appel .mono { color: var(--ocre); }
+  .fond-encre { background: var(--encre); }
+  .telephone { z-index: 3; }
+
+  .courbes { right: -260px; top: -200px; width: 820px; opacity: .85; }
+  .marque { left: 72px; top: 64px; gap: 14px; font-size: 44px; } .marque img { width: 58px; height: 58px; }
+  .accroche { left: 66px; top: 190px; font-size: 150px; }
+  .sous-titre { left: 72px; top: 800px; width: 560px; font-size: 38px; }
+  .fond-encre { left: 0; right: 0; top: 960px; bottom: 0; }
+  .telephone { left: 700px; top: 640px; width: 320px; --bord: 12px; --arrondi: 44px; }
+  .telephone__ecran { width: 296px; height: 640.6px; } .telephone__ecran iframe { transform: scale(0.75897); }
+  .qr { left: 72px; top: 1020px; width: 260px; }
+  .appel { left: 372px; top: 1050px; width: 300px; } .appel .mono { font-size: 14px; }
+  .appel h2 { margin-top: 12px; font-size: 40px; } .appel .url { margin-top: 22px; padding-top: 16px; font-size: 19px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <img class="a courbes" src="assets/courbes-niveau.svg" alt="">
+  <div class="a marque"><img src="assets/logo.svg" alt=""><span class="marque__nom">Yakko<em>MoM</em></span></div>
+  <h1 class="a accroche"><span>Le bon</span><span>terrain.</span><span class="accent">Les vrais</span><span class="accent">papiers.</span></h1>
+  <p class="a sous-titre">Voyez le terrain avant d'y aller. Photos, visite 360°, position GPS.</p>
+  <div class="a fond-encre"></div>
+  <div class="a telephone"><div class="telephone__ecran"><iframe src="ecran/fiche.html" title="Écran de l'application YakkoMoM" scrolling="no"></iframe></div></div>
+  <div class="a qr"><img src="../qrcodes/qr-web.svg" alt="QR code vers yakkomom.onrender.com"></div>
+  <div class="a appel"><p class="mono">Gratuit · sans inscription</p><h2>Scannez pour voir les terrains</h2><p class="url">yakkomom.onrender.com</p></div>
+</main>
+<script src="apercu.js"></script>
+</body>
+</html>

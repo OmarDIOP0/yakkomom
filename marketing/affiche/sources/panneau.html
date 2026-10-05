@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>YakkoMoM — Panneau 4 × 3 m</title>
+<link rel="stylesheet" href="commun.css">
+<style>
+  /* Panneau publicitaire 4 × 3 m, paysage, livré à l'ÉCHELLE 1/10 : 1 mm ici = 1 cm sur le panneau.
+     Format fini 400 × 300 mm (4 × 3 m) + fond perdu de 5 mm (5 cm réels) = page de 410 × 310 mm.
+     Marge de sécurité : 20 mm (20 cm réels). Lisible de loin : accroche, QR code et adresse, rien d'autre. */
+  @page { size: 410mm 310mm; margin: 0; }
+  :root { --b: 5mm; --s: 20mm; }
+  html, body { width: 410mm; height: 310mm; }
+  .page { position: relative; width: 410mm; height: 310mm; overflow: hidden; background: var(--papier); }
+  .format { position: absolute; inset: var(--b); }
+  .a { position: absolute; }
+
+  .courbes { left: 96mm; top: -70mm; width: 230mm; opacity: .75; }
+
+  .marque { left: var(--s); top: var(--s); gap: 6mm; font-size: 17mm; }
+  .marque img { width: 22mm; height: 22mm; }
+
+  /* Accroche : 4 lignes, la plus grande possible dans la partie claire */
+  .accroche { left: calc(var(--s) - 2mm); top: 66mm; font: 600 47mm/.9 var(--f-titre); letter-spacing: -.035em; }
+  .accroche span { display: block; }
+  .accroche .accent { color: var(--laterite); }
+  .bornage { left: var(--s); bottom: var(--s); width: 200mm; border-top: 1.6mm dashed var(--ocre); }
+
+  /* Panneau encre à droite (jusqu'au fond perdu) : QR code très grand + adresse */
+  .colonne { left: 246mm; top: calc(-1 * var(--b)); right: calc(-1 * var(--b)); bottom: calc(-1 * var(--b)); background: var(--encre); }
+  .qr { left: 266mm; top: 40mm; width: 120mm; }  /* 1,20 m réel : 40 % de la hauteur */
+  .appel { left: 266mm; top: 172mm; width: 122mm; color: var(--papier); }
+  .appel h2 { font: 600 13.5mm/1 var(--f-titre); letter-spacing: -.02em; }
+  .appel .url { margin-top: 9mm; padding-top: 7mm; border-top: .5mm solid rgb(244 236 221 / .4); font: 600 9.2mm/1 var(--f-mono); letter-spacing: -.01em; white-space: nowrap; }
+
+  .guides .coupe, .guides .securite { position: absolute; pointer-events: none; z-index: 99; }
+  .guides .coupe { inset: 0; outline: .3mm solid #0af; }
+  .guides .securite { inset: var(--s); outline: .3mm dashed #f0a; }
+</style>
+</head>
+<body>
+<main class="page">
+ <div class="format">
+  <img class="a courbes" src="assets/courbes-niveau.svg" alt="">
+  <div class="a marque"><img src="assets/logo.svg" alt=""><span class="marque__nom">Yakko<em>MoM</em></span></div>
+  <h1 class="a accroche">
+    <span>Le bon</span><span>terrain.</span>
+    <span class="accent">Les vrais</span><span class="accent">papiers.</span>
+  </h1>
+  <div class="a bornage"></div>
+
+  <div class="a colonne"></div>
+  <div class="a qr"><img src="../qrcodes/qr-panneau.svg" alt="QR code vers yakkomom.onrender.com"></div>
+  <div class="a appel">
+    <h2>Scannez pour voir les terrains</h2>
+    <p class="url">yakkomom.onrender.com</p>
+  </div>
+  <div class="coupe"></div><div class="securite"></div>
+ </div>
+</main>
+<script src="apercu.js"></script>
+</body>
+</html>

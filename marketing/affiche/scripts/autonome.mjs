@@ -34,6 +34,8 @@ for (const nom of demandes) {
   let html = fs.readFileSync(path.join(SOURCES, `${nom}.html`), 'utf8');
   const css = integrer(fs.readFileSync(path.join(SOURCES, 'commun.css'), 'utf8'), SOURCES);
   html = html.replace('<link rel="stylesheet" href="commun.css">', `<style>\n${css}\n</style>`);
+  for (const [, f] of [...html.matchAll(/<link rel="stylesheet" href="([^"]+)">/g)])
+    html = html.replace(`<link rel="stylesheet" href="${f}">`, `<style>\n${integrer(fs.readFileSync(path.join(SOURCES, f), 'utf8'), SOURCES)}\n</style>`);
   html = html.replace('<script src="apercu.js"></script>', `<script>\n${fs.readFileSync(path.join(SOURCES, 'apercu.js'), 'utf8')}\n</script>`);
   // QR code (dossier qrcodes) puis autres images (dossier sources)
   html = html.replace(/src="\.\.\/qrcodes\/([^"]+)"/g, (_, f) => `src="${dataUri(path.join(RACINE, 'qrcodes', f))}"`);

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>YakkoMoM — Affiche A3</title>
+<title>YakkoMoM — Affiche A2</title>
 <style>
 /* YakkoMoM : identité commune à tous les formats de l'affiche.
    Reprise exacte de l'application (Yakkomom/wwwroot/css/site.css) : papier, encre, latérite (accent unique), ocre en décor,
@@ -119,10 +119,10 @@ html, body { width: calc(var(--largeur) + 2 * var(--b)); height: calc(var(--haut
 
 </style>
 <style>
-  /* A3 portrait : format fini 297 × 420 mm + 3 mm de fond perdu = page de 303 × 426 mm.
-     Composition de l'A3 à l'échelle 1.00000 ; marge de sécurité de 14 mm à l'intérieur du format fini. */
-  @page { size: 303mm 426mm; margin: 0; }
-  :root { --u: 1.00000mm; --k: 1.00000; --largeur: 297mm; --hauteur: 420mm; }
+  /* A2 portrait : format fini 420 × 594 mm + 3 mm de fond perdu = page de 426 × 600 mm.
+     Composition de l'A3 à l'échelle 1.41421 ; marge de sécurité de 19.8 mm à l'intérieur du format fini. */
+  @page { size: 426mm 600mm; margin: 0; }
+  :root { --u: 1.41421mm; --k: 1.41421; --largeur: 420mm; --hauteur: 594mm; }
 </style>
 </head>
 <body>

@@ -1,0 +1,31 @@
+@inject Yakkomom.Services.Interfaces.IParametreSiteService ParametresSite
+@inject Yakkomom.Services.UrlSite Urls
+@{
+    // Bannière de l'affiche (marketing/affiche) : accroche, téléchargement du PDF, partage et QR code.
+    // Le QR code ne s'affiche que sur grand écran : sur un téléphone, on est déjà sur le site.
+    var nomSite = (await ParametresSite.ObtenirAsync()).NomSite;
+    var texte = $"{nomSite} : terrains vérifiés au Sénégal, avec photos, visite 360° et position GPS.";
+    var lien = Urls.Absolue("/terrains");
+}
+<section class="banniere-affiche" aria-labelledby="titre-affiche">
+    <div class="conteneur banniere-affiche__grille">
+        <div class="banniere-affiche__texte">
+            <h2 id="titre-affiche" class="banniere-affiche__accroche">Le bon terrain.<br><span>Les vrais papiers.</span></h2>
+            <p class="banniere-affiche__sous-titre">Voyez le terrain avant d'y aller : photos, visite 360°, position GPS.</p>
+            <div class="banniere-affiche__actions">
+                <a class="btn btn--accent" href="@Assets["telechargements/yakkomom-affiche-a3.pdf"]" download="affiche-@(nomSite.ToLowerInvariant())-a3.pdf">
+                    <icone nom="document" />Télécharger l'affiche (PDF)
+                </a>
+                <a class="btn btn--contour-clair" href="@WhatsAppLiens.UrlPartage($"{texte} {lien}")" data-partager
+                   data-titre="@nomSite" data-texte="@texte" data-url="@lien" target="_blank" rel="noopener nofollow">
+                    <icone nom="partager" />Partager le site
+                </a>
+            </div>
+            <p class="banniere-affiche__aide"><small>Affiche A3, 3 Mo : à imprimer ou à faire suivre.</small></p>
+        </div>
+        <figure class="banniere-affiche__qr bureau-seulement">
+            <img src="@Assets["img/qr-web.svg"]" alt="QR code vers les terrains @nomSite" width="220" height="220" loading="lazy" decoding="async">
+            <figcaption>Scannez pour ouvrir le site sur votre téléphone</figcaption>
+        </figure>
+    </div>
+</section>

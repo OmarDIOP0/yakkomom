@@ -962,3 +962,23 @@
   .lots:has([data-lots-dispo]:checked) .lot:not(.lot--disponible) { display: none; }
   .lots:has([data-lots-dispo]:checked):not(:has(.lot--disponible)) .lots__vide { display: block; }
 }
+
+/* --- Bannière de l'affiche (_BanniereAffiche) : reprend l'affiche imprimée --------------- */
+@layer components {
+  /* Fond « pied de page » : reste sombre en mode clair comme en mode sombre */
+  .banniere-affiche { background: var(--c-pied); color: var(--c-pied-texte); padding-block: var(--e-8); position: relative; overflow: hidden; }
+  .banniere-affiche::before { /* ligne de bornage ocre, comme sur l'affiche */
+    content: ""; position: absolute; left: 0; right: 0; top: 0; border-top: 3px dashed var(--c-ocre); }
+  .banniere-affiche__grille { display: grid; gap: var(--e-7); align-items: center; }
+  .banniere-affiche__accroche { font: 600 clamp(2.4rem, 1.6rem + 4vw, 4.5rem)/.95 var(--f-titre); letter-spacing: -.03em; color: var(--c-pied-texte); }
+  .banniere-affiche__accroche span { color: #E27B55; } /* latérite éclaircie : contraste AA sur fond sombre */
+  .banniere-affiche__sous-titre { margin-top: var(--e-4); font: italic 400 var(--t-lg)/1.3 var(--f-titre); color: color-mix(in srgb, var(--c-pied-texte) 80%, transparent); max-width: 34ch; }
+  .banniere-affiche__actions { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-6); }
+  .banniere-affiche__aide { margin-top: var(--e-3); color: color-mix(in srgb, var(--c-pied-texte) 65%, transparent); }
+  .btn--contour-clair { --btn-fond: transparent; --btn-texte: var(--c-pied-texte); --btn-bord: color-mix(in srgb, var(--c-pied-texte) 55%, transparent); }
+  .btn--contour-clair:hover { --btn-fond: var(--c-pied-texte); --btn-texte: var(--c-pied); filter: none; }
+  .banniere-affiche__qr { margin: 0; justify-self: end; display: grid; gap: var(--e-3); width: 240px; }
+  .banniere-affiche__qr img { display: block; width: 100%; height: auto; background: #fff; }
+  .banniere-affiche__qr figcaption { font: 600 var(--t-xs)/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--c-ocre); }
+  @media (min-width: 768px) { .banniere-affiche__grille { grid-template-columns: 1fr auto; } }
+}

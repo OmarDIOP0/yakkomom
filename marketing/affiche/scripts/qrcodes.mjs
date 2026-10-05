@@ -44,7 +44,7 @@ export function svgQr(texte) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="geometricPrecision">`
     + `<title>${texte}</title><rect width="${total}" height="${total}" fill="#FFFFFF"/>`
     // Contour fin de même couleur : supprime les filets clairs d'anticrénelage entre modules voisins
-    + `<g fill="${COULEURS.encre}" stroke="${COULEURS.encre}" stroke-width="0.06" stroke-linejoin="round">${points.join('')}</g>${yeux}${logoSvg}</svg>`;
+    + `<g fill="${COULEURS.encre}" stroke="${COULEURS.encre}" stroke-width="0.14" stroke-linejoin="round">${points.join('')}</g>${yeux}${logoSvg}</svg>`;
 }
 
 async function verifier(page, svg, taille) {

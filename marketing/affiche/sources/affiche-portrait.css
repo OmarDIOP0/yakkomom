@@ -1,0 +1,55 @@
+/* Mise en page « affiche portrait » commune à l'A3 et à l'A2.
+   Les cotes sont celles de l'A3, en unités --u (1 mm en A3, √2 mm en A2 : même composition, agrandie),
+   mesurées depuis le format fini. Le fond perdu --b (3 mm) ne s'agrandit pas.
+   Chaque fichier définit : --u, --k (même facteur sans unité), --largeur, --hauteur et son @page. */
+:root { --b: 3mm; --s: calc(14 * var(--u)); }
+html, body { width: calc(var(--largeur) + 2 * var(--b)); height: calc(var(--hauteur) + 2 * var(--b)); }
+.page { position: relative; width: calc(var(--largeur) + 2 * var(--b)); height: calc(var(--hauteur) + 2 * var(--b)); overflow: hidden; background: var(--papier); }
+.format { position: absolute; inset: var(--b); }
+.a { position: absolute; }
+
+/* Décor foncier : courbes de niveau (haut droite), discrètes */
+.courbes { right: calc(-51 * var(--u)); top: calc(-37 * var(--u)); width: calc(236 * var(--u)); opacity: .9; }
+
+/* En-tête */
+.marque { left: var(--s); top: var(--s); gap: calc(3.4 * var(--u)); font-size: calc(9.6 * var(--u)); }
+.marque img { width: calc(12.6 * var(--u)); height: calc(12.6 * var(--u)); }
+.mention { right: var(--s); top: calc(18.4 * var(--u)); font-size: calc(2.9 * var(--u)); color: var(--encre); }
+.filet-haut { left: var(--s); right: var(--s); top: calc(34 * var(--u)); border-top: calc(.35 * var(--u)) solid var(--encre); }
+
+/* Accroche : quatre lignes, alignées à gauche sur la marge */
+.accroche { left: calc(12.6 * var(--u)); top: calc(49 * var(--u)); font: 600 calc(37 * var(--u))/.9 var(--f-titre); letter-spacing: -.035em; }
+.accroche span { display: block; }
+.accroche .accent { color: var(--laterite); }
+.sous-titre { left: var(--s); top: calc(206 * var(--u)); width: calc(160 * var(--u)); font: italic 380 calc(7.4 * var(--u))/1.15 var(--f-titre); color: var(--muet); letter-spacing: -.01em; }
+
+/* Trois arguments, séparés par des filets */
+.arguments { left: var(--s); top: calc(229 * var(--u)); width: calc(164 * var(--u)); list-style: none; border-top: calc(.3 * var(--u)) solid var(--filet); }
+.arguments li { display: grid; grid-template-columns: calc(15 * var(--u)) 1fr; padding: calc(4.6 * var(--u)) 0 calc(4.4 * var(--u)); border-bottom: calc(.3 * var(--u)) solid var(--filet); }
+.arguments .num { font-size: calc(3.1 * var(--u)); color: var(--laterite); padding-top: calc(1.3 * var(--u)); }
+.arguments strong { display: block; font: 650 calc(6.2 * var(--u))/1.1 var(--f-titre); letter-spacing: -.01em; }
+.arguments small { display: block; margin-top: calc(1.4 * var(--u)); font-size: calc(3.7 * var(--u)); line-height: 1.3; color: var(--muet); }
+
+/* Tracé de parcelle derrière le téléphone : écho du logo (4 bornes latérite) */
+.parcelle { z-index: 1; left: calc(186 * var(--u)); top: calc(129 * var(--u)); width: calc(114 * var(--u)); height: calc(170 * var(--u)); overflow: visible; }
+
+/* Téléphone : vrai écran « fiche terrain » de l'application */
+.telephone { left: calc(196 * var(--u)); top: calc(157 * var(--u)); width: calc(86 * var(--u)); --bord: calc(3 * var(--u)); --arrondi: calc(11 * var(--u)); z-index: 3; }
+.telephone__ecran { width: calc(80 * var(--u)); height: calc(173.13 * var(--u)); }
+.telephone__ecran iframe { transform: scale(calc(.77528 * var(--k))); } /* 80 mm = 302,4 px ; 302,4 / 390 */
+
+/* Bandeau encre (jusqu'au bord du fond perdu) : appel à l'action et QR code */
+.bornage { left: var(--s); top: calc(309.5 * var(--u)); width: calc(168 * var(--u)); border-top: calc(.9 * var(--u)) dashed var(--ocre); }
+.bandeau { left: calc(-1 * var(--b)); right: calc(-1 * var(--b)); top: calc(316 * var(--u)); bottom: calc(-1 * var(--b)); background: var(--encre); }
+.qr { left: var(--s); top: calc(331 * var(--u)); width: calc(66 * var(--u)); }
+.appel { left: calc(91 * var(--u)); top: calc(334 * var(--u)); width: calc(98 * var(--u)); color: var(--papier); }
+.appel .mono { font-size: calc(2.9 * var(--u)); color: var(--ocre); }
+.appel h2 { margin-top: calc(4 * var(--u)); font: 600 calc(11.2 * var(--u))/1 var(--f-titre); letter-spacing: -.02em; }
+.appel .url { margin-top: calc(7 * var(--u)); padding-top: calc(4.4 * var(--u)); border-top: calc(.3 * var(--u)) solid rgb(244 236 221 / .35); font: 600 calc(5.3 * var(--u))/1 var(--f-mono); letter-spacing: .01em; }
+.pied { left: var(--s); right: var(--s); bottom: var(--s); display: flex; justify-content: space-between; font-size: calc(2.5 * var(--u)); color: rgb(244 236 221 / .62); }
+.pied em { font-style: normal; color: var(--laterite); }
+
+/* Repères de contrôle (?guides) : coupe (bleu) et zone de sécurité (rose), jamais exportés */
+.guides .coupe, .guides .securite { position: absolute; pointer-events: none; z-index: 99; }
+.guides .coupe { inset: 0; outline: .2mm solid #0af; }
+.guides .securite { inset: var(--s); outline: .2mm dashed #f0a; }
