@@ -45,3 +45,10 @@ body { font-family: var(--f-texte); font-feature-settings: "kern", "liga"; text-
 /* Bloc QR : marge blanche (zone de silence) toujours incluse dans le SVG */
 .qr { background: var(--blanc); display: block; }
 .qr img { display: block; width: 100%; height: auto; }
+
+/* Aperçu écran (apercu.js) : affiche centrée et réduite pour tenir dans la fenêtre ; jamais à l'impression */
+@media screen {
+  html.apercu { background: #E9DCC4; overflow: hidden; } /* l'affiche réduite garde sa taille réelle dans la mise en page */
+  html.apercu body { margin: 0; background: none; overflow: hidden; width: 100vw; height: 100vh; }
+  html.apercu .page { transform-origin: 0 0; box-shadow: 0 2px 18px rgb(28 42 33 / .25); }
+}

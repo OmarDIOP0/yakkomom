@@ -26,7 +26,7 @@ for (const [cle, f] of Object.entries(FORMATS)) {
   await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
   const sortie = path.join(RACINE, 'exports', f.dossier);
   fs.mkdirSync(sortie, { recursive: true });
-  const url = pathToFileURL(path.join(RACINE, 'sources', f.source)).href;
+  const url = pathToFileURL(path.join(RACINE, 'sources', f.source)).href + '?export';
 
   if (f.mm) {
     const [l, h] = f.mm;
