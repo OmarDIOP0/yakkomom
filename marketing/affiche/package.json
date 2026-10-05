@@ -1,0 +1,17 @@
+{
+  "name": "yakkomom-affiche",
+  "private": true,
+  "type": "module",
+  "description": "Affiche promotionnelle YakkoMoM : QR codes, sources HTML/CSS et exports PDF/PNG/WebP",
+  "scripts": {
+    "ecran": "node scripts/capturer-ecran.mjs",
+    "qr": "node scripts/qrcodes.mjs",
+    "export": "node scripts/exporter.mjs"
+  },
+  "dependencies": {
+    "jsqr": "1.4.0",
+    "pngjs": "7.0.0",
+    "puppeteer-core": "24.10.0",
+    "qrcode": "1.5.4"
+  }
+}

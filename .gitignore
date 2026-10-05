@@ -6,3 +6,6 @@ obj/
 
 # Fichiers envoyés en local (photos, documents privés) : jamais dans le dépôt
 Yakkomom/App_Data/
+
+# Outils de génération de l'affiche
+marketing/affiche/node_modules/
